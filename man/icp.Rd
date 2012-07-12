@@ -2,13 +2,14 @@
 \alias{icp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Iterative closest point matching between two triangular meshes.
-%%  ~~function to do ... ~~
+
 }
 \description{
 performs rigid body transformations (and scaling if requested) to map a
 reference mesh onto a target mesh}
 \usage{
-icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL, uprange = 1, rhotol = pi, k = 50)
+icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
+uprange = 1, rhotol = pi, k = 50, reflection=FALSE, pro=c("vcg","morpho"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -41,9 +42,17 @@ icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL, uprange = 1
 %%     ~~Describe \code{rhotol} here~~
 }
   \item{k}{integer: number of closest triangles on target that will be
-    searched for hits.
+    searched for hits. Only used when pro="morpho".
 %%     ~~Describe \code{k} here~~
 }
+  \item{reflection}{logical: allow reflection.
+    
+  }
+   \item{pro}{character: algorithm for closest point search "morpho"
+   calls closemeshKD from the package Morpho, while vcg calls vcgClost
+   from mesheR. For meshes with little overlap use "morpho"!!
+    
+  }
 }
 \details{
 the registration is done by minimising squared distances between
