@@ -1,5 +1,7 @@
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("vcg","morpho"),...)
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,...)
 {
+### the workhorse function running in each iteration of gaussDisplMesh3d
+  ## set projection function according to input request
   pro <- substring(pro[1],1L,1L)
   if (pro == "v")
     {project3d <- vcgClost
@@ -8,7 +10,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     {
       protmp <- function(x,y,sign=F)
         {
-          out <- closemeshKD(x,y,k=10,sign=sign)
+          out <- closemeshKD(x,y,k=k0,sign=sign)
           return(out)
         }
       project3d <- protmp
@@ -20,6 +22,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   S0 <- t(mesh1$vb[1:3,])
   sigma <- (sigma0*f^(-k))^2
   S <- vert2points(project3d(mesh1,mesh2,sign=F))
+  ## get symmetric distances and displacement field between meshes
   if (oneway)
     {
       M <- vert2points(mesh2)
@@ -28,7 +31,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     {
       M <- vert2points(project3d(mesh2,mesh1,sign=F))
      }
-  
+  ## get neighbourhood for each point to minimize calculation time
   if (!is.null (nh))
     {
       clostIndW <- mcNNindex(S,W0,k=nh,cores=cores)
@@ -58,13 +61,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   mclist[[cores]] <-   list()
   mclist[[cores]][[1]] <- W0[-c(1:((cores-1)*iter)),]
   mclist[[cores]][[2]] <- c(1:dim(W0)[1])[-c(1:((cores-1)*iter))]
-  
-  tmpfun <- function(x,...)
+  ## define function to be run in parallel
+  displacefun <- function(x,...)
     {
       tmp0 <- .Fortran("displace_mesh_gauss",x[[1]],nrow(x[[1]]),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW[x[[2]],],nh,clostIndP[x[[2]],],tol=tol,PACKAGE="Morpho")[[1]]
       return(tmp0)
     }
-  tmp <- mclapply(mclist,tmpfun,mc.cores=cores)
+  tmp <- mclapply(mclist,displacefun,mc.cores=cores)
   
   for (i in 1:cores)
     {
@@ -76,6 +79,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   return(list(addit=addit))
 }
 
+<<<<<<< HEAD
 gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,tol=0,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("vcg","morpho"),...)
   {
     if (is.null(nh))
@@ -83,6 +87,25 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
         nh=ceiling(150/meshres(mesh1))
         cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
       }
+=======
+gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,tol=0,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=50,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,...)
+  {
+    ## set projection function according to input request
+    pro <- substring(pro[1],1L,1L)
+    if (pro == "v")
+      {project3d <- vcgClost
+     }
+    if (pro == "m")
+      {
+        protmp <- function(x,y,sign=F)
+          {
+            out <- closemeshKD(x,y,k=k0,sign=sign)
+            return(out)
+          }
+        project3d <- protmp
+      }
+    ## set up patch 
+>>>>>>> d7d15211df1b9ed32d25a9be8da13483572d0c5e
     rescue <- FALSE
     if (!is.null(patch))
       { ## append landmarks to meshes vertices
@@ -93,11 +116,13 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
         if (substr(smoothtype,1L,1L) %in% c("h","H") )
           rescue <- TRUE
       }
+    ## do icp matching
     if (icp)
       {
         cat("performing icp matching\n")
-        mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,uprange=uprange,rhotol=rhotol,iterations=icpiter)
+        mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,uprange=uprange,rhotol=rhotol,iterations=icpiter,pro=pro,k0=k0)
       }
+    ## elastic matching starts
     cat("starting elastic matching\n****************\n")
     for (i in 1:iterations)
       {
@@ -105,7 +130,7 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
         if (!is.null(smooth))
           { if (i %% smooth == 0)
               {
-                if(rescue)
+                if(rescue)#keep patch from becoming NaN
                   {
                     tmppatch <- mesh1$vb[1:3,cols]
                   }
@@ -118,11 +143,13 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
                   }
               }
           }
-        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro)
+        ## call the workhorse doing the displacement
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0)
         mesh1$vb[1:3,] <- t(tmp$addit)
+        ## project the patch back on the temporary surface
         if (!is.null(patch) && repro)
           {
-            mesh1$vb[1:3,cols] <- vcgClost(t(mesh1$vb[1:3,cols]),mesh1)$vb[1:3,]
+            mesh1$vb[1:3,cols] <- project3d(t(mesh1$vb[1:3,cols]),mesh1)$vb[1:3,]
           }
         
         time1 <- Sys.time()

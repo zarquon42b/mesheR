@@ -9,7 +9,11 @@ performs rigid body transformations (and scaling if requested) to map a
 reference mesh onto a target mesh}
 \usage{
 icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
+<<<<<<< HEAD
 uprange = 0.9, rhotol = pi, k = 50, reflection=FALSE, pro=c("vcg","morpho"))
+=======
+uprange = 1, rhotol = pi, k = 50, reflection=FALSE, pro=c("morpho","vcg"))
+>>>>>>> d7d15211df1b9ed32d25a9be8da13483572d0c5e
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -50,7 +54,9 @@ uprange = 0.9, rhotol = pi, k = 50, reflection=FALSE, pro=c("vcg","morpho"))
   }
    \item{pro}{character: algorithm for closest point search "morpho"
    calls closemeshKD from the package Morpho, while vcg calls vcgClost
-   from mesheR. For meshes with little overlap use "morpho"!!
+   from mesheR. If the region of the targetmesh is much smaller than the
+   region of the reference, "vcg" can be really slow. Otherwise very
+   fast. "morpho" is the stable but somewhat slower algorithm.
     
   }
 }
