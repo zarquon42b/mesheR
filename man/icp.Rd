@@ -9,7 +9,7 @@ performs rigid body transformations (and scaling if requested) to map a
 reference mesh onto a target mesh}
 \usage{
 icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
-uprange = 1, rhotol = pi, k = 50, reflection=FALSE, pro=c("vcg","morpho"))
+uprange = 0.9, rhotol = pi, k = 50, reflection=FALSE, pro=c("vcg","morpho"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -61,7 +61,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   
   tmpfun <- function(x,...)
     {
-      tmp0 <- .Fortran("displace_mesh_gauss",x[[1]],nrow(x[[1]]),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW[x[[2]],],nh,clostIndP[x[[2]],],tol=tol)[[1]]
+      tmp0 <- .Fortran("displace_mesh_gauss",x[[1]],nrow(x[[1]]),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW[x[[2]],],nh,clostIndP[x[[2]],],tol=tol,PACKAGE="Morpho")[[1]]
       return(tmp0)
     }
   tmp <- mclapply(mclist,tmpfun,mc.cores=cores)
@@ -76,8 +76,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   return(list(addit=addit))
 }
 
-gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,tol=0,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=50,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("vcg","morpho"),...)
+gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,tol=0,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("vcg","morpho"),...)
   {
+    if (is.null(nh))
+      {
+        nh=ceiling(150/meshres(mesh1))
+        cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
+      }
     rescue <- FALSE
     if (!is.null(patch))
       { ## append landmarks to meshes vertices
@@ -121,7 +126,7 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
           }
         
         time1 <- Sys.time()
-        cat(paste("completed iteration",i, "in", time1-time0, "seconds\n"))
+        cat(paste("completed iteration",i, "in", round(time1-time0,2), "seconds\n"))
         cat("****************\n")
       }
     if (!is.null(patch))
