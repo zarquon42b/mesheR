@@ -37,8 +37,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   ## get neighbourhood for each point to minimize calculation time
   if (!is.null (nh))
     {
-      clostIndW <- mcNNindex(S,W0,k=nh,cores=cores)
-      clostIndP <- mcNNindex(M,W0,k=nh,cores=cores)
+      clostIndW <- mcNNindex(S,W0,k=nh,cores=cores,...)
+      clostIndP <- mcNNindex(M,W0,k=nh,cores=cores,...)
     }
   rt0 <- rep(0,dim(S)[1])
   rt1 <- rep(0,dim(M)[1])
@@ -64,17 +64,25 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   ### make multicore 
   mclist <- list()
   nx <- dim(W0)[1]
-  iter <-floor(nx/cores)    
-  for (i in 1:(cores-1))
+  if (cores > 1)
     {
-      mclist[[i]] <- list()
-      mclist[[i]][[1]] <- W0[(1:iter)+((i-1)*iter),]
-      mclist[[i]][[2]] <-c((1:iter)+((i-1)*iter))
+      iter <-floor(nx/cores)    
+      for (i in 1:(cores-1))
+        {
+          mclist[[i]] <- list()
+          mclist[[i]][[1]] <- W0[(1:iter)+((i-1)*iter),]
+          mclist[[i]][[2]] <-c((1:iter)+((i-1)*iter))
+        }
+      mclist[[cores]] <-   list()
+      mclist[[cores]][[1]] <- W0[-c(1:((cores-1)*iter)),]
+      mclist[[cores]][[2]] <- c(1:dim(W0)[1])[-c(1:((cores-1)*iter))]
     }
-  mclist[[cores]] <-   list()
-  mclist[[cores]][[1]] <- W0[-c(1:((cores-1)*iter)),]
-  mclist[[cores]][[2]] <- c(1:dim(W0)[1])[-c(1:((cores-1)*iter))]
-  ## define function to be run in parallel
+  else
+    {
+      mclist[[1]][[1]] <- W0
+      mclist[[1]][[2]] <- nx
+    }
+      ## define function to be run in parallel
   displacefun <- function(x,...)
     {
       tmp0 <- .Fortran("displace_mesh_gauss",x[[1]],nrow(x[[1]]),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW[x[[2]],],nh,clostIndP[x[[2]],],tol=tol,rt0,rt1,rc,PACKAGE="Morpho")[[1]]
@@ -82,10 +90,12 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     }
   tmp <- mclapply(mclist,displacefun,mc.cores=cores)
   
-  for (i in 1:cores)
-    {
-      out <- rbind(out,tmp[[i]])
-    }
+      for (i in 1:cores)
+        {
+          out <- rbind(out,tmp[[i]])
+        }
+   
+
   ## time <- system.time(out <- .Fortran("displace_mesh_gauss",W0,nrow(W0),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW,nh,clostIndP,tol=tol))
   #print(time)
   addit <- W0+out
@@ -152,7 +162,7 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
               }
           }
         ## call the workhorse doing the displacement
-        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol)
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,...)
         mesh1$vb[1:3,] <- t(tmp$addit)
         ## project the patch back on the temporary surface
         if (!is.null(patch) && repro)
