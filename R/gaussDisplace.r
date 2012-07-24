@@ -1,4 +1,4 @@
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,...)
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,...)
 {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
   ## set projection function according to input request
@@ -15,13 +15,15 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
         }
       project3d <- protmp
     }
+  rc <- 0
   out <- NULL
   t0 <- Sys.time()
   sigma0 <- sigma
   M0 <- t(mesh2$vb[1:3,])
   S0 <- t(mesh1$vb[1:3,])
   sigma <- (sigma0*f^(-k))^2
-  S <- vert2points(project3d(mesh1,mesh2,sign=F))
+  Spro <- project3d(mesh1,mesh2,sign=F)
+  S <- vert2points(Spro)
   ## get symmetric distances and displacement field between meshes
   if (oneway)
     {
@@ -29,13 +31,23 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     }
   else
     {
-      M <- vert2points(project3d(mesh2,mesh1,sign=F))
+      Mpro <- project3d(mesh2,mesh1,sign=F)
+      M <- vert2points(Mpro)
      }
   ## get neighbourhood for each point to minimize calculation time
   if (!is.null (nh))
     {
       clostIndW <- mcNNindex(S,W0,k=nh,cores=cores)
       clostIndP <- mcNNindex(M,W0,k=nh,cores=cores)
+    }
+  rt0 <- rep(0,dim(S)[1])
+  rt1 <- rep(0,dim(M)[1])
+  if (!is.null(rhotol))
+    {
+      rc <- rhotol
+      rt0 <- normcheck(mesh1,Spro)
+      if (!oneway)
+        rt1 <- normcheck(mesh2,Mpro)
     }
   t3 <- Sys.time()
   D1 <- S-S0
@@ -47,6 +59,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   storage.mode(D1) <- "double"
   storage.mode(D2) <- "double"
   storage.mode(nh) <- "integer"
+ 
   tol <- tol^2
   ### make multicore 
   mclist <- list()
@@ -64,7 +77,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   ## define function to be run in parallel
   displacefun <- function(x,...)
     {
-      tmp0 <- .Fortran("displace_mesh_gauss",x[[1]],nrow(x[[1]]),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW[x[[2]],],nh,clostIndP[x[[2]],],tol=tol,PACKAGE="Morpho")[[1]]
+      tmp0 <- .Fortran("displace_mesh_gauss",x[[1]],nrow(x[[1]]),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW[x[[2]],],nh,clostIndP[x[[2]],],tol=tol,rt0,rt1,rc,PACKAGE="Morpho")[[1]]
       return(tmp0)
     }
   tmp <- mclapply(mclist,displacefun,mc.cores=cores)
@@ -79,7 +92,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   return(list(addit=addit))
 }
 
-gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,tol=0,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,...)
+gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,tol=0,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,...)
   {
      if (is.null(nh))
       {
@@ -139,7 +152,7 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
               }
           }
         ## call the workhorse doing the displacement
-        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh)
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol)
         mesh1$vb[1:3,] <- t(tmp$addit)
         ## project the patch back on the temporary surface
         if (!is.null(patch) && repro)
