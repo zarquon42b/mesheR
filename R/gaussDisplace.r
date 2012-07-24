@@ -77,10 +77,12 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
       mclist[[cores]][[1]] <- W0[-c(1:((cores-1)*iter)),]
       mclist[[cores]][[2]] <- c(1:dim(W0)[1])[-c(1:((cores-1)*iter))]
     }
+    
+
   else
-    {
+    { mclist[[1]] <- list()
       mclist[[1]][[1]] <- W0
-      mclist[[1]][[2]] <- nx
+      mclist[[1]][[2]] <- 1:nx
     }
       ## define function to be run in parallel
   displacefun <- function(x,...)
@@ -88,6 +90,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
       tmp0 <- .Fortran("displace_mesh_gauss",x[[1]],nrow(x[[1]]),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW[x[[2]],],nh,clostIndP[x[[2]],],tol=tol,rt0,rt1,rc,PACKAGE="Morpho")[[1]]
       return(tmp0)
     }
+  
   tmp <- mclapply(mclist,displacefun,mc.cores=cores)
   
       for (i in 1:cores)
