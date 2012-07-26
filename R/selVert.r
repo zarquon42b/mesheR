@@ -64,3 +64,23 @@ selectVertex <- function(mesh,col=3,visible=TRUE)
             }
     invisible(selected)
   }
+
+cutMesh <- function(mesh,visible=TRUE,invert=TRUE,col=3)
+  {
+    removal <- selectVertex(mesh,col=col,visible=visible)
+    vb <- 1:ncol(mesh$vb)
+
+    if (invert)
+      vb <- vb[-removal]
+    else
+      vb <- removal
+    outmesh <- rmVertex(mesh,vb)
+    rgl.clear()
+    wire3d(outmesh,col=col,specular="black")
+    cat(paste(length(vb)," vertices removed\n"))
+    invisible(outmesh)
+    
+  }
+    
+
+  
