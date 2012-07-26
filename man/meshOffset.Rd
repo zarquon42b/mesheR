@@ -22,7 +22,7 @@ object of class "mesh3d"
 \author{
 Stefan Schlager}
 
-}
+
 \examples{
 data(nose)
 noseinf <- meshOffset(shortnose.mesh,0.001)
