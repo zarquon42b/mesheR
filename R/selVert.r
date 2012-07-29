@@ -21,10 +21,13 @@ selectVertex <- function(mesh,col=3,visible=TRUE)
         while (selcheck == 0) {
           if (iter == 0)
             view <- points3d(subset[selected,], col = 2, cex = 2)
-          answer <- readline("do you like the view? (y/add/remove)\n")
-          if (answer == "y") {
+          answer <- readline("do more? (q/a/r/i/s)(yes|add|remove|invert|switch view)\n")
+          if (answer == "q") {
             selcheck <- 1
             run <- 1
+          }
+          if (answer == "s") {
+            visible <- !visible
           }
           if (substr(answer,1L,1L) == "a") {
             rgl.bringtotop(stay = FALSE)
@@ -36,6 +39,14 @@ selectVertex <- function(mesh,col=3,visible=TRUE)
                 tmpsel <- visi[which(visi%in%tmpsel)]
               }
             selected <- unique(c(selected,tmpsel))
+            rgl.pop("shapes", id = view)
+            view <- points3d(subset[selected,], col = 2, cex = 2)
+          }
+          if (substr(answer,1L,1L) == "i") {
+            rgl.bringtotop(stay = FALSE)
+            #f <- select3d("right")
+            
+            selected <- (1:ncol(mesh$vb))[-selected]
             rgl.pop("shapes", id = view)
             view <- points3d(subset[selected,], col = 2, cex = 2)
           }
