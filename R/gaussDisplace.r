@@ -1,4 +1,4 @@
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,...)
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,...)
 {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
   ## set projection function according to input request
@@ -49,9 +49,22 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
       if (!oneway)
         rt1 <- normcheck(mesh2,Mpro)
     }
+ 
+      
   t3 <- Sys.time()
   D1 <- S-S0
   D2 <- M-M0
+  if (!border && pro=="v")
+    {
+      if (is.null(rhotol))
+        rc <- pi
+      
+      rt0[as.logical(Spro$border)] <- 4
+      rt1[as.logical(Mpro$border)] <- 4
+    }
+  
+  storage.mode(rt0) <- "double"
+   storage.mode(rt1) <- "double"
   storage.mode(clostIndW) <- "integer"
   storage.mode(clostIndP) <- "integer"
   storage.mode(S0) <- "double"
@@ -105,8 +118,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   return(list(addit=addit))
 }
 
-gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,tol=0,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,...)
+gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,tol=0,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,...)
   {
+   ## clean input mesh
+    if(length(unrefVertex(mesh1))>0)
+      mesh1 <- rmUnrefVertex(mesh1)
+        
+    
      if (is.null(nh))
       {
         nh=ceiling(150/meshres(mesh1))
@@ -134,7 +152,7 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
         colnames(mesh1$vb) <- NULL
         mdim <- dim(mesh1$vb)
         cols <- c((mdim[2]+1-dim(patch)[1]):mdim[2])
-        if (substr(smoothtype,1L,1L) %in% c("h","H") )
+        if (sum(substr(smoothtype,1L,1L) %in% c("h","H")) > 0 )
           rescue <- TRUE
       }
     ## do icp matching
@@ -148,24 +166,24 @@ gaussDisplMesh3d <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,s
     for (i in 1:iterations)
       {
         time0 <- Sys.time()
-        if (!is.null(smooth))
+        if (!is.null(smooth) && i > 1)
           { if (i %% smooth == 0)
               {
-                if(rescue)#keep patch from becoming NaN
+                if(rescue && !is.null(patch))#keep patch from becoming NaN
                   {
                     tmppatch <- mesh1$vb[1:3,cols]
                   }
                 cat("smoothing step\n")
                 mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
                 cat("smoothing finished\n")
-                if (rescue)
+                if (rescue && !is.null(patch))
                   {
                     mesh1$vb[1:3,cols] <- tmppatch 
                   }
               }
           }
         ## call the workhorse doing the displacement
-        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,...)
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,...)
         mesh1$vb[1:3,] <- t(tmp$addit)
         ## project the patch back on the temporary surface
         if (!is.null(patch) && repro)

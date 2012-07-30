@@ -21,7 +21,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE)
         while (selcheck == 0) {
           if (iter == 0)
             view <- points3d(subset[selected,], col = 2, cex = 2)
-          answer <- readline("do more? (q/a/r/i/s)(yes|add|remove|invert|switch view)\n")
+          answer <- readline("do more? (q/a/r/i/s)(quit|add|remove|invert|switch selection mode)\n")
           if (answer == "q") {
             selcheck <- 1
             run <- 1
@@ -72,12 +72,12 @@ selectVertex <- function(mesh,col=3,visible=TRUE)
     return(selected)
   }
 
-cutMesh <- function(mesh,visible=TRUE,invert=TRUE,col=3)
+cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3)
   {
     removal <- selectVertex(mesh,col=col,visible=visible)
     vb <- 1:ncol(mesh$vb)
 
-    if (invert)
+    if (keep.selected)
       vb <- vb[-removal]
     else
       vb <- removal
