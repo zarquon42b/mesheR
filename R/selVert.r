@@ -1,7 +1,12 @@
-selectVertex <- function(mesh,col=3,visible=TRUE)
+selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"),...)
   {
-    open3d()
-    wire3d(mesh, col = col, specular="black")
+    render <- substr(render,1L,1L)
+    do3d <- wire3d
+    if (render == "s")
+      do3d <- shade3d
+    if (!add)
+      open3d()
+    do3d(mesh, col = col, specular="black",...)
     selcheck <- 0
     run <- 0
     cat("select a region using the right mouse button\n")
@@ -72,18 +77,22 @@ selectVertex <- function(mesh,col=3,visible=TRUE)
     return(selected)
   }
 
-cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3)
+cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=c("shade","wire"),...)
   {
-    removal <- selectVertex(mesh,col=col,visible=visible)
+    render <- substr(render,1L,1L)
+    do3d <- wire3d
+    if (render == "s")
+      do3d <- shade3d
+    removal <- selectVertex(mesh,col=col,visible=visible,add=add,render=render,...)
     vb <- 1:ncol(mesh$vb)
-
+    
     if (keep.selected)
       vb <- vb[-removal]
     else
       vb <- removal
     outmesh <- rmVertex(mesh,vb)
     rgl.clear()
-    wire3d(outmesh,col=col,specular="black")
+    do3d(outmesh,col=col,specular="black")
     cat(paste(length(vb)," vertices removed\n"))
     invisible(outmesh)
     
