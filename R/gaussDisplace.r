@@ -6,7 +6,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   if (pro == "v")
     {project3d <- vcgClost
    }
-  if (pro == "m")
+  else if (pro == "m")
     {
       protmp <- function(x,y,sign=F)
         {
@@ -38,7 +38,10 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   if (!is.null (nh))
     {
       clostIndW <- mcNNindex(S,W0,k=nh,cores=cores,...)
-      clostIndP <- mcNNindex(M,W0,k=nh,cores=cores,...)
+      if (!oneway)
+        clostIndP <- mcNNindex(M,W0,k=nh,cores=cores,...)
+      else
+        clostIndP <- matrix(0,dim(W0)[1],nh)
     }
   rt0 <- rep(0,dim(S)[1])
   rt1 <- rep(0,dim(M)[1])
@@ -54,15 +57,27 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   t3 <- Sys.time()
   D1 <- S-S0
   D2 <- M-M0
-  if (!border && pro=="v")
+  if (!border)
     {
-      if (is.null(rhotol))
+       if (is.null(rhotol))
         rc <- pi
-      
-      rt0[as.logical(Spro$border)] <- 4
-      rt1[as.logical(Mpro$border)] <- 4
-    }
-  
+       if (pro=="v")
+         {
+           rt0[as.logical(Spro$border)] <- 4
+           if (!oneway)
+             rt1[as.logical(Mpro$border)] <- 4
+         }
+       else
+         {
+           bordtmp <- vcgBorder(mesh2)
+           rt0[which(Spro$ptr %in% which(as.logical(bordtmp$borderit)))]
+           if (!oneway)
+             {
+               bordtmp <- vcgBorder(mesh1)
+               rt1[which(Mpro$ptr %in% which(as.logical(bordtmp$borderit)))]
+             }
+         }
+     }
   storage.mode(rt0) <- "double"
    storage.mode(rt1) <- "double"
   storage.mode(clostIndW) <- "integer"
