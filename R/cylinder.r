@@ -47,6 +47,7 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
     x1 <- x0+length*dirs
     datavb <- rbind(datavb,x0,x1)
     cylvb <-  t(cbind(datavb,1))
+    colnames(cylvb) <- NULL
     cyl <- list()
     class(cyl) <- "mesh3d"
     cyl$vb <- cylvb
