@@ -9,7 +9,7 @@ placeDowels <- function(lm,mesh,ldowel,smooth=TRUE,render=TRUE,col=1,radius=1,me
         ldo <- TRUE
       }
     
-     if (length(col)>1)
+     if (length(col) > 1)
        {
          colvec <- TRUE
        }
