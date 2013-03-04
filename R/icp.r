@@ -47,16 +47,18 @@ icp <- function(mesh1,mesh2,iterations=3,scale=T,lm1=NULL,lm2=NULL,uprange=0.9,r
   }
         
 
-normcheck <- function(mesh1,mesh2)
+normcheck <- function(mesh1,mesh2,circle=TRUE)
   {
-    x1norm <- mesh1$normals
-    x2norm <- mesh2$normals
+    x1norm <- mesh1$normals[1:3,]
+    x2norm <- mesh2$normals[1:3,]
     ln <- dim(x2norm)[[2]]
+    circle <- as.integer(circle)
     normcheck <- rep(0,dim(x2norm)[2])
     storage.mode(normcheck) <- "double"
     storage.mode(x1norm) <- "double"
     storage.mode(x2norm) <- "double"
     storage.mode(ln) <- "integer"
-    normcheck <- .Fortran("angcheck",x1norm,ln,x2norm,normcheck,PACKAGE="Morpho")[[4]]
+    storage.mode(circle) <- "integer"
+    normcheck <- .Fortran("angcheck",x1norm,ln,x2norm,normcheck,circle,PACKAGE="Morpho")[[4]]
     return(normcheck)
   }

@@ -6,7 +6,7 @@ map two surface meshes using smoothed displacement fields}
 \description{
 Map a reference mesh onto a target surface using displacement fields.}
 \usage{
-gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10, smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2, f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, icp = FALSE, icpiter = 3, uprange = 0.95, rhotol = 1, nh = NULL, toldist = 0, patch = NULL, repro = FALSE, cores = detectCores(), pro = c("morpho", "vcg"), k0 = 50, prometh = 1, angtol = NULL, border = FALSE, ...)
+gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10, smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2, f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, icp = FALSE, icpiter = 3, uprange = 0.95, rhotol = 1, nh = NULL, toldist = 0, patch = NULL, repro = FALSE, cores = detectCores(), pro = c("morpho", "vcg"), k0 = 50, prometh = 1, angtol = NULL, border = FALSE,horiz.disp=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -95,6 +95,12 @@ gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10, smoothty
   }
   \item{border}{Logical: if TRUE, displacement vectors hitting mesh
     borders are discarded.
+  }
+   \item{horiz.disp}{numeric: If the angle between hit points' normals
+  (independent of its orientation) and the distance vector between hit
+  point and starting points exceeds this threshold, the displacement
+    vector will be discarded. Reduces distortion especially at mesh borders.
+    
   }
   \item{\dots}{Further arguments passed to  \code{\link{nn2}}.
   }

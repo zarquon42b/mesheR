@@ -1,4 +1,4 @@
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,...)
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...)
 {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
   ## set projection function according to input request
@@ -52,6 +52,20 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
       if (!oneway)
         rt1 <- normcheck(mesh2,Mpro)
     }
+  if (!is.null(horiz.disp))
+     {
+       if (is.null(rhotol))
+         rc <- horiz.disp
+       tmp <- list();tmp$normals <- mesh1$vb[1:3,]-Spro$vb[1:3,]
+       hordev0 <- normcheck(mesh1,tmp,circle=FALSE)
+       rt0[which(hordev0 > horiz.disp)] <- 4
+       if (!oneway)
+          {
+            tmp <- list();tmp$normals <- mesh2$vb[1:3,]-Mpro$vb[1:3,]
+            hordev1 <- normcheck(mesh2,tmp,circle=FALSE)
+            rt1[which(hordev1 > horiz.disp)] <- 4
+         }
+     }
  
       
   t3 <- Sys.time()
@@ -70,11 +84,11 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
        else
          {
            bordtmp <- vcgBorder(mesh2)
-           rt0[which(Spro$ptr %in% which(as.logical(bordtmp$borderit)))]
+           rt0[which(Spro$ptr %in% which(as.logical(bordtmp$borderit)))] <- 4
            if (!oneway)
              {
                bordtmp <- vcgBorder(mesh1)
-               rt1[which(Mpro$ptr %in% which(as.logical(bordtmp$borderit)))]
+               rt1[which(Mpro$ptr %in% which(as.logical(bordtmp$borderit)))] <- 4
              }
          }
      }
@@ -133,10 +147,10 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   return(list(addit=addit))
 }
 
-gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,...)
+gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,...)
   {
    ## clean input mesh
-    if(length(unrefVertex(mesh1))>0)
+    if(length(unrefVertex(mesh1)) > 0 )
       mesh1 <- rmUnrefVertex(mesh1)
         
     
@@ -198,7 +212,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
               }
           }
         ## call the workhorse doing the displacement
-        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,...)
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
         mesh1$vb[1:3,] <- t(tmp$addit)
         mesh1 <- adnormals(mesh1)
         ## project the patch back on the temporary surface
