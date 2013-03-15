@@ -79,7 +79,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 
 cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=c("shade","wire"),...)
   {
-    render <- substr(render,1L,1L)
+    render <- substr(render[1],1L,1L)
     do3d <- wire3d
     if (render == "s")
       do3d <- shade3d
