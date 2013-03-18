@@ -1,5 +1,12 @@
 selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"),...)
   {
+    visifun <- function()
+      {
+        visi <- which(glVisible(mesh))
+        tmpsel <- visi[which(visi%in%tmpsel)]
+        return(tmpsel)
+      }
+        
     render <- substr(render[1],1L,1L)
     do3d <- wire3d
     if (render == "s")
@@ -10,6 +17,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
     selcheck <- 0
     run <- 0
     cat("select a region using the right mouse button\n")
+   
     while (run == 0) { #initial selection
       rgl.bringtotop(stay = FALSE)
       if (interactive()) {
@@ -17,16 +25,19 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
         subset <- t(mesh$vb[1:3, ])
         tmpsel <- which(f(subset))
         if(visible)
-          {
-            visi <- which(glVisible(mesh))
-            tmpsel <- visi[which(visi%in%tmpsel)]
-          }
+          tmpsel <- visifun()
         selected <- tmpsel
         iter=0   
         while (selcheck == 0) {
           if (iter == 0)
             view <- points3d(subset[selected,], col = 2, cex = 2)
-          answer <- readline("do more? (q/a/r/i/s)(quit|add|remove|invert|switch selection mode)\n")
+          
+          if (visible)
+            visiquestion <- ("do more? (q/a/r/i/s)(quit|add|remove|invert|switch selection mode)\ncurrent selection mode: visible only\n")
+          else
+            visiquestion <-("do more? (q/a/r/i/s)(quit|add|remove|invert|switch selection mode)\ncurrent selection mode: all vertices\n")
+          answer <- readline(visiquestion)
+          
           if (answer == "q") {
             selcheck <- 1
             run <- 1
@@ -39,10 +50,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
             f <- select3d("right")
             tmpsel <- which(f(subset))
             if(visible)
-              {
-                visi <- which(glVisible(mesh))
-                tmpsel <- visi[which(visi%in%tmpsel)]
-              }
+               tmpsel <- visifun()
             selected <- unique(c(selected,tmpsel))
             rgl.pop("shapes", id = view)
             view <- points3d(subset[selected,], col = 2, cex = 2)
@@ -60,10 +68,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
             f <- select3d("right")
             tmpsel <- which(f(subset))
             if(visible)
-              {
-                visi <- which(glVisible(mesh))
-                tmpsel <- visi[which(visi%in%tmpsel)]
-              }
+             tmpsel <- visifun()
             remov <- which(selected%in%tmpsel)
             rgl.pop("shapes", id = view)
             if (length(remov) > 0 )

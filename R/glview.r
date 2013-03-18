@@ -11,7 +11,7 @@ glView <- function()
 glVisible <- function(mesh)
 {
   mesh <- adnormals(mesh)
-  mesh0 <- meshOffset(mesh,0.05)
+  mesh0 <- meshOffset(mesh,1e-5)
   viewpoint <- c(glView(),0)
   normals <- viewpoint-mesh0$vb
   mesh0$normals <- normals

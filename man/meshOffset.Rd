@@ -1,34 +1,34 @@
 \name{meshOffset}
 \alias{meshOffset}
 \title{
-inflate a mesh}
+inflate a mesh along its normals}
 \description{
-inflate or deflate a mesh along its normals}
+translate vertices of a triangular mesh along its normals}
 \usage{
 meshOffset(mesh, offset)
 }
 \arguments{
   \item{mesh}{triangular mesh of class "mesh3d"
 }
-  \item{offset}{numeric: amount of in/deflation (positive values go
-    outward, while negative values go inward)
-}
+  \item{offset}{
+distance to translate the vertices}
 }
 
-\value{
-object of class "mesh3d"
+\value{returns modified mesh.
 }
 
 \author{
 Stefan Schlager}
 
 
+
 \examples{
 data(nose)
-noseinf <- meshOffset(shortnose.mesh,0.001)
-
+shortnose.scale <- scalemesh(shortnose.mesh,500)
+offset <- meshOffset(shortnose.scale,3)
+shade3d(shortnose.scale,col=3)
+wire3d(offset)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 \keyword{ ~kwd1 }
 \keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
