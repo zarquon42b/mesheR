@@ -15,8 +15,8 @@ closest point matching, vertex selection, ...,
 \tabular{ll}{
 Package: \tab mesheR\cr
 Type: \tab Package\cr
-Version: \tab 0.22.1\cr
-Date: \tab 2013-03-07\cr
+Version: \tab 0.2.1\cr
+Date: \tab 2013-03-18\cr
 License: \tab GPL\cr
 LazyLoad: \tab yes\cr
 }
