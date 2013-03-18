@@ -59,7 +59,7 @@ Stefan Schlager}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-code{\link{vcgPlyRead}}
+\code{\link{vcgPlyRead}}
 }
 \examples{
 ##Not run
