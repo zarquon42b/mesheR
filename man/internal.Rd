@@ -1,4 +1,3 @@
-
 \name{mesheR-internal}
 
 \alias{gaussDisplace}
@@ -9,8 +8,15 @@
 %\alias{plotspin}
 %\alias{spinimage}
 
-%mesheR
-
+%curvature
+\alias{mesh2ply2}
+\alias{plotCurves}
+\alias{readCurves}
+\alias{file2ply2}
+%face helpers
+\alias{add.faces}
+\alias{del.faces}
+\alias{find.faces}
 
 
 
