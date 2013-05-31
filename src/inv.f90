@@ -41,7 +41,7 @@ SUBROUTINE M33INV (A, AINV, OK_FLAG)
       RETURN
 
     END SUBROUTINE M33INV
-subroutine multisolve1(A,m,l,trans)
+subroutine multisolve3(A,m,l,trans)
 
 implicit none
 integer :: m,n,i,l,m1,m2,trans
@@ -64,4 +64,4 @@ n=3
    A=Asolve
 
 
-end subroutine multisolve1
+end subroutine multisolve3
