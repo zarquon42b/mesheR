@@ -57,8 +57,18 @@ createS <- function(mesh)
         dia3 <- sparseMatrix(i=1:3,j=1:3,x=rep(1,3))
         arcnodes <- createArcNode(mesh) 
         arcnodes <- kronecker(arcnodes,dia3)
-        out$process <- arcnodes%*%out$sparseAijk
+        out$process <- arcnodes%*%out$sparseAijk%*%sel$sel
         return(out)
     }
 
 
+createC <- function(lm,mesh)
+    {
+        proj <- vcgClost(lm,mesh,barycentric=TRUE)
+        C <- Matrix(0,nrow(lm),ncol(mesh1$vb))
+        vertptr <- t(mesh$it[,proj$faceptr])
+        faceptr <- cbind(1:nrow(lm),vertptr)
+        for(i in 2:4)
+            C[faceptr[,c(1,i)]] <- proj$barycoords[i-1,]
+        return(C)
+    }
