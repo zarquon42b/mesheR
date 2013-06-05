@@ -106,54 +106,50 @@ createC <- function(lm1,mesh)
         return(C)
     }
 
-AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1)
+AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
     {
         t0 <- Sys.time()
         out <- list()
-        S <- createS(mesh)
+        if (is.null(S))
+            S <- createS(mesh)
         ##convert S to class spam
         spamS <- as.spam.dgCMatrix(S$process)
         fn <- S$sel$normals
         
-        ##Jc <- Matrix(0,nrow(lm1),dim(S$process)[2])
-        ##Jc[1:nrow(lm1),1:ncol(C)] <- C
         ## setup Jc Jacobian submatrix
-        
-        Jc <- createJc(lm1,ncol(S$process),mesh)
+        Jc <- createJc(lm1,ncol(spamS),mesh)
         Jc <- lambda*Jc
-        ## setup Jacobian
+        ## setup Jacobian J
         J <- rbind(spamS,Jc)
 
         ## setup Jn Jacobian submatrix
         Jn0 <- sparseMatrix(i=1:ncol(mesh$it),j=1:ncol(mesh$it),x=rep(1,ncol(mesh$it)))
         Jn <- Matrix(0,ncol(mesh$it),ncol(J)-ncol(Jn0))
-                                        #Jn[,-c(1:(ncol(J)-ncol(Jn0)))] <- Jn0
         Jn <- cBind(Jn,Jn0)
         Jn <- k0*Jn
         Jn <- as.spam.dgCMatrix(Jn)
         ##
-        t1 <-  Sys.time();print(t1-t0)
+                                        #t1 <-  Sys.time();print(t1-t0)
         ## convert the matrices to class spam and let spam handle it (much faster)
-        #J <- as.spam.dgCMatrix(J)
-        #Jc <- as.spam.dgCMatrix(Jc)
-       
-        ## append Jn to Jacobian
+        
+        ## append Jn to Jacobian J
         J <- rbind(J,Jn)
+        ## calculate Hessian H
         H <- spam::t(J)%*%J
         Jtc <- spam::t(Jc)%*%lm2
         Hchol <- chol(H)
-        print(system.time(k <- solve.spam(Hchol,lambda*Jtc)))
+        k <- solve.spam(Hchol,lambda*Jtc)
         v <- S$sel$allcoo
         v[-c(1:dim(vert2points(mesh))[1]),] <- 0
         v <- Matrix(v)
         k_v <- k-v
         Jtnv <- spam::t(Jn)%*%(fn)
-        print(system.time(deltav <- solve(H,k0*Jtnv)+k_v))
+        deltav <- solve(H,k0*Jtnv)+k_v
         vert_new <- as.matrix(spam::t((v+deltav)[1:ncol(mesh$vb),]))
         mesh_new <- mesh
         mesh_new$vb[1:3,] <- (vert_new)
         meshout <- adnormals(mesh_new)
-        return(list(mesh=meshout,Jn=Jn,Jc=Jc,J=J,H=H,Hchol=Hchol))
+        return(list(mesh=meshout,Jn=Jn,Jc=Jc,J=J,H=H,Hchol=Hchol,S=S))
     }
 createJc <- function(lm1,ncol,mesh)
     {##function to setup Jc Jacobian submatrix
@@ -164,6 +160,8 @@ createJc <- function(lm1,ncol,mesh)
         return(Jc)
     }
 
+
+###obsolete slow intial version
 AmbergDeform <- function(mesh,lm1,lm2,k0=1,lambda=1)
     {
         t0 <- Sys.time()
