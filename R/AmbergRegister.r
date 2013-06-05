@@ -1,5 +1,6 @@
 AmbergRegister <- function(mesh1,mesh2,lm1,lm2,k=1,lambda=1,iterations=15,rho=pi/2,dist=2,border=F,smooth=T,tol=1e-4)
     {
+        mesh1 <- rmUnrefVertex(mesh1)
         mesh1rot <- rotmesh.onto(mesh1,lm1,lm2)
         lm1 <- mesh1rot$yrot
         mesh1 <- mesh1rot$mesh
