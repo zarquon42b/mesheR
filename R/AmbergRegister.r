@@ -22,7 +22,7 @@ AmbergRegister <- function(mesh1,mesh2,lm1,lm2,k=1,lambda=1,iterations=15,rho=pi
                         clost <- closemeshKD(tmp$mesh,mesh2)
                         verts1 <- vert2points(clost)
                         nc <- normcheck(clost,tmp$mesh)
-                       
+                        
 
                         ## find valid hits
                         normgood <- as.logical(nc < rho)
@@ -35,8 +35,19 @@ AmbergRegister <- function(mesh1,mesh2,lm1,lm2,k=1,lambda=1,iterations=15,rho=pi
                             }
                         
                         good <- sort(which(as.logical(normgood*distgood*bordergood)))
+                        
+### in case no good hit is found within the given distance we increase the distance by 1mm until valid references are found:
+                        increase <- 1
+                        while (length(good) == 0)
+                            {
+                                distgood <- as.logical(abs(clost$quality) <= (dist+increase))
+                                good <- sort(which(as.logical(normgood*distgood*bordergood)))
+                                increase <- increase+1
+                            }
+                        ## update reference points
                         lmtmp1 <- verts0[good,]
                         lmtmp2 <- verts1[good,]
+                        ## map it according to new reference points
                         tmp <- AmbergDeformSpam(mesh,lmtmp1,lmtmp2,k0=k,lambda=lambda[i],S=tmp$S)
                         if (smooth)
                             tmp$mesh <- vcgSmooth(tmp$mesh,iteration = 1)
