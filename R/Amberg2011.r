@@ -137,6 +137,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
         ## calculate Hessian H
         H <- spam::t(J)%*%J
         Jtc <- spam::t(Jc)%*%lm2
+        ## Cholesky decomposition of Hessian H
         Hchol <- chol(H)
         k <- solve.spam(Hchol,lambda*Jtc)
         v <- S$sel$allcoo
@@ -144,7 +145,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
         v <- Matrix(v)
         k_v <- k-v
         Jtnv <- spam::t(Jn)%*%(fn)
-        deltav <- solve(H,k0*Jtnv)+k_v
+        deltav <- solve.spam(Hchol,k0*Jtnv)+k_v
         vert_new <- as.matrix(spam::t((v+deltav)[1:ncol(mesh$vb),]))
         mesh_new <- mesh
         mesh_new$vb[1:3,] <- (vert_new)
