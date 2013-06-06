@@ -9,40 +9,46 @@ AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations
             lambda <- rep(lambda,iterations)
         else if (length(lambda) != iterations)
             stop("lambda must be vector of length 'iterations'")
-       # if (length(k) == 1)
-       #     k <- rep(k,iterations)
-       # else if (length(k) != iterations)
-       #     stop("k must be vector of length 'iterations'")
+        k <- round(k)# make sure k is integer - otherwise RAM overkill
+        if (length(k) == 1)
+            k <- rep(k,iterations)
+        else if (length(k) != iterations)
+            stop("k must be vector of length 'iterations'")
         
         meshorig <- mesh1
+        stopit <- FALSE
         if (!is.null(lm1) && !is.null(lm2))
-            {
+            {   ## case: landmarks are provided
                 mesh1rot <- rotmesh.onto(mesh1,lm1,lm2)
                 lm1 <- mesh1rot$yrot
                 meshorig <- mesh1 <- mesh1rot$mesh
                 lmtmp1 <- lm1
                 lmtmp2 <- lm2
                 verts0 <- vert2points(mesh1)
-                cat(paste("-> performing iteration 1\n"))
+                cat(paste("-> performing landmark based matching 1\n"))
                 tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[1],lambda=lambda[1])
                 count <- count+1
+                if (iterations == 1)
+                    stopit <- TRUE
             }
         else
-            {
+            {   ## case: meshes are already aligned
                 tmp <- list()
                 tmp$mesh <- mesh1
-                tmp$S <- createS(mesh1)
+                if (!useiter)
+                    tmp$S <- createS(mesh1)
                 verts0 <- vert2points(mesh1)
             }
         
         
-        if (iterations > 1)
+        if (!stopit)
             {
+                ## set error and counter appropriately
                 error <- 1e12
                 count <- count+1
                 while (count <= iterations && error > tol)
                     {
-                        t0 <- Sys.time()
+                        time0 <- Sys.time()
                         if (useiter)
                             {
                                 verts0 <- vert2points(tmp$mesh)
@@ -83,15 +89,15 @@ AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations
                         #points3d(lmtmp2,col=count)
                         if (useiter)
                             tmp$S <- NULL
-                        tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k,lambda=lambda[count],S=tmp$S)
+                        tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[count],lambda=lambda[count],S=tmp$S)
                         #oo <- wire3d(tmp$mesh,col=count)
                         gc()
                         ## calculate error
                         if (smooth)
                             tmp$mesh <- vcgSmooth(tmp$mesh,iteration = 1)
                         error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
-                        t0 <- Sys.time()
-                        cat(paste("-> performing iteration",count,"\n"))
+                        time1 <- Sys.time()
+                        cat(paste("-> finished iteration",count,"in",round(time1-time0,2), "seconds\n"))
                         cat(paste(" Info: MSE between iterations:",error,"\n"))
                         if (error < tol)
                             cat(paste("***\n==> Convergence threshold reached after",count,"iterations\n"))
