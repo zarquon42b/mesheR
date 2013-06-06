@@ -1,4 +1,4 @@
-AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations=15,rho=pi/2,dist=2,border=F,smooth=T,tol=1e-4,useiter=FALSE)
+AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations=15,rho=pi/2,dist=2,border=FALSE,smooth=TRUE,tol=1e-4,useiter=TRUE,minclost=50,distinc=1)
     {
         mesh1 <- rmUnrefVertex(mesh1)
         meshbord <- vcgBorder(mesh2)
@@ -9,6 +9,11 @@ AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations
             lambda <- rep(lambda,iterations)
         else if (length(lambda) != iterations)
             stop("lambda must be vector of length 'iterations'")
+       # if (length(k) == 1)
+       #     k <- rep(k,iterations)
+       # else if (length(k) != iterations)
+       #     stop("k must be vector of length 'iterations'")
+        
         meshorig <- mesh1
         if (!is.null(lm1) && !is.null(lm2))
             {
@@ -19,7 +24,7 @@ AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations
                 lmtmp2 <- lm2
                 verts0 <- vert2points(mesh1)
                 cat(paste("-> performing iteration 1\n"))
-                tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k,lambda=lambda[1])
+                tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[1],lambda=lambda[1])
                 count <- count+1
             }
         else
@@ -37,13 +42,14 @@ AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations
                 count <- count+1
                 while (count <= iterations && error > tol)
                     {
+                        t0 <- Sys.time()
                         if (useiter)
                             {
                                 verts0 <- vert2points(tmp$mesh)
                                 mesh1 <- tmp$mesh
                             }
                         vert_old <- vert2points(tmp$mesh)
-                        cat(paste("-> performing iteration",count,"\n"))
+                        
                         clost <- closemeshKD(tmp$mesh,mesh2)
                         verts1 <- vert2points(clost)
 
@@ -61,12 +67,13 @@ AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations
                         good <- sort(which(as.logical(normgood*distgood*bordergood)))
                         
 ### in case no good hit is found within the given distance we increase the distance by 1mm until valid references are found:
-                        increase <- 1
-                        while (length(good) == 0)
+                        increase <- distinc
+                        while (length(good) < minclost)
                             {
                                 distgood <- as.logical(abs(clost$quality) <= (dist+increase))
                                 good <- sort(which(as.logical(normgood*distgood*bordergood)))
-                                increase <- increase+1
+                                increase <- increase+distinc
+                                cat(paste("distance increased to",dist+increase,"\n"))
                             }
                         
                         ## update reference points
@@ -83,6 +90,8 @@ AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations
                         if (smooth)
                             tmp$mesh <- vcgSmooth(tmp$mesh,iteration = 1)
                         error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
+                        t0 <- Sys.time()
+                        cat(paste("-> performing iteration",count,"\n"))
                         cat(paste(" Info: MSE between iterations:",error,"\n"))
                         if (error < tol)
                             cat(paste("***\n==> Convergence threshold reached after",count,"iterations\n"))

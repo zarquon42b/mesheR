@@ -138,7 +138,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
         H <- spam::t(J)%*%J
         Jtc <- spam::t(Jc)%*%lm2
         ## Cholesky decomposition of Hessian H
-        Hchol <- chol(H)
+        Hchol <- spam::chol(H)
         k <- solve.spam(Hchol,lambda*Jtc)
         v <- S$sel$allcoo
         v[-c(1:dim(vert2points(mesh))[1]),] <- 0
@@ -163,7 +163,7 @@ createJc <- function(lm1,ncol,mesh)
 
 
 ###obsolete slow intial version
-AmbergDeform <- function(mesh,lm1,lm2,k0=1,lambda=1)
+AmbergDeform <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
     {
         t0 <- Sys.time()
         ##
@@ -185,14 +185,15 @@ AmbergDeform <- function(mesh,lm1,lm2,k0=1,lambda=1)
 
         
         H <- Matrix::t(J)%*%J
+        Hchol <- Cholesky(H)
         Jtc <- Matrix::t(Jc)%*%lm2
-        print(system.time(k <- solve(H,lambda*Jtc)))
+        print(system.time(k <- solve(Hchol,lambda*Jtc)))
         v <- S$sel$allcoo
         v[-c(1:dim(vert2points(mesh))[1]),] <- 0
         v <- Matrix(v)
         k_v <- k-v
         Jtnv <- t(Jn)%*%(fn)
-        print(system.time(deltav <- solve(H,k0*Jtnv)+k_v))
+        print(system.time(deltav <- solve(Hchol,k0*Jtnv)+k_v))
         vert_new <- as.matrix(t((v+deltav)[1:ncol(mesh$vb),]))
         mesh_new <- mesh
         mesh_new$vb[1:3,] <- (vert_new)
