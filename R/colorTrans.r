@@ -40,5 +40,6 @@ colorTrans <- function(mesh1,mesh2,tol=1)
         material <- list()
         material$color <- matrix(colfun(mesh1$it), dim(mesh1$it))
         mesh1$material$color <- material$color
-        return(list(mesh=mesh1,clost=clost,colmat=colmat,outcol=outcol))
+        #return(list(mesh=mesh1,clost=clost,colmat=colmat,outcol=outcol))
+        return(mesh1)
     }
