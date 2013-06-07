@@ -25,13 +25,18 @@ colorTrans <- function(mesh1,mesh2,tol=1)
         #vert3col <- as(vert3col,"LAB")
         outcol <- vert1col
         outcol@coords <- (vert1col@coords+vert2col@coords+vert3col@coords)/3
+        #over <- which(outcol@coords > 1)
+        #outcol@coords[over] <- 1
 
         goodcoll <- as(outcol,"RGB")
-        blackit <- rep(max(outcol@coords),ncol(mesh1$vb))
+        blackit <- rep(0,ncol(mesh1$vb))
         colmat <- RGB(blackit,blackit,blackit)
         #colmat <- matrix(1,ncol(mesh1$vb),3)
         colmat@coords[hits,] <- goodcoll@coords
         #colmat <- rgb(colmat[, 1], colmat[, 2], colmat[,3], maxColorValue = max(colmat))
+        over <- which(colmat@coords > 1)
+        if (length(over) > 0)
+            colmat@coords[over] <- 1
         colmat <- hex(colmat)
         colfun <- function(x) {
             x <- colmat[x]
