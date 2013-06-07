@@ -29,7 +29,7 @@ colorTrans <- function(mesh1,mesh2,tol=1)
         #outcol@coords[over] <- 1
 
         goodcoll <- as(outcol,"RGB")
-        blackit <- rep(0,ncol(mesh1$vb))
+        blackit <- rep(1,ncol(mesh1$vb))
         colmat <- RGB(blackit,blackit,blackit)
         #colmat <- matrix(1,ncol(mesh1$vb),3)
         colmat@coords[hits,] <- goodcoll@coords
