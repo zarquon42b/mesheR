@@ -6,7 +6,6 @@ Date: 2013-03-18
 Author: Stefan Schlager
 Maintainer: Stefan Schlager <stefan.schlager@uniklinik-freiburg.de>
 Description: Meshing operations on triangular meshes.
-Depends: R (>= 2.14.0),Matrix, Morpho,Rvcg,colorRamps,RANN,spam
-Imports: Matrix
+Depends: R (>= 2.14.0), Matrix, Morpho, Rvcg, colorRamps, RANN, spam, colorspace
 License: GPL-2
 LazyLoad: yes
