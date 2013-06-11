@@ -147,7 +147,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   return(list(addit=addit))
 }
 
-gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,...)
+gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,Amberg=NULL,...)
   {
    ## clean input mesh
     if(length(unrefVertex(mesh1)) > 0 )
@@ -213,8 +213,24 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
           }
         ## call the workhorse doing the displacement
         tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
-        mesh1$vb[1:3,] <- t(tmp$addit)
+
+        
+        
+        if (!is.null(Amberg))#smooth deformation
+         {
+             tmpmesh <- mesh1
+             tmpmesh$vb[1:3,] <- t(tmp$addit)
+             tmpmesh <- adnormals(mesh1)
+             #mesh1 <- AmbergRegister(mesh1,tmpmesh,lambda=Amberg[1],k=Amberg[2],iterations = 1,dist=Amberg[3])$mesh
+             mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=Amberg[1],k=Amberg[2])$mesh
+             
+         }
+    
+        else
+            mesh1$vb[1:3,] <- t(tmp$addit)
+
         mesh1 <- adnormals(mesh1)
+                
         ## project the patch back on the temporary surface
         if (!is.null(patch) && repro)
           {
