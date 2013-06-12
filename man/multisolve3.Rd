@@ -27,7 +27,6 @@ multisolve3(A, trans = FALSE)
 
 }
 
-}
 \author{Stefan Schlager
 }
 
