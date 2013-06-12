@@ -1,4 +1,4 @@
-plotEdges <- function(mesh,col=2,lwd=2)
+plotBorder <- function(mesh,col=2,lwd=2)
     {
         edges <- vcgGetEdge(mesh)
         bord <- which(edges$border == 1)

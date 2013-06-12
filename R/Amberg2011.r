@@ -1,4 +1,5 @@
-buildAffineAmberg <- function(mesh)
+###subroutine preparing vertex assortment in order to create S using an 'arcface' matrix
+buildAffineAmberg <- function(mesh) 
     {
         verts <- vert2points(mesh)
         norms <- t(facenormals(mesh)$normals[1:3,])##calculate face normals
@@ -8,6 +9,7 @@ buildAffineAmberg <- function(mesh)
         rowind2 <- rowind3-1
         rowind1 <- rowind3-2
         whichsel <- cbind(rowind1,rowind2,rowind3,t(mesh$it),nrow(verts)+rowind)
+        ## setup sparse selection matrix to build Affine per-face trafo-matrix 
         sel <- Matrix::Matrix(0,3*ncol(mesh$it),nrow(allcoo))
         sel[whichsel[,c(1,4)]] <- -1
         sel[whichsel[,c(1,5)]] <- 1
@@ -17,7 +19,8 @@ buildAffineAmberg <- function(mesh)
         return(list(sel=sel,allcoo=allcoo,verts=verts,normals=norms))
     }
 
-mesh2sparse2 <- function (mat) 
+### convert affine per-face trafo-matrix
+mat2sparseBlock <- function (mat) 
 {
     mat <- as.matrix(mat)
     nvb <- nrow(mat)
@@ -34,24 +37,41 @@ mesh2sparse2 <- function (mat)
     invisible((out))
 }
 
+### create per face arcnode matrix to differentiate per-face affine trafo
+### based on per edge approximation
 createArcNode <- function(mesh)
     {
-        edges <- vcgNonBorderEdge(mesh)
+        edges <- vcgNonBorderEdge(mesh)##get all non-border edges
         n <- dim(edges)[1]
         dimit <- ncol(mesh$it)
         arcnode <- Matrix(0,n,dimit)
         edges$ind <- 1:n
-        arcnode[cbind(edges$ind,edges$face1)] <- -1
+        ## select adjacent faces later used for approx differentiation
+        arcnode[cbind(edges$ind,edges$face1)] <- -1 
         arcnode[cbind(edges$ind,edges$face2)] <- 1
         out <- list()
         out$arcnode <- arcnode
         out$edges <- edges
         invisible(out)
     }
+
+### calculate area between edge and barycenters of adjacent faces
+### needed in AijkWeights
+areafun <- function(x)
+    {
+        m <- nrow(x)
+        storage.mode(x) <- "double"
+        out <- as.double(rep(0,m))
+        out <- .Fortran("areafun",x,m,out)
+        return(out[[3]])
+    }
+
+### calculate per face-deform weights for approx. derivation
 AijklWeights <- function(mesh,arcnode)
     {
         verts <- vert2points(mesh)
-        bary <-t( facenormals(mesh)$vb[1:3,])
+        ## get facenormals and barycenters
+        bary <-t(facenormals(mesh)$vb[1:3,])
         xijk <- bary[arcnode$edges$face1,]-bary[arcnode$edges$face2,]
         xijk <- apply(xijk,1,function(x){x <- sqrt(sum(x^2))})
         nedge <- length(xijk)
@@ -63,20 +83,10 @@ AijklWeights <- function(mesh,arcnode)
         dia3 <- sparseMatrix(i=1:3,j=1:3,x=rep(1,3))
         diatmp <- kronecker(diatmp,dia3)
         return(diatmp)
-        
-    }
-areafun <- function(x)
-    {
-
-        m <- nrow(x)
-        storage.mode(x) <- "double"
-        out <- as.double(rep(0,m))
-        out <- .Fortran("areafun",x,m,out)
-        return(out[[3]])
     }
 
 
-
+### create S - upper block of Jacobian matrix
 createS <- function(mesh)
     {
         out <- list()
@@ -85,7 +95,7 @@ createS <- function(mesh)
         invtransel <- multisolve3(transel,trans=TRUE)
         arcnodes <- createArcNode(mesh) 
         weight <- AijklWeights(mesh,arcnodes)
-        out$sparseAijk <- Matrix::t(mesh2sparse2(invtransel))
+        out$sparseAijk <- Matrix::t(mat2sparseBlock(invtransel))
         out$sel <- sel
         dia3 <- sparseMatrix(i=1:3,j=1:3,x=rep(1,3))
         arcnodes3 <- kronecker(arcnodes$arcnode,dia3)
@@ -94,7 +104,7 @@ createS <- function(mesh)
         return(out)
     }
 
-
+### create C - middle block of Jacobian matrix
 createC <- function(lm1,mesh)
     {
         proj <- vcgClost(lm1,mesh,barycentric=TRUE)
@@ -106,6 +116,18 @@ createC <- function(lm1,mesh)
         return(C)
     }
 
+##function to setup Jc Jacobian submatrix
+createJc <- function(lm1,ncol,mesh)
+    {
+        C <- createC(lm1,mesh)
+        Jc <- Matrix(0,nrow(lm1),ncol)
+        Jc[1:nrow(lm1),1:ncol(C)] <- C
+        Jc <- as.spam.dgCMatrix(Jc)
+        return(Jc)
+    }
+
+### deformation of a mesh based on correspondences
+### converts all sparse matrices to class spam and let spam handle it (much faster)
 AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
     {
         t0 <- Sys.time()
@@ -128,10 +150,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
         Jn <- cBind(Jn,Jn0)
         Jn <- k0*Jn
         Jn <- as.spam.dgCMatrix(Jn)
-        ##
-                                        #t1 <-  Sys.time();print(t1-t0)
-        ## convert the matrices to class spam and let spam handle it (much faster)
-        
+                                     
         ## append Jn to Jacobian J
         J <- rbind(J,Jn)
         ## calculate Hessian H
@@ -152,51 +171,5 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
         meshout <- adnormals(mesh_new)
         return(list(mesh=meshout,Jn=Jn,Jc=Jc,J=J,H=H,Hchol=Hchol,S=S))
     }
-createJc <- function(lm1,ncol,mesh)
-    {##function to setup Jc Jacobian submatrix
-        C <- createC(lm1,mesh)
-        Jc <- Matrix(0,nrow(lm1),ncol)
-        Jc[1:nrow(lm1),1:ncol(C)] <- C
-        Jc <- as.spam.dgCMatrix(Jc)
-        return(Jc)
-    }
 
 
-###obsolete slow intial version
-AmbergDeform <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
-    {
-        t0 <- Sys.time()
-        ##
-        S <- createS(mesh)
-        fn <- S$sel$normals
-        C <- createC(lm1,mesh)
-        Jc <- Matrix(0,nrow(lm1),dim(S$process)[2])
-        Jc[1:nrow(lm1),1:ncol(C)] <- C
-        Jc <- lambda*Jc
-        J <- rBind(S$process,Jc)
-        Jn0 <- sparseMatrix(i=1:ncol(mesh$it),j=1:ncol(mesh$it),x=rep(1,ncol(mesh$it)))
-        Jn <- Matrix(0,ncol(mesh$it),ncol(J))
-        Jn[,-c(1:(ncol(J)-ncol(Jn0)))] <- Jn0
-        Jn <- k0*Jn
-        ##
-        t1 <-  Sys.time();print(t1-t0)
-        ##
-        J <- rBind(J,Jn)
-
-        
-        H <- Matrix::t(J)%*%J
-        Hchol <- Cholesky(H)
-        Jtc <- Matrix::t(Jc)%*%lm2
-        print(system.time(k <- solve(Hchol,lambda*Jtc)))
-        v <- S$sel$allcoo
-        v[-c(1:dim(vert2points(mesh))[1]),] <- 0
-        v <- Matrix(v)
-        k_v <- k-v
-        Jtnv <- t(Jn)%*%(fn)
-        print(system.time(deltav <- solve(Hchol,k0*Jtnv)+k_v))
-        vert_new <- as.matrix(t((v+deltav)[1:ncol(mesh$vb),]))
-        mesh_new <- mesh
-        mesh_new$vb[1:3,] <- (vert_new)
-        meshout <- adnormals(mesh_new)
-        return(meshout)
-    }
