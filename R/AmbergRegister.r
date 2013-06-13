@@ -1,4 +1,4 @@
-AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations=15,rho=pi/2,dist=2,border=FALSE,smooth=TRUE,tol=1e-4,useiter=TRUE,minclost=50,distinc=1,icp=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL)
     {
         mesh1 <- rmUnrefVertex(mesh1)
         meshbord <- vcgBorder(mesh2)
@@ -30,7 +30,7 @@ AmbergRegister <- function(mesh1,mesh2,lm1=NULL,lm2=NULL,k=1,lambda=1,iterations
                                             }
                 else
                     {
-                        mesh1rot <- rotmesh.onto(mesh1,lm1,lm2)
+                        mesh1rot <- rotmesh.onto(mesh1,lm1,lm2,scale=scale)
                         lm1 <- mesh1rot$yrot
                         meshorig <- mesh1 <- mesh1rot$mesh
                         lmtmp1 <- lm1

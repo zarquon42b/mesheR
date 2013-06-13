@@ -8,7 +8,9 @@
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1, iterations = 15, rho = pi/2, dist = 2, border = FALSE, smooth = TRUE, tol = 1e-04, useiter = TRUE, minclost = 50, distinc = 1)
+AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
+iterations = 15, rho = pi/2, dist = 2, border = FALSE, smooth = TRUE,
+tol = 1e-04, useiter = TRUE, minclost = 50, distinc = 1, scale=TRUE, icp=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -66,6 +68,20 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1, iteratio
 %%     ~~Describe \code{minclost} here~~
 }
   \item{distinc}{increment of dist, in case minclost is not reached.
+%%     ~~Describe \code{distinc} here~~
+}
+  \item{scale}{logical: if TRUE, initial landmark based rigid
+    registration includes scaling.
+%%     ~~Describe \code{distinc} here~~
+}
+  \item{ icp}{vector of length 4. Passing parameters to
+    \code{\link{icp}}, which is performed after intial landmark based
+    registration. The parameters are icp[1]=iterations; icp[2]=rhotol;
+    icp[3]=uprange, and icp[4]=scale. If icp=NULL, no ICP-matching is
+    performed.
+    E.g. icp=c(3,pi/2,0.6,TRUE) will result in 3 icp iterations,
+    condidering the closest 60\% of correspondences with normal
+    deviation of pi/2 and include scaling.
 %%     ~~Describe \code{distinc} here~~
 }
 }
