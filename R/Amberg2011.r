@@ -120,8 +120,8 @@ createC <- function(lm1,mesh)
 createJc <- function(lm1,ncol,mesh)
     {
         C <- createC(lm1,mesh)
-        Jc <- Matrix(0,nrow(lm1),ncol)
-        Jc[1:nrow(lm1),1:ncol(C)] <- C
+        Jc <- Matrix(0,nrow(lm1),ncol-ncol(C))
+        Jc <- cBind(C,Jc)
         Jc <- as.spam.dgCMatrix(Jc)
         return(Jc)
     }
