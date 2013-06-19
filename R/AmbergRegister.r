@@ -1,4 +1,4 @@
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL)
     {
         mesh1 <- rmUnrefVertex(mesh1)
         meshbord <- vcgBorder(mesh2)
@@ -105,7 +105,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                         gc()
                         ## calculate error
                         if (smooth)
-                            tmp$mesh <- vcgSmooth(tmp$mesh,iteration = 1)
+                            tmp$mesh <- vcgSmooth(tmp$mesh,iteration = smoothit,type=smoothtype)
                         error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
                         time1 <- Sys.time()
                         cat(paste("-> finished iteration",count,"in",round(time1-time0,2), "seconds\n"))
