@@ -25,11 +25,9 @@ Stefan Schlager}
 
 \examples{
 data(nose)
-##scale mesh to reasonable size
-shortnose.scale <- scalemesh(shortnose.mesh,500)
-shade3d(shortnose.scale,col=3)
-visi <- glVisible(shortnose.scale)
-points3d(vert2points(shortnose.scale)[which(visi),])
+shade3d(shortnose.mesh,col=3)
+visi <- glVisible(shortnose.mesh)
+points3d(vert2points(shortnose.mesh)[which(visi),])
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

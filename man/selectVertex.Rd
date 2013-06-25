@@ -62,12 +62,10 @@ Stefan Schlager}
 \code{\link{vcgPlyRead}}
 }
 \examples{
-##Not run
+\dontrun{
 data(nose)
-## scale mesh to reasonable size
-shortnose.mesh <- scalemesh(shortnose.mesh,500)
 selection <- selectVertex(shortnose.mesh)
-## End(Not run)
+}
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

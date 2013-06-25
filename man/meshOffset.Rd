@@ -24,9 +24,8 @@ Stefan Schlager}
 
 \examples{
 data(nose)
-shortnose.scale <- scalemesh(shortnose.mesh,500)
-offset <- meshOffset(shortnose.scale,3)
-shade3d(shortnose.scale,col=3)
+offset <- meshOffset(shortnose.mesh,3)
+shade3d(shortnose.mesh,col=3)
 wire3d(offset)
 }
 
