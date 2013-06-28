@@ -41,3 +41,4 @@ Collate:
     'spinimage.r'
     'spinmap.r'
     'trivolume.r'
+    'mesheR-package.R'
