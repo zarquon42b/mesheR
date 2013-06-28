@@ -114,6 +114,6 @@ normcheck <- function(mesh1,mesh2,circle=TRUE)
     storage.mode(x2norm) <- "double"
     storage.mode(ln) <- "integer"
     storage.mode(circle) <- "integer"
-    normcheck <- .Fortran("angcheck",x1norm,ln,x2norm,normcheck,circle,PACKAGE="Morpho")[[4]]
+    normcheck <- .Fortran("angcheck",x1norm,ln,x2norm,normcheck,circle)[[4]]
     return(normcheck)
   }

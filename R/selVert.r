@@ -14,10 +14,8 @@
 #' @param add logical: add the surface to an existing window.
 #' @param render character: how to render the surface. Possible values are
 #' "shade" or "wire". 
-#' @param keep.selected logical: determines if the selected vertices or their
-#' complement are deleted.
 #' @param \dots additional arguments passed to the rendering functions
-#' \code{\link{shade3d}} and \code{\link{wire3d}} 
+#' shade3d and wire3d from package "shapes". 
 #' @return selectVertex returns the indices of the selected vertices.
 #' 
 #' cutMesh returns the trimmed mesh.
@@ -116,6 +114,36 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
     return(selected)
   }
 
+#' crop triangular surface meshes
+#' 
+#' crop a surface mesh interactively.
+#' 
+#' select vertices or trim a triangular mesh by selecting a subset - either
+#' restricted to visible from the current point of view or by rectangular
+#' region. Visibility is determined by the fact that the vector from the
+#' viewpoint to the selected vertex does not intersect the mesh.
+#' 
+#' @aliases selectVertex cutMesh
+#' @param mesh triangular mesh of class "mesh3d"
+#' @param visible select only vertices visible (from the present point of view)
+#' @param keep.selected logical: determines if the selected vertices or their
+#' complement are deleted.
+#' @param col color to render the mesh.
+#' @param \dots additional arguments passed to the rendering functions
+#' shade3d and wire3d from package "rgl".
+#' @return selectVertex returns the indices of the selected vertices.
+#' 
+#' cutMesh returns the trimmed mesh.
+#' @author Stefan Schlager
+#' @seealso \code{\link{vcgPlyRead}}
+#' @keywords ~kwd1 ~kwd2
+#' @examples
+#' 
+#' \dontrun{
+#' data(nose)
+#' selection <- selectVertex(shortnose.mesh)
+#' }
+#' 
 cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=c("shade","wire"),...)
   {
     render <- substr(render[1],1L,1L)

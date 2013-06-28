@@ -239,7 +239,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' ##warp a mesh onto another landmark configuration:
 #' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 #' ### result won't be too good as the surfaces do stronly differ.
-#' match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
+#' match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=3,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
 #' 
 #' @export gaussMatch
 #' @useDynLib mesheR
@@ -318,7 +318,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
              tmpmesh$vb[1:3,] <- t(tmp$addit)
              tmpmesh <- adnormals(mesh1)
              #mesh1 <- AmbergRegister(mesh1,tmpmesh,lambda=Amberg[1],k=Amberg[2],iterations = 1,dist=Amberg[3])$mesh
-             mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=Amberg[1],k=Amberg[2])$mesh
+             mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=Amberg[1],k0=Amberg[2])$mesh
              
          }
     

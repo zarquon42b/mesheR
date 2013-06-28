@@ -135,7 +135,7 @@ data(nose)##load data
 ##warp a mesh onto another landmark configuration:
 warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 ### result won't be too good as the surfaces do stronly differ.
-match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
+match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=3,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
 }
 \author{
   Stefan Schlager

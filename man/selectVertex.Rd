@@ -20,11 +20,8 @@
   \item{render}{character: how to render the surface.
   Possible values are "shade" or "wire".}
 
-  \item{keep.selected}{logical: determines if the selected
-  vertices or their complement are deleted.}
-
   \item{\dots}{additional arguments passed to the rendering
-  functions \code{\link{shade3d}} and \code{\link{wire3d}}}
+  functions shade3d and wire3d from package "shapes".}
 }
 \value{
   selectVertex returns the indices of the selected
