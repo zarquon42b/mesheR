@@ -1,3 +1,11 @@
+#' Calculate volume between two states of a mesh
+#'
+#'  Calculate volume between two states of a mesh by dividing it into prisms
+#'
+#' @param mesh1 triangular mesh in first state
+#' @param mesh1 triangular mesh in second state
+#' @return Volume
+#' @export trivolume
 trivolume <- function(mesh1,mesh2)
   {
     #mesh2 <- conv2backf(mesh2)
