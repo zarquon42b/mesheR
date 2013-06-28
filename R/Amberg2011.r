@@ -1,4 +1,9 @@
-###subroutine preparing vertex assortment in order to create S using an 'arcface' matrix
+#' subfunction of AmbergDeformSpam
+#'
+#' subroutine preparing vertex assortment in order to create S using an 'arcface' matrix
+#' @param mesh triangular mesh
+#' @export buildAffineAmberg
+
 buildAffineAmberg <- function(mesh) 
     {
         verts <- vert2points(mesh)
@@ -19,7 +24,11 @@ buildAffineAmberg <- function(mesh)
         return(list(sel=sel,allcoo=allcoo,verts=verts,normals=norms))
     }
 
-### convert affine per-face trafo-matrix
+#' subfunction of AmbergDeformSpam
+#'
+#' convert affine per-face trafo-matrix
+#' @param mat quadratic matrix
+#' @export mat2sparseBlock
 mat2sparseBlock <- function (mat) 
 {
     mat <- as.matrix(mat)
@@ -37,8 +46,11 @@ mat2sparseBlock <- function (mat)
     invisible((out))
 }
 
-### create per face arcnode matrix to differentiate per-face affine trafo
-### based on per edge approximation
+#' subfunction of AmbergDeformSpam
+#'
+#' create per face arcnode matrix to differentiate per-face affine trafo based on per edge approximation
+#' @param mesh triangular mesh
+#' @export createArcNode
 createArcNode <- function(mesh)
     {
         edges <- vcgNonBorderEdge(mesh)##get all non-border edges
@@ -55,8 +67,11 @@ createArcNode <- function(mesh)
         invisible(out)
     }
 
-### calculate area between edge and barycenters of adjacent faces
-### needed in AijkWeights
+#' subfunction of AmbergDeformSpam
+#'
+#' calculate area between edge and barycenters of adjacent faces needed in AijkWeights
+#' @param x n x 4  matrix containing cornerstones of area 
+#' @export areafun
 areafun <- function(x)
     {
         m <- nrow(x)
@@ -66,7 +81,11 @@ areafun <- function(x)
         return(out[[3]])
     }
 
-### calculate per face-deform weights for approx. derivation
+#' subfunction of AmbergDeformSpam
+#'
+#' calculate per face-deform weights for approx. derivation
+#' @param mesh triangular mesh
+#' @export AijklWeights
 AijklWeights <- function(mesh,arcnode)
     {
         verts <- vert2points(mesh)
@@ -86,7 +105,12 @@ AijklWeights <- function(mesh,arcnode)
     }
 
 
-### create S - upper block of Jacobian matrix
+### 
+#' subfunction of AmbergDeformSpam
+#'
+#' create S - upper block of Jacobian matrix
+#' @param mesh triangular mesh
+#' @export createS
 createS <- function(mesh)
     {
         out <- list()
@@ -104,7 +128,12 @@ createS <- function(mesh)
         return(out)
     }
 
-### create C - middle block of Jacobian matrix
+#' subfunction of AmbergDeformSpam
+#'
+#' create C - middle block of Jacobian matrix
+#' @param lm1 landmarks
+#' @param mesh triangular mesh
+#' @export createC
 createC <- function(lm1,mesh)
     {
         proj <- vcgClost(lm1,mesh,barycentric=TRUE)
@@ -116,7 +145,14 @@ createC <- function(lm1,mesh)
         return(C)
     }
 
-##function to setup Jc Jacobian submatrix
+#' subfunction of AmbergDeformSpam
+#'
+#' function to setup Jc Jacobian submatrix
+#' 
+#' @param lm1 landmarks
+#' @param ncol column numbers of complete Jacbian
+#' @param mesh triangular mesh
+#' @export createJc
 createJc <- function(lm1,ncol,mesh)
     {
         C <- createC(lm1,mesh)
@@ -128,6 +164,35 @@ createJc <- function(lm1,ncol,mesh)
 
 ### deformation of a mesh based on correspondences
 ### converts all sparse matrices to class spam and let spam handle it (much faster)
+
+
+#' Deform triangular mesh based on correspondences
+#' 
+#' Perform smooth deformation of a triangular mesh, minimizing per-face
+#' distortions.
+#' 
+#' Perform smooth deformation of a triangular mesh, minimizing per-face
+#' distortions.No loose vertices, edges and degenerated faces are allowed, as
+#' they lead to singular equation system.
+#' 
+#' @param mesh triangular mesh of class "mesh3d". No loose vertices, edges and
+#' degenerated faces are allowed.
+#' @param lm1 m x 3 matrix containing correspondences on "mesh"
+#' @param lm2 m x 3 matrix containing target correspondences
+#' @param k0 integer: parameter regularizing face normal distortion.
+#' @param lambda numeric: parameter regularizing faces's distortion.  
+#' @param S optional: object from function createS from previous calculation.
+#' @return
+#' \item{mesh}{deformed mesh}
+#' \item{Jn}{Jacobi submatrix Jn}
+#' \item{Jc}{Jacobi submatrix Jc}
+#' \item{J }{Jacobian matrix}
+#' \item{H }{Hessian of J, class "spam"}
+#' \item{Hchol}{Cholesky decomposition of H; class"spam"}
+#' @author Stefan Schlager
+#' @seealso \code{\link{gaussMatch}}
+#' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
+#' @keywords ~kwd1 ~kwd2
 AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
     {
         t0 <- Sys.time()

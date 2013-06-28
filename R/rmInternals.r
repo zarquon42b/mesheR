@@ -1,3 +1,24 @@
+#' remove vertices within a convex surface mesh
+#' 
+#' remove vertices within a convex surface mesh by checking if they intersect
+#' the mesh along their normals.
+#' 
+#' This only works for convex meshes, for concave substructures this might
+#' result in unwanted removals.
+#' 
+#' @param mesh triangular mesh of class "mesh3d" 
+#' @param mindist numeric: restrict to those vertices whose intersection point
+#' is further away as mindist. 
+#' @param explode logical: instead of surface normals use the direction outward
+#' from a center of the mesh. Per default, the center of the meshes bounding
+#' box is used. 
+#' @param center numeric vector of length 3, used in the case "explode=TRUE",
+#' if another center is required.
+#' @return returns a cleaned mesh
+#' @author Stefan Schlager
+#' @seealso \code{\link{rmVertex}}
+#' @keywords ~kwd1 ~kwd2
+#' @export rmInternals
 rmInternals <- function(mesh,mindist=NULL,explode=FALSE,center=NULL)
   {
 

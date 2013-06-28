@@ -1,3 +1,52 @@
+#' Register two triangular meshes based on smooth deformation.
+#' 
+#' Perform registration of two triangular meshes, minimizing per-face
+#' distortions. 
+#' 
+#' @param mesh1 reference mesh: triangular mesh of class "mesh3d". No loose
+#' vertices, edges and degenerated faces are allowed. 
+#' @param mesh2 target mesh: triangular mesh of class "mesh3d". 
+#' @param lm1 m x 3 matrix containing correspondences on "mesh1" 
+#' @param lm2 m x 3 matrix containing target correspondences on "mesh2" 
+#' @param k integer: parameter regularizing face normal distortion. Can be
+#' vector of length(iterations) or single value. 
+#' @param lambda numeric: parameter regularizing faces's distortion. Can be
+#' vector of length(iterations) or single value. 
+#' @param iterations integer: number of iterations to run. 
+#' @param rho numeric: 0 < rho < 2*pi tolerance of normal deviation between
+#' reference vertices and corresponding closest points on target suface. 
+#' @param dist numeric: tolerance of maximal distance between reference
+#' vertices and corresponding closest points on target suface.
+#' @param border logical: if FALSE, hits on border faces are ignored (reduces
+#' distortion) 
+#' @param smooth logical: if TRUE after each iteration a Taubin smooth is
+#' performed (1 iteration).
+#' @param tol numeric: convergence threshold of MSE between vertices of two
+#' successive iterations.
+#' @param useiter logical: if TRUE, each iteration uses the updated reference
+#' mesh, if false. The original mesh will be deformed based on the updated
+#' correspondences. 
+#' @param minclost minimum amount of correspondence points. If less
+#' correspondences are found, dist will be increased by "distinc" (see below).
+#' @param distinc increment of dist, in case minclost is not reached.
+#' @param scale logical: if TRUE, initial landmark based rigid registration
+#' includes scaling. 
+#' @param icp vector of length 4. Passing parameters to \code{\link{icp}},
+#' which is performed after intial landmark based registration. The parameters
+#' are icp[1]=iterations; icp[2]=rhotol; icp[3]=uprange, and icp[4]=scale. If
+#' icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,TRUE) will
+#' result in 3 icp iterations, condidering the closest 60\% of correspondences
+#' with normal deviation of pi/2 and include scaling.
+#' @return 
+#' \item{mesh}{registered mesh}
+#' \item{meshrot }{mesh1, rotated onto mesh2}
+#' \item{lm1rot }{lm1, rotated onto lm2}
+#' \item{lmtmp1 }{correspondences on updated reference mesh of last iteration}
+#' \item{lmtmp2 }{correspondences on updated target mesh of last iteration}
+#' @author Stefan Schlager
+#' @seealso \code{\link{gaussMatch}}
+#' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
+#' @keywords ~kwd1 ~kwd2
 AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL)
     {
         mesh1 <- rmUnrefVertex(mesh1)

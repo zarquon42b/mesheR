@@ -1,3 +1,4 @@
+#' @export placeDowels
 placeDowels <- function(lm,mesh,ldowel,smooth=TRUE,render=TRUE,col=1,radius=1,meshcol=3,output=TRUE,fine=50)
   {
 

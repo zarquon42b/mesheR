@@ -6,6 +6,38 @@ Date: 2013-06-28
 Author: Stefan Schlager
 Maintainer: Stefan Schlager <stefan.schlager@uniklinik-freiburg.de>
 Description: Meshing operations on triangular meshes.
-Depends: R (>= 2.14.0), Matrix, Morpho, Rvcg, colorRamps, RANN, spam, colorspace
+Depends:
+    R (>= 2.14.0),
+    Matrix,
+    Morpho,
+    Rvcg,
+    colorRamps,
+    RANN,
+    spam,
+    colorspace
 License: GPL-2
 LazyLoad: yes
+Collate:
+    'Amberg2011.r'
+    'AmbergMesh2Sparse.r'
+    'AmbergRegister.r'
+    'centermesh3d.r'
+    'colorTrans.r'
+    'crestlines.r'
+    'cylinder.r'
+    'face.r'
+    'gaussDisplace.r'
+    'glview.r'
+    'icp.r'
+    'map.mesh.r'
+    'meshOffset.r'
+    'mixColorMesh.r'
+    'multisolve.r'
+    'placeDowels.r'
+    'plotBorder.r'
+    'plotspin.r'
+    'rmInternals.r'
+    'selVert.r'
+    'spinimage.r'
+    'spinmap.r'
+    'trivolume.r'

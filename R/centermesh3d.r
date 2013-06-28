@@ -1,3 +1,4 @@
+#' @export centermesh3d
 centermesh3d <- function(x,center=NULL)
   {
 

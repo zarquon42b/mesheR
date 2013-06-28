@@ -1,3 +1,37 @@
+#' select and crop triangular surface meshes
+#' 
+#' select a subset of a surface mesh interactively.
+#' 
+#' select vertices or trim a triangular mesh by selecting a subset - either
+#' restricted to visible from the current point of view or by rectangular
+#' region. Visibility is determined by the fact that the vector from the
+#' viewpoint to the selected vertex does not intersect the mesh.
+#' 
+#' @aliases selectVertex cutMesh
+#' @param mesh triangular mesh of class "mesh3d"
+#' @param col color to render the mesh. 
+#' @param visible select only vertices visible (from the present point of view)
+#' @param add logical: add the surface to an existing window.
+#' @param render character: how to render the surface. Possible values are
+#' "shade" or "wire". 
+#' @param keep.selected logical: determines if the selected vertices or their
+#' complement are deleted.
+#' @param \dots additional arguments passed to the rendering functions
+#' \code{\link{shade3d}} and \code{\link{wire3d}} 
+#' @return selectVertex returns the indices of the selected vertices.
+#' 
+#' cutMesh returns the trimmed mesh.
+#' @author Stefan Schlager
+#' @seealso \code{\link{vcgPlyRead}}
+#' @keywords ~kwd1 ~kwd2
+#' @examples
+#' 
+#' \dontrun{
+#' data(nose)
+#' selection <- selectVertex(shortnose.mesh)
+#' }
+#' 
+#' 
 selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"),...)
   {
     visifun <- function()

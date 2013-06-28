@@ -1,3 +1,4 @@
+#' @export mixColorMesh
 mixColorMesh <- function(mesh1,mesh2,alpha=0.5)
     {
        col1 <- mesh1$material$color

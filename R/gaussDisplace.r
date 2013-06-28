@@ -1,3 +1,4 @@
+#' @export gaussDisplace
 gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...)
 {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
@@ -93,7 +94,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
          }
      }
   storage.mode(rt0) <- "double"
-   storage.mode(rt1) <- "double"
+  storage.mode(rt1) <- "double"
   storage.mode(clostIndW) <- "integer"
   storage.mode(clostIndP) <- "integer"
   storage.mode(S0) <- "double"
@@ -147,6 +148,101 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
   return(list(addit=addit))
 }
 
+
+
+#' map two surface meshes using smoothed displacement fields
+#' 
+#' Map a reference mesh onto a target surface using displacement fields.
+#' 
+#' This function implements the mesh matching method suggested by Moshfeghi et
+#' al. and Bryan et al.. Additional mechanisms for controlling and restricting
+#' the displacement smoothing are implemented
+#' 
+#' @param mesh1 An object of class mesh3d used as atlas mesh to be deformed
+#' onto the target mesh. Mesh resolution should be ~1.5.
+#' @param mesh2 An object of class mesh3d used as target mesh. Mesh resolution
+#' should be ~1.5.
+#' @param iterations Iterations of displacement. Default is 10.
+#' @param smooth Integer: smoothing factor. Default is NULL, no smoothing.
+#' @param smoothit integer: smoothing steps.
+#' @param smoothtype Type of smoothing: Taubin, Laplacian, or HClaplacian. For
+#' details see \code{\link{vcgSmooth}}
+#' @param sigma starting parameter for smoothed displacement (see Moshfeghi
+#' 1994).
+#' @param gamma stiffness factor controlling displacement strength.
+#' @param f parameter controlling iterative change in displacement smoothing
+#' (Moshfeghi 1994).
+#' @param oneway logical: only displace towards the target without taking into
+#' account the displacement from the target.
+#' 
+#' @param lm1 A k x 3 matrix containing landmarks corrresponding to mesh1 for
+#' initial rotation of mesh1 onto mesh2.
+#' @param lm2 A k x 3 matrix containing landmarks corrresponding to mesh2 for
+#' initial rotation of mesh1 onto mesh2.
+#' @param icp Logical: if TRUE, iterative closest point procedure will be
+#' executed.
+#' @param icpiter Integer: Number of iterations of icp.
+#' @param uprange argument passed to icp (see \code{\link{icp}})
+#' @param rhotol Numeric: argument passed to \code{\link{icp}}.Exclude target
+#' points with deviation of normals larger than than rhotol.
+#' @param nh Integer: neighbourhood (number vertices) for controlling
+#' displacement smoothing, default is 150/mesh resolution.
+#' @param toldist Integer: Exclude everything from the whole procedure with a
+#' greater distance from initial point than toldist. 0 disables this feature.
+#' @param patch A m x 3 matrix containing the atlas landmark configuration on
+#' mesh1 which is not present in mesh2 and will automatically placed on the
+#' latter.
+#' @param repro Logical: If TRUE, a reprojection of patch onto the iteratively
+#' estimated target surface will be performed after each iteration.
+#' @param cores integer: number of CPU cores to be used for multithreaded
+#' subroutines.
+#' @param pro which projection method to use: "m"= \code{\link{closemeshKD}}
+#' from Morpho; "v"= \code{\link{vcgClost}} from package Rvcg
+#' @param k0 Integer: argument passed to closemeshKD (will be argument "k" in
+#' \code{\link{closemeshKD}} .
+#' @param prometh argument passed to closemeshKD.  Integer: 0 or 1. If
+#' prometh=0, take closest point for displacement. If prometh=1, do not just
+#' take the closest point, but for two absolut distances which are the same,
+#' take the point which is orthogonal to the closest face see Moshfeghi 1994).
+#' @param angtol numeric: If the angle between hit points' normals and the
+#' starting points' normals exceeds this threshold the displacement vector will
+#' be discarded.
+#' 
+#' @param border Logical: if TRUE, displacement vectors hitting mesh borders
+#' are discarded.
+#' @param horiz.disp numeric: If the angle between hit points' normals
+#' (independent of its orientation) and the distance vector between hit point
+#' and starting points exceeds this threshold, the displacement vector will be
+#' discarded. Reduces distortion especially at mesh borders.
+#' 
+#' @param \dots Further arguments passed to \code{\link{nn2}}.
+#' @return If a patch is specified:
+#'  \item{mesh}{matched mesh}
+#'  \item{patch}{displaced patch as specified in input.}
+#' else a mesh of class "mesh3d" is returned.
+#'
+#' @author Stefan Schlager
+#' @seealso \code{\link{meshres}}, \code{\link{vcgClost}},
+#' \code{\link{vcgBorder}}, \code{\link{icp}}, \code{\link{vcgSmooth}}
+#' @references Bryan, R., Mohan, P. S., Hopkins, A., Galloway, F., Taylor, M.,
+#' and Nair, P. B. 2010. Statistical modelling of the whole human femur
+#' incorporating geometric and material properties. Medical Engineering &amp;
+#' Physics, 32(1):57 – 65.
+#' 
+#' Moshfeghi, M., Ranganath, S., and Nawyn, K. 1994. Three-dimensional elastic
+#' matching of volumes. IEEE Transactions on Image Processing: A Publication of
+#' the IEEE Signal Processing Society, 3(2):128–138.
+#' @keywords ~kwd1 ~kwd2
+#' @examples
+#' 
+#' data(nose)##load data
+#' ##warp a mesh onto another landmark configuration:
+#' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
+#' ### result won't be too good as the surfaces do stronly differ.
+#' match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
+#' 
+#' @export gaussMatch
+#' @useDynLib mesheR
 gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,Amberg=NULL,...)
   {
    ## clean input mesh
