@@ -2,9 +2,13 @@
 #' 
 #' A toolbox for meshing operations: elastic mesh mapping, Iteratively closest point matching, vertex selection, ...,
 #' 
-#' \tabular{ll}{ Package: \tab mesheR\cr Type: \tab Package\cr Version: \tab
-#' 0.3\cr Date: \tab 2013-06-28\cr License: \tab GPL\cr LazyLoad: \tab
-#' yes\cr }
+#' \tabular{ll}{
+#' Package: \tab mesheR\cr
+#' Type: \tab Package\cr
+#' Version: \tab 0.3\cr
+#' Date: \tab 2013-06-28\cr
+#' License: \tab GPL\cr
+#' LazyLoad: \tab yes\cr }
 #' 
 #' @name mesheR-package
 #' @aliases mesheR-package mesheR
