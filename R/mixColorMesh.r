@@ -3,7 +3,6 @@
 #' mixColorMesh mixes the vertex colors of two
 #' registered meshes (identical faces and corresponding vertices). 
 #' 
-#' @aliases colorTrans mixColorMesh
 #' @param mesh1 triangular mesh of class "mesh3d".
 #' @param mesh2 triangular mesh of class "mesh3d". 
 #' @param alpha numeric: 0 <= alpha <=1 weight of color associated with mesh1.

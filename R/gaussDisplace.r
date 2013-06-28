@@ -227,11 +227,11 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @references Bryan, R., Mohan, P. S., Hopkins, A., Galloway, F., Taylor, M.,
 #' and Nair, P. B. 2010. Statistical modelling of the whole human femur
 #' incorporating geometric and material properties. Medical Engineering &amp;
-#' Physics, 32(1):57 – 65.
+#' Physics, 32(1):57-65.
 #' 
 #' Moshfeghi, M., Ranganath, S., and Nawyn, K. 1994. Three-dimensional elastic
 #' matching of volumes. IEEE Transactions on Image Processing: A Publication of
-#' the IEEE Signal Processing Society, 3(2):128–138.
+#' the IEEE Signal Processing Society, 3(2):128-138.
 #' @keywords ~kwd1 ~kwd2
 #' @examples
 #' 

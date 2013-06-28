@@ -7,7 +7,6 @@
 #' region. Visibility is determined by the fact that the vector from the
 #' viewpoint to the selected vertex does not intersect the mesh.
 #' 
-#' @aliases selectVertex cutMesh
 #' @param mesh triangular mesh of class "mesh3d"
 #' @param col color to render the mesh. 
 #' @param visible select only vertices visible (from the present point of view)
@@ -123,12 +122,14 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 #' region. Visibility is determined by the fact that the vector from the
 #' viewpoint to the selected vertex does not intersect the mesh.
 #' 
-#' @aliases selectVertex cutMesh
 #' @param mesh triangular mesh of class "mesh3d"
 #' @param visible select only vertices visible (from the present point of view)
 #' @param keep.selected logical: determines if the selected vertices or their
 #' complement are deleted.
 #' @param col color to render the mesh.
+#' @param add logical: add the surface to an existing window.
+#' @param render character: how to render the surface. Possible values are
+#' "shade" or "wire". 
 #' @param \dots additional arguments passed to the rendering functions
 #' shade3d and wire3d from package "rgl".
 #' @return selectVertex returns the indices of the selected vertices.

@@ -3,7 +3,6 @@
 #' colorTrans transfers the vertex color of mesh2 onto mesh1 by interpolating
 #' vertex colors of closest face. 
 #' 
-#' @aliases colorTrans mixColorMesh
 #' @param mesh1 triangular mesh of class "mesh3d".
 #' @param mesh2 triangular mesh of class "mesh3d". 
 #' @param tol maximal distance of closest point included in color transfer.
