@@ -1,4 +1,4 @@
-#' @export gaussDisplace
+## @export gaussDisplace
 gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...)
 {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
@@ -214,7 +214,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' (independent of its orientation) and the distance vector between hit point
 #' and starting points exceeds this threshold, the displacement vector will be
 #' discarded. Reduces distortion especially at mesh borders.
-#' 
+#' @param Amberg vector containing 2 arguments invoking a smooth Deformation using \code{\link{AmbergDeformSpam}}. Layout: Amgerg=c(lambda, k0)
 #' @param \dots Further arguments passed to \code{\link{nn2}}.
 #' @return If a patch is specified:
 #'  \item{mesh}{matched mesh}

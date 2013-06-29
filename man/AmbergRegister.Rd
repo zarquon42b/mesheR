@@ -44,7 +44,12 @@
   ignored (reduces distortion)}
 
   \item{smooth}{logical: if TRUE after each iteration a
-  Taubin smooth is performed (1 iteration).}
+  mesh smoothing is performed.}
+
+  \item{smoothit}{integer: determine smoothing iterations.}
+
+  \item{smoothtype}{character: select smoothing algorithm -
+  see vcgSmooth for further details.}
 
   \item{tol}{numeric: convergence threshold of MSE between
   vertices of two successive iterations.}

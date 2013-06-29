@@ -85,6 +85,7 @@ areafun <- function(x)
 #'
 #' calculate per face-deform weights for approx. derivation
 #' @param mesh triangular mesh
+#' @param arcnode output from createArcNode(mesh)
 #' @export AijklWeights
 AijklWeights <- function(mesh,arcnode)
     {

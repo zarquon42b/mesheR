@@ -1,5 +1,4 @@
 \name{selectVertex}
-\alias{cutMesh}
 \alias{selectVertex}
 \title{select and crop triangular surface meshes}
 \usage{

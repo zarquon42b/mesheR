@@ -6,6 +6,8 @@
 }
 \arguments{
   \item{mesh}{triangular mesh}
+
+  \item{arcnode}{output from createArcNode(mesh)}
 }
 \description{
   calculate per face-deform weights for approx. derivation

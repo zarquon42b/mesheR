@@ -112,6 +112,10 @@
   discarded. Reduces distortion especially at mesh
   borders.}
 
+  \item{Amberg}{vector containing 2 arguments invoking a
+  smooth Deformation using \code{\link{AmbergDeformSpam}}.
+  Layout: Amgerg=c(lambda, k0)}
+
   \item{\dots}{Further arguments passed to
   \code{\link{nn2}}.}
 }
@@ -145,12 +149,12 @@ match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=3,smooth=1,s
   Taylor, M., and Nair, P. B. 2010. Statistical modelling
   of the whole human femur incorporating geometric and
   material properties. Medical Engineering &amp; Physics,
-  32(1):57 – 65.
+  32(1):57-65.
 
   Moshfeghi, M., Ranganath, S., and Nawyn, K. 1994.
   Three-dimensional elastic matching of volumes. IEEE
   Transactions on Image Processing: A Publication of the
-  IEEE Signal Processing Society, 3(2):128–138.
+  IEEE Signal Processing Society, 3(2):128-138.
 }
 \seealso{
   \code{\link{meshres}}, \code{\link{vcgClost}},

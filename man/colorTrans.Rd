@@ -1,6 +1,5 @@
 \name{colorTrans}
 \alias{colorTrans}
-\alias{mixColorMesh}
 \title{Transfers vertex colors between meshes.}
 \usage{
   colorTrans(mesh1, mesh2, tol = 1)

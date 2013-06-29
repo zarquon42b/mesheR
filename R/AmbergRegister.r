@@ -19,8 +19,9 @@
 #' vertices and corresponding closest points on target suface.
 #' @param border logical: if FALSE, hits on border faces are ignored (reduces
 #' distortion) 
-#' @param smooth logical: if TRUE after each iteration a Taubin smooth is
-#' performed (1 iteration).
+#' @param smooth logical: if TRUE after each iteration a mesh smoothing is performed.
+#' @param smoothit integer: determine smoothing iterations.
+#' @param smoothtype character: select smoothing algorithm - see vcgSmooth for further details.
 #' @param tol numeric: convergence threshold of MSE between vertices of two
 #' successive iterations.
 #' @param useiter logical: if TRUE, each iteration uses the updated reference
