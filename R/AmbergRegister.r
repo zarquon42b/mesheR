@@ -38,6 +38,7 @@
 #' icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,TRUE) will
 #' result in 3 icp iterations, condidering the closest 60\% of correspondences
 #' with normal deviation of pi/2 and include scaling.
+#' @param cores integer: how many cores to use for closest point search
 #' @return 
 #' \item{mesh}{registered mesh}
 #' \item{meshrot }{mesh1, rotated onto mesh2}
@@ -49,7 +50,7 @@
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
 #' @keywords ~kwd1 ~kwd2
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL,cores=detectCores())
     {
         mesh1 <- rmUnrefVertex(mesh1)
         meshbord <- vcgBorder(mesh2)
@@ -118,7 +119,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                             }
                         vert_old <- vert2points(tmp$mesh)
                         
-                        clost <- closemeshKD(tmp$mesh,mesh2)
+                        clost <- closemeshKD(tmp$mesh,mesh2, cores=cores)
                         verts1 <- vert2points(clost)
 
                         nc <- normcheck(clost,tmp$mesh)                        

@@ -194,6 +194,7 @@ createJc <- function(lm1,ncol,mesh)
 #' @seealso \code{\link{gaussMatch}}
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
 #' @keywords ~kwd1 ~kwd2
+#' @export AmbergDeformSpam
 AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
     {
         t0 <- Sys.time()
