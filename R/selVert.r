@@ -28,7 +28,7 @@
 #' selection <- selectVertex(shortnose.mesh)
 #' }
 #' 
-#' 
+#' @export selectVertex 
 selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"),...)
   {
     visifun <- function()
@@ -61,7 +61,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
         iter=0   
         while (selcheck == 0) {
           if (iter == 0)
-            view <- points3d(subset[selected,], col = 2, cex = 2)
+            view <- points3d(subset[selected,1],subset[selected,2],subset[selected,3], col = 2, cex = 2)
           
           if (visible)
             visiquestion <- ("do more? (q/a/r/i/s)(quit|add|remove|invert|switch selection mode)\ncurrent selection mode: visible only\n")
@@ -84,7 +84,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
                tmpsel <- visifun()
             selected <- unique(c(selected,tmpsel))
             rgl.pop("shapes", id = view)
-            view <- points3d(subset[selected,], col = 2, cex = 2)
+            view <- points3d(subset[selected,1],subset[selected,2],subset[selected,3], col = 2, cex = 2)
           }
           if (substr(answer,1L,1L) == "i") {
             rgl.bringtotop(stay = FALSE)
@@ -92,7 +92,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
             
             selected <- (1:ncol(mesh$vb))[-selected]
             rgl.pop("shapes", id = view)
-            view <- points3d(subset[selected,], col = 2, cex = 2)
+            view <- points3d(subset[selected,1],subset[selected,2],subset[selected,3], col = 2, cex = 2)
           }
           if (substr(answer,1L,1L) == "r") {
             rgl.bringtotop(stay = FALSE)
@@ -104,7 +104,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
             rgl.pop("shapes", id = view)
             if (length(remov) > 0 )
               selected <- selected[-remov]
-            view <- points3d(subset[selected,], col = 2, cex = 2)
+            view <- points3d(subset[selected,1],subset[selected,2],subset[selected,3],col = 2, cex = 2)
           }
           iter <- iter+1
         }
@@ -166,5 +166,3 @@ cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=
     
   }
     
-
-  
