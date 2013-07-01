@@ -28,6 +28,6 @@
   create a mesh representation of a cylinder
 }
 \examples{
-wire3d(cylinder(1:3,1:3,4,adNormals = T))
+wire3d(cylinder(1:3,1:3,4,adNormals = TRUE))
 }
 

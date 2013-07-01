@@ -11,7 +11,7 @@
 #' @return
 #' a triangular mesh of class 'mesh3d'
 #' @examples
-#' wire3d(cylinder(1:3,1:3,4,adNormals = T))
+#' wire3d(cylinder(1:3,1:3,4,adNormals = TRUE))
 #' @export cylinder
 cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
     {
