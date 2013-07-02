@@ -7,7 +7,7 @@
     dist = 2, border = FALSE, smooth = TRUE, smoothit = 1,
     smoothtype = "t", tol = 1e-04, useiter = TRUE,
     minclost = 50, distinc = 1, scale = TRUE, icp = NULL,
-    cores = detectCores())
+    cores = 1)
 }
 \arguments{
   \item{mesh1}{reference mesh: triangular mesh of class
