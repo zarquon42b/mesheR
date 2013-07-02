@@ -6,6 +6,7 @@
 #' @param mesh1 triangular mesh of class "mesh3d".
 #' @param mesh2 triangular mesh of class "mesh3d". 
 #' @param tol maximal distance of closest point included in color transfer.
+#' @param cores maximum cores for \code{\link{closemeshKD}} to use.
 #' @return returns the mesh1 with transfered vertex colors.
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2
@@ -21,12 +22,12 @@
 #' mixmesh <- colorTrans(nocolmesh, redmesh)
 #' shade3d(mixmesh)
 #' @export colorTrans 
-colorTrans <- function(mesh1,mesh2,tol=1)
+colorTrans <- function(mesh1, mesh2, tol=1, cores=1)
     {
         if (is.null(mesh2$material$color))
             stop("no color to transfer")
         vn <- ncol(mesh2$vb)
-        clost <- closemeshKD(mesh1,mesh2)
+        clost <- closemeshKD(mesh1,mesh2,cores=cores)
         col <-  rep("#FFFFFF", vn)
         tmp1 <- data.frame(it = as.vector(mesh2$it))
         tmp1$rgb <- as.vector(mesh2$material$color)

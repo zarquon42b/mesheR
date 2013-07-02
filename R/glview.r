@@ -18,24 +18,27 @@ glView <- function()
 #' 
 #' @param mesh triangular mesh of class "mesh3d". Must be currently rendered in
 #' an rgl window.
+#' @param offset initial offset to move vertex slightly away from the surface.
 #' @return returns logical vector, assigning TRUE/FALSE to each vertex of a
 #' mesh.
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2
+#' @seealso \code{\link{selectVertex}}, \code{\link{cutMesh}}
 #' @examples
 #' 
 #' data(nose)
 #' shade3d(shortnose.mesh,col=3)
 #' visi <- glVisible(shortnose.mesh)
 #' points3d(vert2points(shortnose.mesh)[which(visi),])
-#' 
+#'
 #' @export glVisible
-glVisible <- function(mesh)
+glVisible <- function(mesh, offset=1e-3)
 {
   mesh <- adnormals(mesh)
-  mesh0 <- meshOffset(mesh,1e-5)
+  mesh0 <- meshOffset(mesh, offset)
   viewpoint <- c(glView(),0)
   normals <- viewpoint-mesh0$vb
+  #normals <- apply(normals,2,function(x) x <- x/sqrt(sum(x^2)))
   mesh0$normals <- normals
   tmp <- as.logical(vcgIntersect(mesh0,mesh)$quality)
   out <- tmp
