@@ -12,14 +12,15 @@
 #' @param visible select only vertices visible (from the present point of view)
 #' @param add logical: add the surface to an existing window.
 #' @param render character: how to render the surface. Possible values are
-#' "shade" or "wire". 
+#' "shade" or "wire".
+#' @param offset initial offset to move vertex slightly away from the surface.
 #' @param \dots additional arguments passed to the rendering functions
 #' shade3d and wire3d from package "shapes". 
 #' @return selectVertex returns the indices of the selected vertices.
 #' 
 #' cutMesh returns the trimmed mesh.
 #' @author Stefan Schlager
-#' @seealso \code{\link{vcgPlyRead}}
+#' @seealso \code{\link{vcgPlyRead}}, \code{\link{glVisible}}, \code{\link{cutMesh}}
 #' @keywords ~kwd1 ~kwd2
 #' @examples
 #' 
@@ -29,11 +30,11 @@
 #' }
 #' 
 #' @export selectVertex 
-selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"),...)
+selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"), offset=1e-3, ...)
   {
     visifun <- function()
       {
-        visi <- which(glVisible(mesh))
+        visi <- which(glVisible(mesh, offset=offset))
         tmpsel <- visi[which(visi%in%tmpsel)]
         return(tmpsel)
       }
@@ -129,14 +130,15 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 #' @param col color to render the mesh.
 #' @param add logical: add the surface to an existing window.
 #' @param render character: how to render the surface. Possible values are
-#' "shade" or "wire". 
+#' "shade" or "wire".
+#' @param offset initial offset to move vertex slightly away from the surface. 1e-3 seems to be a good threshold for objects from the macroscopical world.
 #' @param \dots additional arguments passed to the rendering functions
 #' shade3d and wire3d from package "rgl".
 #' @return selectVertex returns the indices of the selected vertices.
 #' 
 #' cutMesh returns the trimmed mesh.
 #' @author Stefan Schlager
-#' @seealso \code{\link{vcgPlyRead}}
+#' @seealso \code{\link{vcgPlyRead}},  \code{\link{glVisible}}, \code{\link{selectVertex}}
 #' @keywords ~kwd1 ~kwd2
 #' @examples
 #' 
@@ -144,14 +146,15 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 #' data(nose)
 #' selection <- selectVertex(shortnose.mesh)
 #' }
-#' 
-cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=c("shade","wire"),...)
+#' @export cutMesh
+cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=c("shade","wire"),offset=1e-3,...)
   {
+      mesh <- adnormals(mesh)
     render <- substr(render[1],1L,1L)
     do3d <- wire3d
     if (render == "s")
       do3d <- shade3d
-    removal <- selectVertex(mesh,col=col,visible=visible,add=add,render=render,...)
+    removal <- selectVertex(mesh,col=col,visible=visible,add=add,render=render,offset=offset,...)
     vb <- 1:ncol(mesh$vb)
     
     if (keep.selected)

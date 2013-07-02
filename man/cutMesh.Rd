@@ -3,7 +3,8 @@
 \title{crop triangular surface meshes}
 \usage{
   cutMesh(mesh, visible = TRUE, keep.selected = TRUE,
-    col = 3, add = FALSE, render = c("shade", "wire"), ...)
+    col = 3, add = FALSE, render = c("shade", "wire"),
+    offset = 0.001, ...)
 }
 \arguments{
   \item{mesh}{triangular mesh of class "mesh3d"}
@@ -21,6 +22,10 @@
 
   \item{render}{character: how to render the surface.
   Possible values are "shade" or "wire".}
+
+  \item{offset}{initial offset to move vertex slightly away
+  from the surface. 1e-3 seems to be a good threshold for
+  objects from the macroscopical world.}
 
   \item{\dots}{additional arguments passed to the rendering
   functions shade3d and wire3d from package "rgl".}
@@ -51,7 +56,8 @@ selection <- selectVertex(shortnose.mesh)
   Stefan Schlager
 }
 \seealso{
-  \code{\link{vcgPlyRead}}
+  \code{\link{vcgPlyRead}}, \code{\link{glVisible}},
+  \code{\link{selectVertex}}
 }
 \keyword{~kwd1}
 \keyword{~kwd2}
