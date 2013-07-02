@@ -6,7 +6,8 @@
     k = 1, lambda = 1, iterations = 15, rho = pi/2,
     dist = 2, border = FALSE, smooth = TRUE, smoothit = 1,
     smoothtype = "t", tol = 1e-04, useiter = TRUE,
-    minclost = 50, distinc = 1, scale = TRUE, icp = NULL)
+    minclost = 50, distinc = 1, scale = TRUE, icp = NULL,
+    cores = detectCores())
 }
 \arguments{
   \item{mesh1}{reference mesh: triangular mesh of class
@@ -77,6 +78,9 @@
   iterations, condidering the closest 60\% of
   correspondences with normal deviation of pi/2 and include
   scaling.}
+
+  \item{cores}{integer: how many cores to use for closest
+  point search}
 }
 \value{
   \item{mesh}{registered mesh} \item{meshrot }{mesh1,

@@ -3,8 +3,8 @@
 \title{Iterative closest point matching between two triangular meshes.}
 \usage{
   icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL,
-    lm2 = NULL, uprange = 0.9, rhotol = pi, k = 50,
-    reflection = FALSE, pro = c("morpho", "vcg"))
+    lm2 = NULL, uprange = 0.9, maxdist = NULL, rhotol = pi,
+    k = 50, reflection = FALSE, pro = c("morpho", "vcg"))
 }
 \arguments{
   \item{mesh1}{object of class "mesh3d".}
@@ -26,6 +26,9 @@
   mesh1 and closest points on mesh2. All hit points on
   mesh2 farther away than the specified quantile are not
   used for matching.}
+
+  \item{maxdist}{maximum distance for closest points to be
+  included for matching. Overrides uprange, if specified.}
 
   \item{rhotol}{maximum allowed angle of which normals are
   allowed to differ between reference points and hit target

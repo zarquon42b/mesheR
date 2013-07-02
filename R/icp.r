@@ -16,13 +16,13 @@
 #' @param uprange quantile of distances between vertices of mesh1 and closest
 #' points on mesh2. All hit points on mesh2 farther away than the specified
 #' quantile are not used for matching.
+#' @param maxdist maximum distance for closest points to be included for matching. Overrides uprange, if specified.
 #' @param rhotol maximum allowed angle of which normals are allowed to differ
 #' between reference points and hit target points. Hit points above this
 #' threshold will be neglected.
 #' @param k integer: number of closest triangles on target that will be
 #' searched for hits. Only used when pro="morpho".
 #' @param reflection logical: allow reflection.
-#' 
 #' @param pro character: algorithm for closest point search "morpho" calls
 #' closemeshKD from the package Morpho, while vcg calls vcgClost from mesheR.
 #' If the region of the targetmesh is much smaller than the region of the
@@ -45,7 +45,7 @@
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' 
 #' @export icp
-icp <- function(mesh1,mesh2,iterations=3,scale=T,lm1=NULL,lm2=NULL,uprange=0.9,rhotol=pi,k=50,reflection=FALSE,pro=c("morpho","vcg"))
+icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"))
   {
 
     mesh1 <- adnormals(mesh1)
@@ -85,7 +85,10 @@ icp <- function(mesh1,mesh2,iterations=3,scale=T,lm1=NULL,lm2=NULL,uprange=0.9,r
         dists <- dists[goodnorm]
         
         ## check distances of remaining points and select points
-        qud <- quantile(dists,probs=uprange)
+        if (is.null(maxdist))
+            qud <- quantile(dists,probs=uprange)
+        else
+            qud <- maxdist
         good <- which(dists < qud)
         mesh1 <- rotmesh.onto(mesh1,x1[good,],x2[good,],scale=scale)$mesh
       }
