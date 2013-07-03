@@ -40,3 +40,4 @@ Collate:
     'spinmap.r'
     'trivolume.r'
     'mesheR-package.R'
+    'warpmovieMulti.R'
