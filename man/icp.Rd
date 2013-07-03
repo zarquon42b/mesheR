@@ -3,8 +3,9 @@
 \title{Iterative closest point matching between two triangular meshes.}
 \usage{
   icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL,
-    lm2 = NULL, uprange = 0.9, maxdist = NULL, rhotol = pi,
-    k = 50, reflection = FALSE, pro = c("morpho", "vcg"))
+    lm2 = NULL, uprange = 0.9, maxdist = NULL,
+    minclost = 50, distinc = 0.5, rhotol = pi, k = 50,
+    reflection = FALSE, pro = c("morpho", "vcg"))
 }
 \arguments{
   \item{mesh1}{object of class "mesh3d".}
@@ -29,6 +30,14 @@
 
   \item{maxdist}{maximum distance for closest points to be
   included for matching. Overrides uprange, if specified.}
+
+  \item{minclost}{integer: only valid if maxdist is
+  specified. If less than maxdist closest points are found,
+  maxdist is increased by distinc (see below) until the
+  specified number is reached.}
+
+  \item{distinc}{numeric: amount to increment maxdist until
+  minclost points are within this disatnce.}
 
   \item{rhotol}{maximum allowed angle of which normals are
   allowed to differ between reference points and hit target

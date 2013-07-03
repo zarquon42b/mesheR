@@ -17,6 +17,8 @@
 #' points on mesh2. All hit points on mesh2 farther away than the specified
 #' quantile are not used for matching.
 #' @param maxdist maximum distance for closest points to be included for matching. Overrides uprange, if specified.
+#' @param minclost integer: only valid if maxdist is specified. If less than maxdist closest points are found, maxdist is increased by distinc (see below) until the specified number is reached.
+#' @param distinc numeric: amount to increment maxdist until minclost points are within this disatnce.
 #' @param rhotol maximum allowed angle of which normals are allowed to differ
 #' between reference points and hit target points. Hit points above this
 #' threshold will be neglected.
@@ -45,7 +47,7 @@
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' 
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"))
+icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"))
   {
 
     mesh1 <- adnormals(mesh1)
@@ -86,10 +88,25 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
         
         ## check distances of remaining points and select points
         if (is.null(maxdist))
-            qud <- quantile(dists,probs=uprange)
+            {
+                qud <- quantile(dists,probs=uprange)
+                good <- which(dists < qud)
+            }
         else
-            qud <- maxdist
-        good <- which(dists < qud)
+            { 
+                qud <- maxdist
+                good <- which(dists < qud)
+                increase <- distinc
+                while (length(good) < minclost)
+                    {
+                        ## distgood <- as.logical(abs(clost$quality) <= (dist+increase))
+                        good <- which(dists <= (qud+increase))
+                        cat(paste("distance increased to",qud+increase,"\n"))
+                        increase <- increase+distinc
+                    }
+                
+            }
+        
         mesh1 <- rotmesh.onto(mesh1,x1[good,],x2[good,],scale=scale)$mesh
       }
     cat("\n")
