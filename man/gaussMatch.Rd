@@ -116,8 +116,7 @@
   smooth Deformation using \code{\link{AmbergDeformSpam}}.
   Layout: Amgerg=c(lambda, k0)}
 
-  \item{\dots}{Further arguments passed to
-  \code{\link{nn2}}.}
+  \item{\dots}{Further arguments passed to \code{nn2}.}
 }
 \value{
   If a patch is specified: \item{mesh}{matched mesh}

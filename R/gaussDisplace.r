@@ -215,7 +215,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' and starting points exceeds this threshold, the displacement vector will be
 #' discarded. Reduces distortion especially at mesh borders.
 #' @param Amberg vector containing 2 arguments invoking a smooth Deformation using \code{\link{AmbergDeformSpam}}. Layout: Amgerg=c(lambda, k0)
-#' @param \dots Further arguments passed to \code{\link{nn2}}.
+#' @param \dots Further arguments passed to \code{nn2}.
 #' @return If a patch is specified:
 #'  \item{mesh}{matched mesh}
 #'  \item{patch}{displaced patch as specified in input.}
