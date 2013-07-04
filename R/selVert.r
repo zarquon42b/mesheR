@@ -111,7 +111,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
         }
       }
     }
-    return(selected)
+    return(sort(selected))
   }
 
 #' crop triangular surface meshes
