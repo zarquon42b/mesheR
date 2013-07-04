@@ -41,3 +41,4 @@ Collate:
     'trivolume.r'
     'mesheR-package.R'
     'warpmovieMulti.R'
+    'restrict.deform.r'
