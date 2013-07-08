@@ -1,0 +1,35 @@
+\name{bary2point}
+\alias{bary2point}
+\title{transform barycentric coordinates into 3D-coordinates}
+\usage{
+  bary2point(bary, faceptr, mesh)
+}
+\arguments{
+  \item{bary}{3xn Matrix containing barycentric
+  coordinates}
+
+  \item{faceptr}{integer vector of length n. Assigning a
+  face to each triple of barycentric coordinates}
+
+  \item{mesh}{mesh to extract coordinates from}
+}
+\value{
+  a nx3 matrix containing 3D-coordinates
+}
+\description{
+  transform barycentric coordinates into 3D-coordinates
+}
+\examples{
+require(rgl)
+data(humface)
+#extract 300 random points from humface
+coords <- vcgSample(humface,200)
+#get barycentric coordinates
+proj <- vcgClost(coords, humface, barycentric=TRUE)
+#move original mesh
+transface <- translate3d(humface, 10, 10 ,10)
+newcoord <- bary2point(proj$barycoords, proj$faceptr, transface)
+wire3d(transface, col=3)
+spheres3d(newcoord,radius=0.5)
+}
+
