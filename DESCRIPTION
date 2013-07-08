@@ -42,3 +42,4 @@ Collate:
     'mesheR-package.R'
     'warpmovieMulti.R'
     'restrict.deform.r'
+    'bary2point.r'
