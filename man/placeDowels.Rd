@@ -3,7 +3,8 @@
 \title{Place Dowels representing tissue depth on a skull}
 \usage{
   placeDowels(lm, mesh, ldowel, render = TRUE, col = 1,
-    radius = 1, meshcol = 3, output = TRUE, fine = 50)
+    radius = 1, meshcol = 3, output = TRUE, fine = 50,
+    smooth = TRUE, dowelcol = NULL)
 }
 \arguments{
   \item{lm}{k x 3landmarks representing dowel locations}
@@ -27,6 +28,11 @@
 
   \item{fine}{integer: amount of vertices to generate the
   cylinders representing tissue thickness.}
+
+  \item{smooth}{logical: use smoothed normals for dowel
+  orientation}
+
+  \item{dowelcol}{specify dowelcolor.}
 }
 \value{
   if output = TRUE, a list containing mesh representations
