@@ -1,7 +1,7 @@
 Package: mesheR
 Type: Package
 Title: Meshing operations on triangular meshes.
-Version: 0.3
+Version: 0.3.1
 Date: 2013-06-28
 Author: Stefan Schlager
 Maintainer: Stefan Schlager <stefan.schlager@uniklinik-freiburg.de>
