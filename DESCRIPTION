@@ -11,6 +11,7 @@ Depends:
     Matrix,
     Morpho,
     Rvcg,
+    rgl,
     colorspace,
     spam
 License: GPL-2

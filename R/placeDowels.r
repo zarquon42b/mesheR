@@ -28,7 +28,7 @@ placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3,o
 
         ldo <- FALSE
         colvec <- FALSE
-        projLM <- vcgClost(lm,mesh,smooth=smooth)
+        projLM <- vcgClost(lm,mesh,smoothNormals=smooth)
                                         ##projLM <- closemeshKD(lm,mesh)
         #projLM <- projRead(lm,mesh,smooth=TRUE)
         if (length(ldowel) > 1)
