@@ -7,7 +7,7 @@
     dist = 2, border = FALSE, smooth = TRUE, smoothit = 1,
     smoothtype = "t", tol = 1e-04, useiter = TRUE,
     minclost = 50, distinc = 1, scale = TRUE, icp = NULL,
-    cores = 1)
+    nn = 20, cores = 1)
 }
 \arguments{
   \item{mesh1}{reference mesh: triangular mesh of class
@@ -79,6 +79,11 @@
   correspondences with normal deviation of pi/2 and include
   scaling.}
 
+  \item{nn}{integer: closest barycenters. During search for
+  closest points on target, the closest \code{nn} faces are
+  probed. The larger \code{nn} is , the more accurate the
+  closest point search but also the more time consuming.}
+
   \item{cores}{integer: how many cores to use for closest
   point search}
 }
@@ -92,6 +97,23 @@
 \description{
   Perform registration of two triangular meshes, minimizing
   per-face distortions.
+}
+\details{
+  This function runs an elastic-ICP surface matching
+  algorithm, that monimizes the original meshes internal
+  structure by solving a sparse equation system. The user
+  can control 2 parameters of mesh stiffness: \code{lambda}
+  and \code{k}. \code{lambda} controls the impact of the
+  control points (closest points) as it is a weight applied
+  to the equation system. Reasonable values are 0 <
+  \code{lambda} <=1, where \code{lambda} = 1 means that the
+  control points are exactly matched onto each other.
+  \code{k} controls the normal slackness, i.e. the
+  deviation of normal direction. The larger, \code{k}, the
+  more elastic the deformation will be. \code{lambda} and
+  \code{k} can be specified as vectors of length
+  \code{iterations}, to assign a specific value for each
+  iteration.
 }
 \author{
   Stefan Schlager

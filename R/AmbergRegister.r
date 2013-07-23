@@ -38,6 +38,7 @@
 #' icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,TRUE) will
 #' result in 3 icp iterations, condidering the closest 60\% of correspondences
 #' with normal deviation of pi/2 and include scaling.
+#' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.
 #' @param cores integer: how many cores to use for closest point search
 #' @return 
 #' \item{mesh}{registered mesh}
@@ -45,12 +46,14 @@
 #' \item{lm1rot }{lm1, rotated onto lm2}
 #' \item{lmtmp1 }{correspondences on updated reference mesh of last iteration}
 #' \item{lmtmp2 }{correspondences on updated target mesh of last iteration}
+#' 
+#' @details This function runs an elastic-ICP surface matching algorithm, that monimizes the original meshes internal structure by solving a sparse equation system. The user can control 2 parameters of mesh stiffness: \code{lambda} and \code{k}. \code{lambda} controls the impact of the control points (closest points) as it is a weight applied to the equation system. Reasonable values are 0 < \code{lambda} <=1, where \code{lambda} = 1 means that the control points are exactly matched onto each other. \code{k} controls the normal slackness, i.e. the deviation of normal direction. The larger, \code{k}, the more elastic the deformation will be. \code{lambda} and \code{k} can be specified as vectors of length \code{iterations}, to assign a specific value for each iteration. 
 #' @author Stefan Schlager
 #' @seealso \code{\link{gaussMatch}}
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
 #' @keywords ~kwd1 ~kwd2
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL, cores=1)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL,nn=20, cores=1)
     {
         mesh1 <- rmUnrefVertex(mesh1)
         meshbord <- vcgBorder(mesh2)
@@ -119,7 +122,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                             }
                         vert_old <- vert2points(tmp$mesh)
                         
-                        clost <- closemeshKD(tmp$mesh,mesh2, cores=cores)
+                        clost <- closemeshKD(tmp$mesh,mesh2, cores=cores,k=nn)
                         verts1 <- vert2points(clost)
 
                         nc <- normcheck(clost,tmp$mesh)                        
