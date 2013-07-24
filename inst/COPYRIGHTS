@@ -1,0 +1,7 @@
+Files: *
+Copyright: Stefan Schlager
+License: GPL-2
+
+Files: parts of src/inv.f90 [subroutine M33INV]
+Copyright: David G. Simpson
+Copied from http://www.davidgsimpson.com/software/m33inv_f90.txt

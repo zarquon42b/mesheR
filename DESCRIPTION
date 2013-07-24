@@ -15,6 +15,7 @@ Depends:
     colorspace,
     spam
 License: GPL-2
+Copyright: see COPYRIGHTS file
 LazyLoad: yes
 Collate:
     'Amberg2011.r'

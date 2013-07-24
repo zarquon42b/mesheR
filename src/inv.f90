@@ -1,3 +1,19 @@
+!***********************************************************************************************************************************
+! SUBROUTINE M33INV:
+!                                                   
+!
+!  Programmer:   David G. Simpson
+!                NASA Goddard Space Flight Center
+!                Greenbelt, Maryland  20771
+!
+!  Date:         July 22, 2005
+!
+!  Language:     Fortran-90
+!
+!  Version:      1.00b  (Feburary 7, 2009)
+!
+! 
+!***********************************************************************************************************************************
 SUBROUTINE M33INV (A, AINV, OK_FLAG)
 
       IMPLICIT NONE
