@@ -168,10 +168,10 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param smoothtype Type of smoothing: Taubin, Laplacian, or HClaplacian. For
 #' details see \code{\link{vcgSmooth}}
 #' @param sigma starting parameter for smoothed displacement (see Moshfeghi
-#' 1994).
-#' @param gamma stiffness factor controlling displacement strength.
-#' @param f parameter controlling iterative change in displacement smoothing
-#' (Moshfeghi 1994).
+#' 1994). Sigma controls the importance of the neighbourhood by defining the standard-deviation for the gaussian smoothing
+#' @param gamma stiffness factor controlling displacement strength. The smoothed displacement vector for each vertex is divided by \code{gamma}. The larger \code{gamma}, the slower the approximation.
+#' @param f parameter controlling iterative decrease of \code{sigma} making the displacement locally more elastic with each iteration.
+#' (Moshfeghi 1994). Starting with \code{sigma}, this parameter for the k-th iteration is \code{sigma *f ^(-k)}
 #' @param oneway logical: only displace towards the target without taking into
 #' account the displacement from the target.
 #' 

@@ -33,13 +33,20 @@
   or HClaplacian. For details see \code{\link{vcgSmooth}}}
 
   \item{sigma}{starting parameter for smoothed displacement
-  (see Moshfeghi 1994).}
+  (see Moshfeghi 1994). Sigma controls the importance of
+  the neighbourhood by defining the standard-deviation for
+  the gaussian smoothing}
 
   \item{gamma}{stiffness factor controlling displacement
-  strength.}
+  strength. The smoothed displacement vector for each
+  vertex is divided by \code{gamma}. The larger
+  \code{gamma}, the slower the approximation.}
 
-  \item{f}{parameter controlling iterative change in
-  displacement smoothing (Moshfeghi 1994).}
+  \item{f}{parameter controlling iterative decrease of
+  \code{sigma} making the displacement locally more elastic
+  with each iteration. (Moshfeghi 1994). Starting with
+  \code{sigma}, this parameter for the k-th iteration is
+  \code{sigma *f ^(-k)}}
 
   \item{oneway}{logical: only displace towards the target
   without taking into account the displacement from the
