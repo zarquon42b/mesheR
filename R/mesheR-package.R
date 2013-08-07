@@ -19,5 +19,6 @@
 #' @references To be announced
 #' @keywords package
 #' @useDynLib mesheR
+#' @importClassesFrom spam spam spam.chol.NgPeyton
 
 NULL

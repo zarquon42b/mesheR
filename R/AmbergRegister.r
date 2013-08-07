@@ -52,6 +52,29 @@
 #' @seealso \code{\link{gaussMatch}}
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
 #' @keywords ~kwd1 ~kwd2
+#' @examples
+#' require(Morpho)
+#' require(rgl)
+#' data(humface)
+#' data(dummyhead)
+#' ## set parameters making each iteration more elastic
+#' # only 10 iterations to keep example calculation time reasonable.
+#' params <- list(iterations=10) 
+#' params <- append(params, list(
+#'    # first \code{lambda} is set relatively high because first matching uses landmarks
+#'    # then let it increase from 0.2 to 0.6
+#'    lambda=c(0.7,seq(from = 0.2,to=0.6,length.out = params$iterations-1)),
+#'    # treat \code{k} similar as \code{lambda}
+#'    k=c(10,seq(from = 1,to=params$iterations-1,by=1)),
+#'    useiter=FALSE # iteratively deform dummyhead onto humface
+#'    ))
+#' map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
+#'                  lm2=humface.lm, iterations=params$iterations,
+#'                  k=params$k, lambda=params$lambda, useiter=params$useiter)
+#' # compare matched and original face:
+#' meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
+#' # render original mesh as wireframe
+#' wire3d(humface)
 #' @export AmbergRegister
 AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL,nn=20, cores=1)
     {

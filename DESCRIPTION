@@ -11,10 +11,10 @@ Depends:
     Morpho,
     Rvcg,
     rgl,
-    spam,
     colorspace
 Imports:
-    Matrix
+    Matrix,
+    spam
 License: GPL-2
 Copyright: see COPYRIGHTS file
 LazyLoad: yes

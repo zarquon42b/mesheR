@@ -158,6 +158,7 @@ createC <- function(lm1,mesh)
 #' @export createJc
 #' @importClassesFrom Matrix dgCMatrix sparseMatrix
 #' @importFrom Matrix cBind
+#' @importFrom spam as.spam.dgCMatrix
 createJc <- function(lm1,ncol,mesh)
     {
         C <- createC(lm1,mesh)
@@ -199,6 +200,8 @@ createJc <- function(lm1,ncol,mesh)
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
 #' @keywords ~kwd1 ~kwd2
 #' @export AmbergDeformSpam
+#' @importFrom spam rbind.spam solve.spam
+#' @importMethodsFrom spam rbind
 AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
     {
         t0 <- Sys.time()
@@ -213,7 +216,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
         Jc <- createJc(lm1,ncol(spamS),mesh)
         Jc <- lambda*Jc
         ## setup Jacobian J
-        J <- rbind(spamS,Jc)
+        J <- rbind.spam(spamS,Jc)
 
         ## setup Jn Jacobian submatrix
         Jn0 <- sparseMatrix(i=1:ncol(mesh$it),j=1:ncol(mesh$it),x=rep(1,ncol(mesh$it)))
@@ -223,7 +226,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
         Jn <- as.spam.dgCMatrix(Jn)
                                      
         ## append Jn to Jacobian J
-        J <- rbind(J,Jn)
+        J <- rbind.spam(J,Jn)
         ## calculate Hessian H
         H <- spam::t(J)%*%J
         Jtc <- spam::t(Jc)%*%lm2

@@ -115,6 +115,30 @@
   \code{iterations}, to assign a specific value for each
   iteration.
 }
+\examples{
+require(Morpho)
+require(rgl)
+data(humface)
+data(dummyhead)
+## set parameters making each iteration more elastic
+# only 10 iterations to keep example calculation time reasonable.
+params <- list(iterations=10)
+params <- append(params, list(
+   # first \\code{lambda} is set relatively high because first matching uses landmarks
+   # then let it increase from 0.2 to 0.6
+   lambda=c(0.7,seq(from = 0.2,to=0.6,length.out = params$iterations-1)),
+   # treat \\code{k} similar as \\code{lambda}
+   k=c(10,seq(from = 1,to=params$iterations-1,by=1)),
+   useiter=FALSE # iteratively deform dummyhead onto humface
+   ))
+map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
+                 lm2=humface.lm, iterations=params$iterations,
+                 k=params$k, lambda=params$lambda, useiter=params$useiter)
+# compare matched and original face:
+meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
+# render original mesh as wireframe
+wire3d(humface)
+}
 \author{
   Stefan Schlager
 }
