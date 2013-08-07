@@ -29,6 +29,7 @@ buildAffineAmberg <- function(mesh)
 #' convert affine per-face trafo-matrix
 #' @param mat quadratic matrix
 #' @export mat2sparseBlock
+#' @importFrom Matrix sparseMatrix
 mat2sparseBlock <- function (mat) 
 {
     mat <- as.matrix(mat)
@@ -51,6 +52,7 @@ mat2sparseBlock <- function (mat)
 #' create per face arcnode matrix to differentiate per-face affine trafo based on per edge approximation
 #' @param mesh triangular mesh
 #' @export createArcNode
+#' @importFrom Matrix Matrix
 createArcNode <- function(mesh)
     {
         edges <- vcgNonBorderEdge(mesh)##get all non-border edges
@@ -154,6 +156,8 @@ createC <- function(lm1,mesh)
 #' @param ncol column numbers of complete Jacbian
 #' @param mesh triangular mesh
 #' @export createJc
+#' @importClassesFrom Matrix dgCMatrix sparseMatrix
+#' @importFrom Matrix cBind
 createJc <- function(lm1,ncol,mesh)
     {
         C <- createC(lm1,mesh)

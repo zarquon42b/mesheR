@@ -120,7 +120,7 @@ warpRestrict <- function(x,which,tar.lm,model,tol=1e-5,sd=3,maxVar=95,scale=F,re
           }
         else
           {
-            p <- angle.calc(tmp,tmp.old)$rho
+            p <- angle.calc(tmp,tmp.old)
           }                         # print(p)
         if (uniform)
           {

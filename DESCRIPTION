@@ -8,12 +8,13 @@ Maintainer: Stefan Schlager <stefan.schlager@uniklinik-freiburg.de>
 Description: Meshing operations on triangular meshes.
 Depends:
     R (>= 2.14.0),
-    Matrix,
     Morpho,
     Rvcg,
     rgl,
-    colorspace,
-    spam
+    spam,
+    colorspace
+Imports:
+    Matrix
 License: GPL-2
 Copyright: see COPYRIGHTS file
 LazyLoad: yes
