@@ -39,7 +39,7 @@
 #' 13:119-152.
 #' @keywords ~kwd1 ~kwd2
 #' @examples
-#' 
+#' require(rgl)
 #' data(nose)
 #' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 #' rotnose <- icp(warpnose.long,shortnose.mesh,lm1=longnose.lm,lm2=shortnose.lm,rhotol=0.7,uprange=0.9)
@@ -49,68 +49,57 @@
 #' @export icp
 icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"))
   {
-
-    mesh1 <- adnormals(mesh1)
-    mesh2 <- adnormals(mesh2)
-    pro <- substring(pro[1],1L,1L)
-    if (pro == "v")
-    {project3d <- vcgClost
-   }
-  if (pro == "m")
-    {
-      tmpfun <- function(x,y,sign=F)
-        {
-          out <- closemeshKD(x,y,k=k,sign=sign)
-          return(out)
-        }
-      project3d <- tmpfun
-    }
-    if (!is.null(lm1))## perform initial rough registration
-      {
-        mesh1 <- rotmesh.onto(mesh1,lm1,lm2,scale=scale,reflection=reflection)$mesh
+      mesh1 <- adnormals(mesh1)
+      mesh2 <- adnormals(mesh2)
+      pro <- substring(pro[1],1L,1L)
+      if (pro == "v") {
+          project3d <- vcgClost
+      } else if (pro == "m") {
+          tmpfun <- function(x,y,sign=F)
+              {
+                  out <- closemeshKD(x,y,k=k,sign=sign)
+                  return(out)
+              }
+          project3d <- tmpfun
       }
-    
-    for( i in 1:iterations)
-      {
-        cat("*")
-        proMesh <- project3d(mesh1,mesh2,sign=F) ## project mesh1 onto mesh2
-        x1 <- vert2points(mesh1)
-        x2 <- vert2points(proMesh)
-        dists <- abs(proMesh$quality)
-        
-        ## check if normals angles are below rhotol
-        
-        normchk <- normcheck(mesh1,proMesh)
-        goodnorm <- which(normchk < rhotol)
-        x1 <- x1[goodnorm,]
-        x2 <- x2[goodnorm,]
-        dists <- dists[goodnorm]
-        
-        ## check distances of remaining points and select points
-        if (is.null(maxdist))
-            {
-                qud <- quantile(dists,probs=uprange)
-                good <- which(dists < qud)
-            }
-        else
-            { 
-                qud <- maxdist
-                good <- which(dists < qud)
-                increase <- distinc
-                while (length(good) < minclost)
-                    {
-                        ## distgood <- as.logical(abs(clost$quality) <= (dist+increase))
-                        good <- which(dists <= (qud+increase))
-                        cat(paste("distance increased to",qud+increase,"\n"))
-                        increase <- increase+distinc
-                    }
-                
-            }
-        
-        mesh1 <- rotmesh.onto(mesh1,x1[good,],x2[good,],scale=scale)$mesh
+      if (!is.null(lm1))## perform initial rough registration
+          mesh1 <- rotmesh.onto(mesh1,lm1,lm2,scale=scale,reflection=reflection)$mesh
+      
+      for( i in 1:iterations) {
+          cat("*")
+          proMesh <- project3d(mesh1,mesh2,sign=F) ## project mesh1 onto mesh2
+          x1 <- vert2points(mesh1)
+          x2 <- vert2points(proMesh)
+          dists <- abs(proMesh$quality)
+          
+          ## check if normals angles are below rhotol
+          
+          normchk <- normcheck(mesh1,proMesh)
+          goodnorm <- which(normchk < rhotol)
+          x1 <- x1[goodnorm,]
+          x2 <- x2[goodnorm,]
+          dists <- dists[goodnorm]
+          
+          ## check distances of remaining points and select points
+          if (is.null(maxdist)) {
+              qud <- quantile(dists,probs=uprange)
+              good <- which(dists < qud)
+          } else { 
+              qud <- maxdist
+              good <- which(dists < qud)
+              increase <- distinc
+              while (length(good) < minclost) {
+                  ## distgood <- as.logical(abs(clost$quality) <= (dist+increase))
+                  good <- which(dists <= (qud+increase))
+                  cat(paste("distance increased to",qud+increase,"\n"))
+                  increase <- increase+distinc
+              }
+              
+          }
+          mesh1 <- rotmesh.onto(mesh1,x1[good,],x2[good,],scale=scale)$mesh
       }
-    cat("\n")
-    return(mesh1)
+      cat("\n")
+      return(mesh1)
   }
 #' compare normal directions between two states of a mesh
 #'

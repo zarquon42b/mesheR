@@ -21,17 +21,14 @@
 #' 
 #' @export bary2point
 bary2point <- function(bary,faceptr, mesh)
-    {
-        
-        nbary <- ncol(bary)
-        C <- Matrix::Matrix(0,nbary,ncol(mesh$vb))
-        vertptr <- t(mesh$it[,faceptr])
-        faceptr <- cbind(1:nbary,vertptr)
-        
-        for(i in 2:4)
-            C[faceptr[,c(1,i)]] <- bary[i-1,]
-
-        out <- as.matrix(C%*%t(mesh$vb[1:3,]))
-        #print(dim(C))
-        return(out)
-    }
+ {
+     nbary <- ncol(bary)
+     C <- Matrix::Matrix(0,nbary,ncol(mesh$vb))
+     vertptr <- t(mesh$it[,faceptr])
+     faceptr <- cbind(1:nbary,vertptr)
+     for(i in 2:4)
+         C[faceptr[,c(1,i)]] <- bary[i-1,]
+     
+     out <- as.matrix(C%*%t(mesh$vb[1:3,]))
+     return(out)
+ }

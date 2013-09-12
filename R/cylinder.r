@@ -11,6 +11,7 @@
 #' @return
 #' a triangular mesh of class 'mesh3d'
 #' @examples
+#' require(rgl)
 #' wire3d(cylinder(1:3,1:3,4,adNormals = TRUE))
 #' @export cylinder
 cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
@@ -27,28 +28,24 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
         
 ###  begin create faces of a cylinder ###
         it <-NULL
-        for (i in 1:(lc-1))
-            {
-                face0 <- c(i,i+1,i+lc)
-                face1 <- c(i+1,i+lc+1,i+lc)
-                it <- rbind(it,face0,face1)
-            }
+        for (i in 1:(lc-1)) {
+            face0 <- c(i,i+1,i+lc)
+            face1 <- c(i+1,i+lc+1,i+lc)
+            it <- rbind(it,face0,face1)
+        }
         it <- rbind(it,c(lc,1,lc+1))
         it <- rbind(it,c(2*lc,lc,lc+1))
 ### close lids ###
         for (i in 1:(lc-1))
-            {
-                it <- rbind(it,c(lc*2+1,i+1,i))
-            }
+            it <- rbind(it,c(lc*2+1,i+1,i))
+        
         it <- rbind(it,c(lc*2+1,lc,1))
         
         for (i in (lc+1):(2*lc-1))
-            {
-                it <- rbind(it,c(lc*2+2,i,i+1))
-            }
+            it <- rbind(it,c(lc*2+2,i,i+1))
         it <- rbind(it,c(lc*2+2,lc*2,lc+1))
 ### end faces creation ###
-
+        
 ### rotate initial circle and create opposing circle ###    
         dirs <- dirs/sqrt(sum(dirs^2))
         yz <- tanplan(dirs)
@@ -71,8 +68,7 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
         cyl$normals <- NULL
         cyl <- translate3d(cyl,x[1],x[2],x[3])
         if (adNormals)
-            {
-                cyl <- adnormals(cyl)
-            }
+            cyl <- adnormals(cyl)
+            
         return(cyl)
     }

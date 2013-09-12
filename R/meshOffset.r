@@ -9,7 +9,7 @@
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2
 #' @examples
-#' 
+#' require(rgl)
 #' data(nose)
 #' offset <- meshOffset(shortnose.mesh,3)
 #' shade3d(shortnose.mesh,col=3)

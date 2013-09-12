@@ -16,6 +16,7 @@
   translate vertices of a triangular mesh along its normals
 }
 \examples{
+require(rgl)
 data(nose)
 offset <- meshOffset(shortnose.mesh,3)
 shade3d(shortnose.mesh,col=3)

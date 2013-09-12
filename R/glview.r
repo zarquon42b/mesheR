@@ -25,12 +25,12 @@ glView <- function()
 #' @keywords ~kwd1 ~kwd2
 #' @seealso \code{\link{selectVertex}}, \code{\link{cutMesh}}
 #' @examples
-#' 
+#' require(rgl)
 #' data(nose)
 #' shade3d(shortnose.mesh,col=3)
 #' visi <- glVisible(shortnose.mesh)
 #' points3d(vert2points(shortnose.mesh)[which(visi),])
-#'
+#' @importFrom rgl rgl.projection
 #' @export glVisible
 glVisible <- function(mesh, offset=1e-3)
 {

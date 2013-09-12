@@ -17,6 +17,7 @@
   move the centroid of a mesh to a given coordinate
 }
 \examples{
+require(rgl)
 data(humface)
 wire3d(humface, col=3)
 humcenter <- centermesh3d(humface)

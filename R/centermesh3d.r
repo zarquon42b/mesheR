@@ -6,6 +6,7 @@
 #'
 #' @return returns the translated mesh
 #' @examples
+#' require(rgl)
 #' data(humface)
 #' wire3d(humface, col=3)
 #' humcenter <- centermesh3d(humface)
@@ -14,13 +15,11 @@
 #' @export centermesh3d
 centermesh3d <- function(x,center=NULL)
   {
-
-    bary <- apply(vert2points(x),2,mean)
-    if (is.null(center))
-     center <- c(0,0,0)
-     
-       
-    x$vb[1:3,] <- x$vb[1:3,]- (bary-center)
-    invisible(x)
+      bary <- apply(vert2points(x),2,mean)
+      if (is.null(center))
+          center <- c(0,0,0)
+      
+      x$vb[1:3,] <- x$vb[1:3,]- (bary-center)
+      invisible(x)
   }
- 
+

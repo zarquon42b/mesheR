@@ -28,6 +28,7 @@
   create a mesh representation of a cylinder
 }
 \examples{
+require(rgl)
 wire3d(cylinder(1:3,1:3,4,adNormals = TRUE))
 }
 

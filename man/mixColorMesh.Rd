@@ -20,6 +20,7 @@
   meshes (identical faces and corresponding vertices).
 }
 \examples{
+require(rgl)
 data(nose)
 redmesh <- shortnose.mesh
 redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))

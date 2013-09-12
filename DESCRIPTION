@@ -10,10 +10,10 @@ Depends:
     R (>= 2.14.0),
     Morpho,
     Rvcg,
-    rgl,
     colorspace
 Imports:
     Matrix,
+    rgl(>= 0.93.963),
     spam
 License: GPL-2
 Copyright: see COPYRIGHTS file

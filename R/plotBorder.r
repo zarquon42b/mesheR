@@ -9,7 +9,7 @@
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2
 #' @examples
-#' 
+#' require(rgl)
 #' data(nose)
 #' plotBorder(shortnose.mesh)
 #' wire3d(shortnose.mesh,col=3)

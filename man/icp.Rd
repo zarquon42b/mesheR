@@ -70,6 +70,7 @@
   target surface (a.k.a. Procrustes registration)
 }
 \examples{
+require(rgl)
 data(nose)
 warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 rotnose <- icp(warpnose.long,shortnose.mesh,lm1=longnose.lm,lm2=shortnose.lm,rhotol=0.7,uprange=0.9)

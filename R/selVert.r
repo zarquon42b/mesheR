@@ -28,7 +28,7 @@
 #' data(nose)
 #' selection <- selectVertex(shortnose.mesh)
 #' }
-#' 
+#' @importFrom rgl select3d shade3d wire3d points3d open3d rgl.bringtotop rgl.ids rgl.pop
 #' @export selectVertex 
 selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"), offset=1e-3, ...)
 {
@@ -62,7 +62,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
             iter=0   
             while (selcheck == 0) {
                 if (iter == 0)
-                    
+                   view <- points3d(subset[selected,1],subset[selected,2],subset[selected,3], col = 2, cex = 2) 
                     
                     if (visible)
                         visiquestion <- ("do more? (q/a/r/i/s)(quit|add|remove|invert|switch selection mode)\ncurrent selection mode: visible only\n")
@@ -146,6 +146,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 #' data(nose)
 #' selection <- selectVertex(shortnose.mesh)
 #' }
+#' @importFrom rgl rgl.clear
 #' @export cutMesh
 cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=c("shade","wire"),offset=1e-3,...)
     {

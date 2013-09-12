@@ -20,6 +20,7 @@
   from the current viewpoint
 }
 \examples{
+require(rgl)
 data(nose)
 shade3d(shortnose.mesh,col=3)
 visi <- glVisible(shortnose.mesh)

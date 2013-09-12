@@ -23,6 +23,7 @@
   by interpolating vertex colors of closest face.
 }
 \examples{
+require(rgl)
 data(nose)
 redmesh <- shortnose.mesh
 #color mesh red
