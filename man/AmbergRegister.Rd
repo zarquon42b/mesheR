@@ -7,7 +7,7 @@
     dist = 2, border = FALSE, smooth = TRUE, smoothit = 1,
     smoothtype = "t", tol = 1e-04, useiter = TRUE,
     minclost = 50, distinc = 1, scale = TRUE, icp = NULL,
-    nn = 20, cores = 1)
+    nn = 20, cores = 1, silent = FALSE)
 }
 \arguments{
   \item{mesh1}{reference mesh: triangular mesh of class
@@ -86,6 +86,8 @@
 
   \item{cores}{integer: how many cores to use for closest
   point search}
+
+  \item{silent}{logical: no verbosity}
 }
 \value{
   \item{mesh}{registered mesh} \item{meshrot }{mesh1,
@@ -105,9 +107,12 @@
   can control 2 parameters of mesh stiffness: \code{lambda}
   and \code{k}. \code{lambda} controls the impact of the
   control points (closest points) as it is a weight applied
-  to the equation system. Reasonable values are 0 <
-  \code{lambda} <=1, where \code{lambda} = 1 means that the
-  control points are exactly matched onto each other.
+  to the equation system. The value of \code{lambda} should
+  be carefully selected depending on the object overall
+  size: i.e. to match two tiny meshes one will need a
+  higher value than a for a larger object (example: I found
+  values between 0 and 1 suitable for human faces and
+  values between 10 and 100 suitable for mice teeth).
   \code{k} controls the normal slackness, i.e. the
   deviation of normal direction. The larger, \code{k}, the
   more elastic the deformation will be. \code{lambda} and

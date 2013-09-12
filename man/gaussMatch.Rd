@@ -11,7 +11,7 @@
     repro = FALSE, cores = detectCores(),
     pro = c("morpho", "vcg"), k0 = 50, prometh = 1,
     angtol = NULL, border = FALSE, horiz.disp = NULL,
-    Amberg = NULL, ...)
+    Amberg = NULL, silent = FALSE, ...)
 }
 \arguments{
   \item{mesh1}{An object of class mesh3d used as atlas mesh
@@ -122,6 +122,8 @@
   \item{Amberg}{vector containing 2 arguments invoking a
   smooth Deformation using \code{\link{AmbergDeformSpam}}.
   Layout: Amgerg=c(lambda, k0)}
+
+  \item{silent}{logical suppress messages}
 
   \item{\dots}{Further arguments passed to \code{nn2}.}
 }

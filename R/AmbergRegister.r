@@ -11,7 +11,7 @@
 #' @param k integer: parameter regularizing face normal distortion. Can be
 #' vector of length(iterations) or single value. 
 #' @param lambda numeric: parameter regularizing faces's distortion. Can be
-#' vector of length(iterations) or single value. 
+#' vector of length(iterations) or single value.
 #' @param iterations integer: number of iterations to run. 
 #' @param rho numeric: 0 < rho < 2*pi tolerance of normal deviation between
 #' reference vertices and corresponding closest points on target suface. 
@@ -40,6 +40,7 @@
 #' with normal deviation of pi/2 and include scaling.
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.
 #' @param cores integer: how many cores to use for closest point search
+#' @param silent logical: no verbosity
 #' @return 
 #' \item{mesh}{registered mesh}
 #' \item{meshrot }{mesh1, rotated onto mesh2}
@@ -47,7 +48,7 @@
 #' \item{lmtmp1 }{correspondences on updated reference mesh of last iteration}
 #' \item{lmtmp2 }{correspondences on updated target mesh of last iteration}
 #' 
-#' @details This function runs an elastic-ICP surface matching algorithm, that monimizes the original meshes internal structure by solving a sparse equation system. The user can control 2 parameters of mesh stiffness: \code{lambda} and \code{k}. \code{lambda} controls the impact of the control points (closest points) as it is a weight applied to the equation system. Reasonable values are 0 < \code{lambda} <=1, where \code{lambda} = 1 means that the control points are exactly matched onto each other. \code{k} controls the normal slackness, i.e. the deviation of normal direction. The larger, \code{k}, the more elastic the deformation will be. \code{lambda} and \code{k} can be specified as vectors of length \code{iterations}, to assign a specific value for each iteration. 
+#' @details This function runs an elastic-ICP surface matching algorithm, that monimizes the original meshes internal structure by solving a sparse equation system. The user can control 2 parameters of mesh stiffness: \code{lambda} and \code{k}. \code{lambda} controls the impact of the control points (closest points) as it is a weight applied to the equation system. The value of \code{lambda} should be carefully selected depending on the object overall size: i.e. to match two tiny meshes one will need a higher value than a for a larger object (example: I found values between 0 and 1 suitable for human faces and values between 10 and 100 suitable for mice teeth). \code{k} controls the normal slackness, i.e. the deviation of normal direction. The larger, \code{k}, the more elastic the deformation will be. \code{lambda} and \code{k} can be specified as vectors of length \code{iterations}, to assign a specific value for each iteration. 
 #' @author Stefan Schlager
 #' @seealso \code{\link{gaussMatch}}
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
@@ -76,7 +77,7 @@
 #' # render original mesh as wireframe
 #' wire3d(humface)
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL,nn=20, cores=1)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL,nn=20, cores=1, silent=FALSE)
     {
         mesh1 <- rmUnrefVertex(mesh1)
         meshbord <- vcgBorder(mesh2)
@@ -95,103 +96,91 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         
         meshorig <- mesh1
         stopit <- FALSE
-        if (!is.null(lm1) && !is.null(lm2))
-            {   ## case: landmarks are provided
-                if (!is.null(icp))##perform initial icp-matching
-                    {
-                        meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp[1],rhotol=icp[2],uprange=icp[3],scale=icp[4])
-                        tmp <- list()
-                        tmp$mesh <- mesh1
-                        if (!useiter)
-                            tmp$S <- createS(mesh1)
-                        verts0 <- vert2points(mesh1)
-                                            }
-                else
-                    {
-                        mesh1rot <- rotmesh.onto(mesh1,lm1,lm2,scale=scale)
-                        lm1 <- mesh1rot$yrot
-                        meshorig <- mesh1 <- mesh1rot$mesh
-                        lmtmp1 <- lm1
-                        lmtmp2 <- lm2
-                        cat(paste("-> performing landmark based matching 1\n"))
-                        tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[1],lambda=lambda[1])
-                        count <- count+1
-                        if (iterations == 1)
-                            stopit <- TRUE
-                    }
-                verts0 <- vert2points(mesh1)
-            }
-        else
-            {   ## case: meshes are already aligned
+        if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
+            if (!is.null(icp)) {##perform initial icp-matching
+                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp[1],rhotol=icp[2],uprange=icp[3],scale=icp[4])
                 tmp <- list()
                 tmp$mesh <- mesh1
                 if (!useiter)
                     tmp$S <- createS(mesh1)
                 verts0 <- vert2points(mesh1)
-            }
-        
-        if (!stopit)
-            {
-                ## set error and counter appropriately
-                error <- 1e12
+            } else {
+                mesh1rot <- rotmesh.onto(mesh1,lm1,lm2,scale=scale)
+                lm1 <- mesh1rot$yrot
+                meshorig <- mesh1 <- mesh1rot$mesh
+                lmtmp1 <- lm1
+                lmtmp2 <- lm2
+                if (!silent)
+                    cat(paste("-> performing landmark based matching 1\n"))
+                tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[1],lambda=lambda[1])
                 count <- count+1
-                while (count <= iterations && error > tol)
-                    {
-                        time0 <- Sys.time()
-                        if (useiter)
-                            {
-                                verts0 <- vert2points(tmp$mesh)
-                                mesh1 <- tmp$mesh
-                            }
-                        vert_old <- vert2points(tmp$mesh)
-                        
-                        clost <- closemeshKD(tmp$mesh,mesh2, cores=cores,k=nn)
-                        verts1 <- vert2points(clost)
-
-                        nc <- normcheck(clost,tmp$mesh)                        
-
-                        ## find valid hits
-                        normgood <- as.logical(nc < rho)
-                        distgood <- as.logical(abs(clost$quality) <= dist)
-                        bordergood <- 1
-                        if (!border)
-                            {
-                                bordgood <- as.logical(!meshbord$borderit[clost$ptr])
-                            }
-                        
-                        good <- sort(which(as.logical(normgood*distgood*bordergood)))
+                if (iterations == 1)
+                    stopit <- TRUE
+            }
+            verts0 <- vert2points(mesh1)
+        } else {   ## case: meshes are already aligned
+            tmp <- list()
+            tmp$mesh <- mesh1
+            if (!useiter)
+                tmp$S <- createS(mesh1)
+            verts0 <- vert2points(mesh1)
+        }
+        
+        if (!stopit) {
+            ## set error and counter appropriately
+            error <- 1e12
+            count <- count+1
+            while (count <= iterations && error > tol) {
+                time0 <- Sys.time()
+                if (useiter) {
+                    verts0 <- vert2points(tmp$mesh)
+                    mesh1 <- tmp$mesh
+                }
+                vert_old <- vert2points(tmp$mesh)
+                clost <- closemeshKD(tmp$mesh,mesh2, cores=cores,k=nn)
+                verts1 <- vert2points(clost)
+                nc <- normcheck(clost,tmp$mesh)                        
+                
+                ## find valid hits
+                normgood <- as.logical(nc < rho)
+                distgood <- as.logical(abs(clost$quality) <= dist)
+                bordergood <- 1
+                if (!border) 
+                    bordgood <- as.logical(!meshbord$borderit[clost$ptr])
+                good <- sort(which(as.logical(normgood*distgood*bordergood)))
                         
 ### in case no good hit is found within the given distance we increase the distance by 1mm until valid references are found:
-                        increase <- distinc
-                        while (length(good) < minclost)
-                            {
-                                distgood <- as.logical(abs(clost$quality) <= (dist+increase))
-                                good <- sort(which(as.logical(normgood*distgood*bordergood)))
-                                increase <- increase+distinc
-                                cat(paste("distance increased to",dist+increase,"\n"))
-                            }
-                        
-                        ## update reference points
-                        lmtmp1 <- verts0[good,]
-                        lmtmp2 <- verts1[good,]
-                        ## map it according to new reference points
+                increase <- distinc
+                while (length(good) < minclost) {
+                    distgood <- as.logical(abs(clost$quality) <= (dist+increase))
+                    good <- sort(which(as.logical(normgood*distgood*bordergood)))
+                    increase <- increase+distinc
+                    cat(paste("distance increased to",dist+increase,"\n"))
+                }
+                
+                ## update reference points
+                lmtmp1 <- verts0[good,]
+                lmtmp2 <- verts1[good,]
+                ## map it according to new reference points
                                         #points3d(lmtmp2,col=count)
-                        if (useiter)
-                            tmp$S <- NULL
-                        tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[count],lambda=lambda[count],S=tmp$S)
+                if (useiter)
+                    tmp$S <- NULL
+                tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[count],lambda=lambda[count],S=tmp$S)
                                         #oo <- wire3d(tmp$mesh,col=count)
-                        gc()
-                        ## calculate error
-                        if (smooth)
-                            tmp$mesh <- vcgSmooth(tmp$mesh,iteration = smoothit,type=smoothtype)
-                        error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
-                        time1 <- Sys.time()
-                        cat(paste("-> finished iteration",count,"in",round(time1-time0,2), "seconds\n"))
-                        cat(paste(" Info: MSE between iterations:",error,"\n"))
-                        if (error < tol)
-                            cat(paste("***\n==> Convergence threshold reached after",count,"iterations\n"))
-                        count <- count+1
-                    }
+                gc()
+                ## calculate error
+                if (smooth)
+                    tmp$mesh <- vcgSmooth(tmp$mesh,iteration = smoothit,type=smoothtype)
+                error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
+                time1 <- Sys.time()
+                if (!silent) {
+                    cat(paste("-> finished iteration",count,"in",round(time1-time0,2), "seconds\n"))
+                    cat(paste(" Info: MSE between iterations:",error,"\n"))
+                    if (error < tol)
+                        cat(paste("***\n==> Convergence threshold reached after",count,"iterations\n"))
+                }
+                count <- count+1
             }
+        }
         return(list(mesh=tmp$mesh,meshrot=meshorig,lm1rot=lm1,lmtmp1=lmtmp1,lmtmp2=lmtmp2))
     }
