@@ -13,7 +13,6 @@
 #' 
 #' @param countbegin integer: number to start image sequence. 
 #' @param ask logical: if TRUE, the viewpoint can be selected manually. 
-#' @importFrom rgl points3d open3d rgl.pop rgl.snapshot rgl.close shade3d
 #' @export warpmovieMulti
 warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=1)
 {	

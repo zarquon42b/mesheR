@@ -15,14 +15,14 @@
 #' @docType package
 #' @author Stefan Schlager
 #' 
-#' Maintainer: Stefan Schlager <zarquon42@gmail.com>
+#' Maintainer: Stefan Schlager <zarquon42@@gmail.com>
 #' @references To be announced
 #' @keywords package
 #' @useDynLib mesheR
 #' @importClassesFrom spam spam spam.chol.NgPeyton
-#' @importFrom Morpho vert2points closemeshKD tanplan tps3d conv2backf facenormals adnormals meshDist rmUnrefVertex rotmesh.onto file2mesh meshres warp.mesh unrefVertex rotonto angle.calc rotonmat meshcube rmVertex projRead mcNNindex
-#' @importFrom Rvcg vcgNonBorderEdge vcgClost vcgBorder vcgSmooth vcgIntersect vcgGetEdge
+#' @importFrom Morpho adnormals angle.calc closemeshKD conv2backf facenormals file2mesh mcNNindex meshcube meshDist meshres projRead rmUnrefVertex rmVertex rotmesh.onto rotonmat rotonto tanplan tps3d unrefVertex vert2points warp.mesh
+#' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgIntersect vcgNonBorderEdge vcgSmooth 
 #' @importFrom parallel detectCores mclapply
-#' @importFrom rgl translate3d
+#' @importFrom rgl open3d points3d rgl.bringtotop rgl.clear rgl.close rgl.ids rgl.pop rgl.snapshot select3d shade3d translate3d wire3d 
 
 NULL

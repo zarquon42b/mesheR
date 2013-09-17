@@ -17,7 +17,7 @@
 \author{
   Stefan Schlager
 
-  Maintainer: Stefan Schlager <zarquon42
+  Maintainer: Stefan Schlager <zarquon42@gmail.com>
 }
 \references{
   To be announced
