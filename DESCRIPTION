@@ -8,8 +8,8 @@ Maintainer: Stefan Schlager <stefan.schlager@uniklinik-freiburg.de>
 Description: Meshing operations on triangular meshes.
 Depends:
     R (>= 2.14.0),
-    colorspace
 Imports:
+    colorspace,
     Rvcg,
     parallel,
     Morpho,

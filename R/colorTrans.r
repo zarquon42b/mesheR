@@ -21,6 +21,8 @@
 #' nocolmesh <- shortnose.mesh
 #' mixmesh <- colorTrans(nocolmesh, redmesh)
 #' shade3d(mixmesh)
+#' @importClassesFrom colorspace LAB RGB color
+#' @importFrom colorspace RGB hex hex2RGB
 #' @export colorTrans 
 colorTrans <- function(mesh1, mesh2, tol=1, cores=1)
     {
