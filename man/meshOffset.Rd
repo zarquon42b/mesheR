@@ -17,6 +17,7 @@
 }
 \examples{
 require(rgl)
+require(Morpho)
 data(nose)
 offset <- meshOffset(shortnose.mesh,3)
 shade3d(shortnose.mesh,col=3)

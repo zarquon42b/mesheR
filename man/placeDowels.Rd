@@ -47,6 +47,7 @@
   normal vectors of the surface is used.
 }
 \examples{
+require(Rvcg)
 data(humface)
 lms <- matrix(c(17.6061 , 9.2072 , -6.9917 , 44.7959 , 37.1135 , 76.0469 , 3.7734 , 12.8234 , 81.3138 , 63.4207 , 47.5009 , 44.6468), 4, 3)
 #place markers of 5mm length

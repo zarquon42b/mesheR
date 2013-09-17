@@ -207,7 +207,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' the IEEE Signal Processing Society, 3(2):128-138.
 #' @keywords ~kwd1 ~kwd2
 #' @examples
-#' 
+#' require(Morpho)
 #' data(nose)##load data
 #' ##warp a mesh onto another landmark configuration:
 #' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)

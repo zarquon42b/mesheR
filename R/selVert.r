@@ -25,6 +25,7 @@
 #' @examples
 #' 
 #' \dontrun{
+#' require(Morpho)
 #' data(nose)
 #' selection <- selectVertex(shortnose.mesh)
 #' }
@@ -143,6 +144,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 #' @examples
 #' 
 #' \dontrun{
+#' require(Morpho)
 #' data(nose)
 #' selection <- selectVertex(shortnose.mesh)
 #' }

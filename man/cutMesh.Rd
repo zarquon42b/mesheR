@@ -48,6 +48,7 @@
 }
 \examples{
 \dontrun{
+require(Morpho)
 data(nose)
 selection <- selectVertex(shortnose.mesh)
 }

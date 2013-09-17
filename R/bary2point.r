@@ -8,6 +8,7 @@
 #' @return a nx3 matrix containing 3D-coordinates
 #' @examples
 #' require(rgl)
+#' require(Rvcg)
 #' data(humface)
 #' #extract 300 random points from humface 
 #' coords <- vcgSample(humface,200)

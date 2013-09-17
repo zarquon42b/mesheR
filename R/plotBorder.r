@@ -10,6 +10,7 @@
 #' @keywords ~kwd1 ~kwd2
 #' @examples
 #' require(rgl)
+#' require(Morpho)
 #' data(nose)
 #' plotBorder(shortnose.mesh)
 #' wire3d(shortnose.mesh,col=3)

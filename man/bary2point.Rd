@@ -21,6 +21,7 @@
 }
 \examples{
 require(rgl)
+require(Rvcg)
 data(humface)
 #extract 300 random points from humface
 coords <- vcgSample(humface,200)

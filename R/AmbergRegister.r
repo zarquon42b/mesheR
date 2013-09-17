@@ -56,6 +56,7 @@
 #' @examples
 #' require(Morpho)
 #' require(rgl)
+#' require(Rvcg)
 #' data(humface)
 #' data(dummyhead)
 #' ## set parameters making each iteration more elastic

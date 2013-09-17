@@ -8,10 +8,11 @@ Maintainer: Stefan Schlager <stefan.schlager@uniklinik-freiburg.de>
 Description: Meshing operations on triangular meshes.
 Depends:
     R (>= 2.14.0),
-    Morpho,
-    Rvcg,
     colorspace
 Imports:
+    Rvcg,
+    parallel,
+    Morpho,
     Matrix,
     rgl(>= 0.93.963),
     spam
@@ -24,13 +25,11 @@ Collate:
     'AmbergRegister.r'
     'centermesh3d.r'
     'colorTrans.r'
-    'crestlines.r'
     'cylinder.r'
     'face.r'
     'gaussDisplace.r'
     'glview.r'
     'icp.r'
-    'map.mesh.r'
     'meshOffset.r'
     'mixColorMesh.r'
     'multisolve.r'
@@ -39,8 +38,6 @@ Collate:
     'plotspin.r'
     'rmInternals.r'
     'selVert.r'
-    'spinimage.r'
-    'spinmap.r'
     'trivolume.r'
     'mesheR-package.R'
     'warpmovieMulti.R'

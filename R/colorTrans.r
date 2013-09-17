@@ -12,6 +12,7 @@
 #' @keywords ~kwd1 ~kwd2
 #' @examples
 #' require(rgl)
+#' require(Morpho)
 #' data(nose)
 #' redmesh <- shortnose.mesh
 #' #color mesh red

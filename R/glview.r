@@ -26,6 +26,7 @@ glView <- function()
 #' @seealso \code{\link{selectVertex}}, \code{\link{cutMesh}}
 #' @examples
 #' require(rgl)
+#' require(Morpho)
 #' data(nose)
 #' shade3d(shortnose.mesh,col=3)
 #' visi <- glVisible(shortnose.mesh)

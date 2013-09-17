@@ -24,6 +24,7 @@
 }
 \examples{
 require(rgl)
+require(Morpho)
 data(nose)
 redmesh <- shortnose.mesh
 #color mesh red

@@ -10,7 +10,8 @@
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2
 #' @examples
-#' require(rgl) 
+#' require(rgl)
+#' require(Morpho)
 #' data(nose)
 #' redmesh <- shortnose.mesh
 #' redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))

@@ -10,6 +10,7 @@
 #' @keywords ~kwd1 ~kwd2
 #' @examples
 #' require(rgl)
+#' require(Morpho)
 #' data(nose)
 #' offset <- meshOffset(shortnose.mesh,3)
 #' shade3d(shortnose.mesh,col=3)

@@ -7,6 +7,7 @@
 #' @return returns the translated mesh
 #' @examples
 #' require(rgl)
+#' require(Rvcg)
 #' data(humface)
 #' wire3d(humface, col=3)
 #' humcenter <- centermesh3d(humface)
