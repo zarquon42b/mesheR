@@ -55,7 +55,7 @@ mat2sparseBlock <- function (mat)
 #' @importFrom Matrix Matrix
 createArcNode <- function(mesh)
     {
-        edges <- vcgNonBorderEdge(mesh)##get all non-border edges
+        edges <- vcgNonBorderEdge(mesh, silent=TRUE)##get all non-border edges
         n <- dim(edges)[1]
         dimit <- ncol(mesh$it)
         arcnode <- Matrix(0,n,dimit)
