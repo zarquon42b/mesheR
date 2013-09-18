@@ -23,6 +23,6 @@
 #' @importFrom Morpho adnormals angle.calc closemeshKD conv2backf facenormals file2mesh mcNNindex meshcube meshDist meshres projRead rmUnrefVertex rmVertex rotmesh.onto rotonmat rotonto tanplan tps3d unrefVertex vert2points warp.mesh
 #' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgIntersect vcgNonBorderEdge vcgSmooth 
 #' @importFrom parallel detectCores mclapply
-#' @importFrom rgl open3d points3d rgl.bringtotop rgl.clear rgl.close rgl.ids rgl.pop rgl.snapshot select3d shade3d translate3d wire3d 
+#' 
 
 NULL

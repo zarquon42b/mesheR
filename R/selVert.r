@@ -29,7 +29,7 @@
 #' data(nose)
 #' selection <- selectVertex(shortnose.mesh)
 #' }
-#' 
+#' @importFrom rgl wire3d shade3d open3d rgl.bringtotop select3d rgl.pop points3d rgl.clear
 #' @export selectVertex 
 selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"), offset=1e-3, ...)
 {

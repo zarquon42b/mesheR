@@ -12,7 +12,8 @@
 #' @param whichcolor select which mesh's vertexcolors to use. 
 #' 
 #' @param countbegin integer: number to start image sequence. 
-#' @param ask logical: if TRUE, the viewpoint can be selected manually. 
+#' @param ask logical: if TRUE, the viewpoint can be selected manually.
+#' @importFrom rgl open3d points3d shade3d rgl.snapshot rgl.pop rgl.close
 #' @export warpmovieMulti
 warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=1)
 {	

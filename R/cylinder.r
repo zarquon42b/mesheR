@@ -13,6 +13,7 @@
 #' @examples
 #' require(rgl)
 #' wire3d(cylinder(1:3,1:3,4,adNormals = TRUE))
+#' @importFrom rgl translate3d
 #' @export cylinder
 cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
     {

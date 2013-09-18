@@ -19,6 +19,7 @@
 #' bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
 #' mixmesh <- mixColorMesh(bluemesh,redmesh)
 #' shade3d(mixmesh)
+#' @importFrom colorspace mixcolor
 #' @export mixColorMesh
 mixColorMesh <- function(mesh1,mesh2,alpha=0.5)
     {

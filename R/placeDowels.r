@@ -23,6 +23,7 @@
 #' #place markers of 5mm length
 #' placeDowels(lms, humface, rep(5, 4),output = FALSE)
 #' @seealso \code{\link{cylinder}}
+#' @importFrom rgl shade3d
 #' @export placeDowels
 placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3,output=TRUE,fine=50, smooth=TRUE, dowelcol=NULL)
     {
