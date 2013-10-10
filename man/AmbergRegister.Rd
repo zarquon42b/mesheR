@@ -102,7 +102,7 @@
 }
 \details{
   This function runs an elastic-ICP surface matching
-  algorithm, that monimizes the original meshes internal
+  algorithm, that minimizes the original meshes internal
   structure by solving a sparse equation system. The user
   can control 2 parameters of mesh stiffness: \code{lambda}
   and \code{k}. \code{lambda} controls the impact of the

@@ -15,7 +15,7 @@ __mesheR__ is an R-package providing methods for mesh manipulations in R. Its ma
 
    2. Installation command from within R: 
    
-        install.packages("Path_to_downloaded_package_Rvcg[Version_OS]",repos=NULL)
+        install.packages("Path_to_downloaded_package_mesheR[Version_OS]",repos=NULL)
 
    3. check if the package can be loaded:
         
