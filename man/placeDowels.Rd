@@ -3,8 +3,8 @@
 \title{Place Dowels representing tissue depth on a skull}
 \usage{
   placeDowels(lm, mesh, ldowel, render = TRUE, col = 1,
-    radius = 1, meshcol = 3, output = TRUE, fine = 50,
-    smooth = TRUE, dowelcol = NULL)
+    radius = 1, meshcol = 3, fine = 50, smooth = TRUE,
+    dowelcol = NULL)
 }
 \arguments{
   \item{lm}{k x 3landmarks representing dowel locations}
@@ -23,9 +23,6 @@
 
   \item{meshcol}{mesh color}
 
-  \item{output}{if TRUE, a list containing triangular meshs
-  is returned}
-
   \item{fine}{integer: amount of vertices to generate the
   cylinders representing tissue thickness.}
 
@@ -35,8 +32,9 @@
   \item{dowelcol}{specify dowelcolor.}
 }
 \value{
-  if output = TRUE, a list containing mesh representations
-  of placed dowels
+  an invisible list with \item{dowels }{a list containing
+  the meshes for all dowels} \item{endpoints }{a matrix
+  containing the coordinates of the dowels endpoints}
 }
 \description{
   Place Dowels representing tissue depth on a skull by

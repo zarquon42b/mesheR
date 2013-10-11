@@ -9,13 +9,15 @@
 #' @param col color of the dowels
 #' @param radius numeric: diameter of dowels
 #' @param meshcol mesh color
-#' @param output if TRUE, a list containing triangular meshs is returned
 #' @param fine integer: amount of vertices to generate the cylinders representing tissue thickness.
 #' @param smooth logical: use smoothed normals for dowel orientation
 #' @param dowelcol specify dowelcolor.
 #'
 #' @details For orientation of the dowels, the (angle weighted) normal vectors of the surface is used. 
-#' @return if output = TRUE, a list containing mesh representations of placed dowels
+#' @return an invisible list with
+#' \item{dowels }{a list containing the meshes for all dowels}
+#' \item{endpoints }{a matrix containing the coordinates of the dowels endpoints}
+#' 
 #' @examples
 #' require(Rvcg)
 #' data(humface)
@@ -25,7 +27,7 @@
 #' @seealso \code{\link{cylinder}}
 #' @importFrom rgl shade3d
 #' @export placeDowels
-placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3,output=TRUE,fine=50, smooth=TRUE, dowelcol=NULL)
+placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3, fine=50, smooth=TRUE, dowelcol=NULL)
     {
 
         ldo <- FALSE
@@ -40,6 +42,8 @@ placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3,o
             colvec <- TRUE
 
         dowels <- list()
+        endpoints <- matrix(NA, dim(lm)[1] ,3)
+        endpoints <- vert2points(projLM)+t(projLM$normals[1:3,])*ldowel
 ### create dowels and render them if required
         for (i in 1:dim(lm)[1])
             {
@@ -49,6 +53,7 @@ placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3,o
                     ltmp=ldowel
 
                 dowels[[i]] <- cylinder(projLM$vb[1:3,i],projLM$normals[1:3,i],length=ltmp,radius=radius,fine=fine,adNormals=FALSE)
+                
                 if (!is.null(dowelcol))
                     dowels[[i]]$material$color <- matrix(dowelcol,dim(dowels[[i]]$it)[1],dim(dowels[[i]]$it)[2])
                     
@@ -65,5 +70,5 @@ placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3,o
         if (render) ## render mesh ##
             shade3d(mesh,col=meshcol)
         if (output)
-            return(dowels)
+            invisible(list(dowels=dowels, endpoints=endpoints))
     }
