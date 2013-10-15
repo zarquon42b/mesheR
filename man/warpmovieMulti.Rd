@@ -4,7 +4,8 @@
 \usage{
   warpmovieMulti(..., n, col = "green", folder = NULL,
     movie = "warpmovie", add = FALSE, close = TRUE,
-    countbegin = 0, ask = TRUE, whichcolor = 1)
+    countbegin = 0, ask = TRUE, whichcolor = 1,
+    align = TRUE, scale = FALSE)
 }
 \arguments{
   \item{\dots}{registered meshes}
@@ -28,6 +29,11 @@
 
   \item{whichcolor}{select which mesh's vertexcolors to
   use.}
+
+  \item{align}{logical: align all meshes to the first one}
+
+  \item{scale}{if \code{align=TRUE} this controls if
+  scaling is allowed.}
 
   \item{countbegin}{integer: number to start image
   sequence.}

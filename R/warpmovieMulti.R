@@ -2,23 +2,30 @@
 #'
 #' make a warpmovie with multiple registered meshes - this is a pimped version of warpmovie3d from package 'Morpho'
 #'
-#' @param \dots registered meshes
+#' @param \dots registered meshes or a list containing registered meshes.
 #' @param n amount of intermediate images between two meshes
 #' @param col mesh color
 #' @param folder character: output folder for created images (optional)
 #' @param movie character: name of the output files
 #' @param add logical: if TRUE, the movie will be added to the focussed rgl-windows.
 #' @param close logical: if TRUE, the rgl window will be closed when finished. width and 200 the height of the image.
-#' @param whichcolor select which mesh's vertexcolors to use. 
+#' @param whichcolor select which mesh's vertexcolors to use.
+#' @param align logical: align all meshes to the first one
+#' @param scale if \code{align=TRUE} this controls if scaling is allowed.
 #' 
 #' @param countbegin integer: number to start image sequence. 
 #' @param ask logical: if TRUE, the viewpoint can be selected manually.
 #' @importFrom rgl open3d points3d shade3d rgl.snapshot rgl.pop rgl.close
 #' @export warpmovieMulti
-warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=1)
+warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=1, align=TRUE, scale=FALSE)
 {	
     args <- list(...)
+    if (length(args) == 1 && !inherits(args[[1]],"mesh3d"))
+        args <- unlist(args, recursive = FALSE)
+
     argc <- length(args)
+    if (argc < 2)
+            stop("at least two arguments needed")
 
     if(!is.null(folder)) {
         if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") {
@@ -34,8 +41,11 @@ warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",a
     ##bbox <- apply(rbind(vert2points(x),vert2points(y)),2,range)
     bbox0 <- lapply(args,function(x) x <- apply(vert2points(x),2,range))
     bbox <- vert2points(args[[1]])
-    for (i in 2:length(args))
+    for (i in 2:length(args)) {
+        if (align)
+            args[[i]] <- rotmesh.onto(args[[i]], vert2points(args[[i]]), vert2points(args[[1]]),scale=scale, adnormals=TRUE)$mesh
         bbox <- rbind(bbox,vert2points(args[[i]]))
+    }
     bbox <- apply(bbox,2,range)
     bbox <- expand.grid(bbox[,1],bbox[,2],bbox[,3])
     points3d(bbox,col="white",alpha=0)
@@ -47,9 +57,9 @@ warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",a
             y$material$color <- args[[whichcolor]]$material$color
             x$material$color <- args[[whichcolor]]$material$color
         }
-        
+                
         for (i in 0:n) {
-            mesh<-x
+            mesh <- x
             mesh$vb[1:3,]<-(i/n)*y$vb[1:3,]+(1-(i/n))*x$vb[1:3,]
             mesh <- adnormals(mesh)
             a <- shade3d(mesh,col=col,specular=1)
