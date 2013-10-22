@@ -6,8 +6,9 @@
     k = 1, lambda = 1, iterations = 15, rho = pi/2,
     dist = 2, border = FALSE, smooth = TRUE, smoothit = 1,
     smoothtype = "t", tol = 1e-04, useiter = TRUE,
-    minclost = 50, distinc = 1, scale = TRUE, icp = NULL,
-    nn = 20, cores = 1, silent = FALSE)
+    minclost = 50, distinc = 1, scale = TRUE,
+    reflection = FALSE, icp = NULL, nn = 20, cores = 1,
+    silent = FALSE)
 }
 \arguments{
   \item{mesh1}{reference mesh: triangular mesh of class
@@ -68,6 +69,9 @@
 
   \item{scale}{logical: if TRUE, initial landmark based
   rigid registration includes scaling.}
+
+  \item{reflection}{logical: if TRUE, initial landmark
+  based rigid registration allows reflections.}
 
   \item{icp}{vector of length 4. Passing parameters to
   \code{\link{icp}}, which is performed after intial

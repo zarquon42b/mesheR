@@ -8,7 +8,8 @@
     align = TRUE, scale = FALSE)
 }
 \arguments{
-  \item{\dots}{registered meshes}
+  \item{\dots}{registered meshes or a list containing
+  registered meshes.}
 
   \item{n}{amount of intermediate images between two
   meshes}

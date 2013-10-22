@@ -31,7 +31,9 @@
 #' correspondences are found, dist will be increased by "distinc" (see below).
 #' @param distinc increment of dist, in case minclost is not reached.
 #' @param scale logical: if TRUE, initial landmark based rigid registration
-#' includes scaling. 
+#' includes scaling.
+#' @param reflection logical: if TRUE, initial landmark based rigid registration
+#' allows reflections.
 #' @param icp vector of length 4. Passing parameters to \code{\link{icp}},
 #' which is performed after intial landmark based registration. The parameters
 #' are icp[1]=iterations; icp[2]=rhotol; icp[3]=uprange, and icp[4]=scale. If
@@ -78,7 +80,7 @@
 #' # render original mesh as wireframe
 #' wire3d(humface)
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, icp=NULL,nn=20, cores=1, silent=FALSE)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-4, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, cores=1, silent=FALSE)
     {
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
@@ -99,14 +101,14 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         stopit <- FALSE
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
             if (!is.null(icp)) {##perform initial icp-matching
-                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp[1],rhotol=icp[2],uprange=icp[3],scale=icp[4])
+                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp[1],rhotol=icp[2],uprange=icp[3],scale=icp[4],reflection=reflection)
                 tmp <- list()
                 tmp$mesh <- mesh1
                 if (!useiter)
                     tmp$S <- createS(mesh1)
                 verts0 <- vert2points(mesh1)
             } else {
-                mesh1rot <- rotmesh.onto(mesh1,lm1,lm2,scale=scale)
+                mesh1rot <- rotmesh.onto(mesh1,lm1,lm2,scale=scale, reflection=reflection,adnormals=TRUE)
                 lm1 <- mesh1rot$yrot
                 meshorig <- mesh1 <- mesh1rot$mesh
                 lmtmp1 <- lm1
