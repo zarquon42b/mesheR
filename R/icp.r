@@ -30,7 +30,7 @@
 #' If the region of the targetmesh is much smaller than the region of the
 #' reference, "vcg" can be really slow. Otherwise very fast. "morpho" is the
 #' stable but somewhat slower algorithm.
-#' 
+#' @param silent logical: no verbosity
 #' @return Returns the rotated mesh1.
 #' @author Stefan Schlager
 #' @seealso \code{\link{rotmesh.onto}}, \code{\link{rotonto}}
@@ -48,7 +48,7 @@
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' 
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"))
+icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"), silent=FALSE)
   {
       mesh1 <- adnormals(mesh1)
       mesh2 <- adnormals(mesh2)
@@ -67,7 +67,8 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
           mesh1 <- rotmesh.onto(mesh1,lm1,lm2,scale=scale,reflection=reflection)$mesh
       
       for( i in 1:iterations) {
-          cat("*")
+          if (!silent)
+              cat("*")
           proMesh <- project3d(mesh1,mesh2,sign=F) ## project mesh1 onto mesh2
           x1 <- vert2points(mesh1)
           x2 <- vert2points(proMesh)
@@ -92,14 +93,15 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
               while (length(good) < minclost) {
                   ## distgood <- as.logical(abs(clost$quality) <= (dist+increase))
                   good <- which(dists <= (qud+increase))
-                  cat(paste("distance increased to",qud+increase,"\n"))
+                  if (!silent)
+                      cat(paste("distance increased to",qud+increase,"\n"))
                   increase <- increase+distinc
               }
-              
           }
           mesh1 <- rotmesh.onto(mesh1,x1[good,],x2[good,],scale=scale)$mesh
       }
-      cat("\n")
+      if (!silent)
+          cat("\n")
       return(mesh1)
   }
 #' compare normal directions between two states of a mesh

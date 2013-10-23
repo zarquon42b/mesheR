@@ -5,7 +5,7 @@
   AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL,
     k = 1, lambda = 1, iterations = 15, rho = pi/2,
     dist = 2, border = FALSE, smooth = TRUE, smoothit = 1,
-    smoothtype = "t", tol = 1e-04, useiter = TRUE,
+    smoothtype = "t", tol = 1e-10, useiter = TRUE,
     minclost = 50, distinc = 1, scale = TRUE,
     reflection = FALSE, icp = NULL, nn = 20, cores = 1,
     silent = FALSE)
