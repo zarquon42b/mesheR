@@ -63,11 +63,11 @@ warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",a
         x <- args[[j]]
         y <- args[[j+1]]
         if (!is.null(whichcolor)) {
-        if (!is.null(args[[whichcolor]]$material$color)) {
-            y$material$color <- args[[whichcolor]]$material$color
-            x$material$color <- args[[whichcolor]]$material$color
+            if (!is.null(args[[whichcolor]]$material$color)) {
+                y$material$color <- args[[whichcolor]]$material$color
+                x$material$color <- args[[whichcolor]]$material$color
+            }
         }
-    }
                 
         for (i in 0:n) {
             mesh <- x
