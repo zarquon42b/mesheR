@@ -15,9 +15,18 @@
 #' 
 #' @param countbegin integer: number to start image sequence. 
 #' @param ask logical: if TRUE, the viewpoint can be selected manually.
+#' @param mixcolor logical: if available existing colors are subsequently mixed using \code{\link{mixColorMesh}}.
+#' @examples
+#' require(Morpho)
+#' data(nose)
+#' redmesh <- shortnose.mesh
+#' redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
+#' bluemesh <- shortnose.mesh
+#' bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
+#' warpmovieMulti(bluemesh, redmesh, n=15)
 #' @importFrom rgl open3d points3d shade3d rgl.snapshot rgl.pop rgl.close
 #' @export warpmovieMulti
-warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=1, align=TRUE, scale=FALSE)
+warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE)
 {	
     args <- list(...)
     if (length(args) == 1 && !inherits(args[[1]],"mesh3d"))
@@ -53,15 +62,26 @@ warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",a
     for (j in 1:(argc-1)) {
         x <- args[[j]]
         y <- args[[j+1]]
+        if (!is.null(whichcolor)) {
         if (!is.null(args[[whichcolor]]$material$color)) {
             y$material$color <- args[[whichcolor]]$material$color
             x$material$color <- args[[whichcolor]]$material$color
         }
+    }
                 
         for (i in 0:n) {
             mesh <- x
             mesh$vb[1:3,]<-(i/n)*y$vb[1:3,]+(1-(i/n))*x$vb[1:3,]
             mesh <- adnormals(mesh)
+            if (mixcolor && is.null(whichcolor)) {
+                if (is.null(mesh$material$color)) 
+                    mesh$material$color <- matrix("#FFFFFF",mesh$it[1],mesh$it[2])
+                if (is.null(y$material$color)) 
+                    y$material$color <- matrix("#FFFFFF",y$it[1],y$it[2])
+                mesh <- mixColorMesh(mesh,y, alpha=((i/n)))
+            }
+                    
+                
             a <- shade3d(mesh,col=col,specular=1)
             if (i ==0 && j == 1 && ask==TRUE)
                 readline("please select view and press return\n")

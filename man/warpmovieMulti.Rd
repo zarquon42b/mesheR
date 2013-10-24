@@ -4,8 +4,8 @@
 \usage{
   warpmovieMulti(..., n, col = "green", folder = NULL,
     movie = "warpmovie", add = FALSE, close = TRUE,
-    countbegin = 0, ask = TRUE, whichcolor = 1,
-    align = TRUE, scale = FALSE)
+    countbegin = 0, ask = TRUE, whichcolor = NULL,
+    align = TRUE, scale = FALSE, mixcolor = TRUE)
 }
 \arguments{
   \item{\dots}{registered meshes or a list containing
@@ -41,9 +41,21 @@
 
   \item{ask}{logical: if TRUE, the viewpoint can be
   selected manually.}
+
+  \item{mixcolor}{logical: if available existing colors are
+  subsequently mixed using \code{\link{mixColorMesh}}.}
 }
 \description{
   make a warpmovie with multiple registered meshes - this
   is a pimped version of warpmovie3d from package 'Morpho'
+}
+\examples{
+require(Morpho)
+data(nose)
+redmesh <- shortnose.mesh
+redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
+bluemesh <- shortnose.mesh
+bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
+warpmovieMulti(bluemesh, redmesh, n=15)
 }
 

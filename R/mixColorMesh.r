@@ -5,7 +5,7 @@
 #' 
 #' @param mesh1 triangular mesh of class "mesh3d".
 #' @param mesh2 triangular mesh of class "mesh3d". 
-#' @param alpha numeric: 0 <= alpha <=1 weight of color associated with mesh1.
+#' @param alpha numeric: 0 <= alpha <=1 weight of color associated with mesh2.
 #' @return returns mesh1 with mixed vertex colors.
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2

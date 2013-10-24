@@ -10,7 +10,7 @@
   \item{mesh2}{triangular mesh of class "mesh3d".}
 
   \item{alpha}{numeric: 0 <= alpha <=1 weight of color
-  associated with mesh1.}
+  associated with mesh2.}
 }
 \value{
   returns mesh1 with mixed vertex colors.
