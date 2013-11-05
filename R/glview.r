@@ -41,7 +41,7 @@ glVisible <- function(mesh, offset=1e-3)
   normals <- viewpoint-mesh0$vb
   #normals <- apply(normals,2,function(x) x <- x/sqrt(sum(x^2)))
   mesh0$normals <- normals
-  tmp <- as.logical(vcgIntersect(mesh0,mesh)$quality)
+  tmp <- as.logical(vcgRaySearch(mesh0,mesh)$quality)
   out <- tmp
   out[tmp] <- FALSE
   out[!tmp] <- TRUE

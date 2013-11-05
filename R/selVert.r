@@ -146,7 +146,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 #' \dontrun{
 #' require(Morpho)
 #' data(nose)
-#' selection <- selectVertex(shortnose.mesh)
+#' selection <- cutMesh(shortnose.mesh)
 #' }
 #' @export cutMesh
 cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=c("shade","wire"),offset=1e-3,...)

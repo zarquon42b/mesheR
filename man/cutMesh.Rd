@@ -50,7 +50,7 @@
 \dontrun{
 require(Morpho)
 data(nose)
-selection <- selectVertex(shortnose.mesh)
+selection <- cutMesh(shortnose.mesh)
 }
 }
 \author{
