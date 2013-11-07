@@ -69,10 +69,10 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
                 rt1[as.logical(Mpro$border)] <- 4
         } else {
             bordtmp <- vcgBorder(mesh2)
-            rt0[which(Spro$ptr %in% which(as.logical(bordtmp$borderit)))] <- 4
+            rt0[which(Spro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
             if (!oneway) {
                 bordtmp <- vcgBorder(mesh1)
-                rt1[which(Mpro$ptr %in% which(as.logical(bordtmp$borderit)))] <- 4
+                rt1[which(Mpro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
             }
         }
     }

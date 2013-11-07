@@ -149,7 +149,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 distgood <- as.logical(abs(clost$quality) <= dist)
                 bordergood <- 1
                 if (!border) 
-                    bordgood <- as.logical(!meshbord$borderit[clost$ptr])
+                    bordgood <- as.logical(!meshbord$borderit[clost$faceptr])
                 good <- sort(which(as.logical(normgood*distgood*bordergood)))
                         
 ### in case no good hit is found within the given distance we increase the distance by 1mm until valid references are found:

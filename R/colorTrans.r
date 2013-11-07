@@ -40,8 +40,8 @@ colorTrans <- function(mesh1, mesh2, tol=1, cores=1)
         if (length(hits) == 0)
             stop("no hits within the given tolerance - increase tol!")
         colmesh1 <- matrix(0,ncol(mesh1$vb),4)
-        colmesh1[hits,1] <- clost$ptr[hits]
-        colmesh1[hits,2:4] <- t(mesh2$it[,clost$ptr[hits]])
+        colmesh1[hits,1] <- clost$faceptr[hits]
+        colmesh1[hits,2:4] <- t(mesh2$it[,clost$faceptr[hits]])
         vert1col <- as(colout[colmesh1[hits,2],],"LAB")
         vert2col <- as(colout[colmesh1[hits,3],],"LAB")
         vert3col <- as(colout[colmesh1[hits,4],],"LAB")
