@@ -19,8 +19,6 @@
 #' @references To be announced
 #' @keywords package
 #' @useDynLib mesheR
-#' @importClassesFrom spam spam spam.chol.NgPeyton
-#' @importMethodsFrom spam t chol
 #' @importFrom Morpho adnormals angle.calc closemeshKD conv2backf facenormals file2mesh mcNNindex meshcube meshDist meshres projRead rmUnrefVertex rmVertex rotmesh.onto rotonmat rotonto tanplan tps3d unrefVertex vert2points warp.mesh
 #' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgRaySearch vcgNonBorderEdge vcgSmooth 
 #' @importFrom parallel detectCores mclapply
