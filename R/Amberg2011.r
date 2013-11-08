@@ -1,3 +1,12 @@
+#  List all imports necessary in this file
+#' @importFrom Matrix sparseMatrix Matrix cBind
+#' @importClassesFrom Matrix dgCMatrix sparseMatrix
+#' @importMethodsFrom Matrix t
+#' @importFrom spam as.spam.dgCMatrix rbind.spam solve.spam
+#' @importClassesFrom spam spam spam.chol.NgPeyton
+#' @importMethodsFrom spam t chol rbind
+NULL
+
 #' subfunction of AmbergDeformSpam
 #'
 #' subroutine preparing vertex assortment in order to create S using an 'arcface' matrix
@@ -15,7 +24,7 @@ buildAffineAmberg <- function(mesh)
         rowind1 <- rowind3-2
         whichsel <- cbind(rowind1,rowind2,rowind3,t(mesh$it),nrow(verts)+rowind)
         ## setup sparse selection matrix to build Affine per-face trafo-matrix 
-        sel <- Matrix::Matrix(0,3*ncol(mesh$it),nrow(allcoo))
+        sel <- Matrix(0,3*ncol(mesh$it),nrow(allcoo))
         sel[whichsel[,c(1,4)]] <- -1
         sel[whichsel[,c(1,5)]] <- 1
         sel[whichsel[,c(2,4)]] <- -1
@@ -29,7 +38,7 @@ buildAffineAmberg <- function(mesh)
 #' convert affine per-face trafo-matrix
 #' @param mat quadratic matrix
 #' @export mat2sparseBlock
-#' @importFrom Matrix sparseMatrix
+
 mat2sparseBlock <- function (mat) 
 {
     mat <- as.matrix(mat)
@@ -43,7 +52,7 @@ mat2sparseBlock <- function (mat)
     j1[,(c(1:ncol(j))*3)-2] <- j
     j1 <- as.vector(j1)
     i1 <- as.vector(rbind(1:(nvb),1:(nvb),1:(nvb))[,1:nvb])
-    out <- Matrix::sparseMatrix(j = j1, i = i1, x = data)
+    out <- sparseMatrix(j = j1, i = i1, x = data)
     invisible((out))
 }
 
@@ -52,7 +61,7 @@ mat2sparseBlock <- function (mat)
 #' create per face arcnode matrix to differentiate per-face affine trafo based on per edge approximation
 #' @param mesh triangular mesh
 #' @export createArcNode
-#' @importFrom Matrix Matrix
+#' 
 createArcNode <- function(mesh)
     {
         edges <- vcgNonBorderEdge(mesh, silent=TRUE)##get all non-border edges
@@ -122,7 +131,7 @@ createS <- function(mesh)
         invtransel <- multisolve3(transel,trans=TRUE)
         arcnodes <- createArcNode(mesh) 
         weight <- AijklWeights(mesh,arcnodes)
-        out$sparseAijk <- Matrix::t(mat2sparseBlock(invtransel))
+        out$sparseAijk <- t(mat2sparseBlock(invtransel))
         out$sel <- sel
         dia3 <- sparseMatrix(i=1:3,j=1:3,x=rep(1,3))
         arcnodes3 <- kronecker(arcnodes$arcnode,dia3)
@@ -156,9 +165,7 @@ createC <- function(lm1,mesh)
 #' @param ncol column numbers of complete Jacbian
 #' @param mesh triangular mesh
 #' @export createJc
-#' @importClassesFrom Matrix dgCMatrix sparseMatrix
-#' @importFrom Matrix cBind
-#' @importFrom spam as.spam.dgCMatrix
+
 createJc <- function(lm1,ncol,mesh)
     {
         C <- createC(lm1,mesh)
@@ -200,8 +207,6 @@ createJc <- function(lm1,ncol,mesh)
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
 #' @keywords ~kwd1 ~kwd2
 #' @export AmbergDeformSpam
-#' @importFrom spam rbind.spam solve.spam
-#' @importMethodsFrom spam rbind
 AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
     {
         t0 <- Sys.time()
@@ -228,18 +233,18 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
         ## append Jn to Jacobian J
         J <- rbind.spam(J,Jn)
         ## calculate Hessian H
-        H <- spam::t(J)%*%J
-        Jtc <- spam::t(Jc)%*%lm2
+        H <- t(J)%*%J
+        Jtc <- t(Jc)%*%lm2
         ## Cholesky decomposition of Hessian H
-        Hchol <- spam::chol(H)
+        Hchol <- chol(H)
         k <- solve.spam(Hchol,lambda*Jtc)
         v <- S$sel$allcoo
         v[-c(1:dim(vert2points(mesh))[1]),] <- 0
         v <- Matrix(v)
         k_v <- k-v
-        Jtnv <- spam::t(Jn)%*%(fn)
+        Jtnv <- t(Jn)%*%(fn)
         deltav <- solve.spam(Hchol,k0*Jtnv)+k_v
-        vert_new <- as.matrix(spam::t((v+deltav)[1:ncol(mesh$vb),]))
+        vert_new <- as.matrix(t((v+deltav)[1:ncol(mesh$vb),]))
         mesh_new <- mesh
         mesh_new$vb[1:3,] <- (vert_new)
         meshout <- adnormals(mesh_new)
