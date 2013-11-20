@@ -6,7 +6,7 @@
     lm2 = NULL, uprange = 0.9, maxdist = NULL,
     minclost = 50, distinc = 0.5, rhotol = pi, k = 50,
     reflection = FALSE, pro = c("morpho", "vcg"),
-    silent = FALSE, mc.cores = detectCores())
+    silent = FALSE, mc.cores = 1)
 }
 \arguments{
   \item{mesh1}{object of class "mesh3d".}
