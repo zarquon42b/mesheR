@@ -6,7 +6,7 @@
     lm2 = NULL, uprange = 0.9, maxdist = NULL,
     minclost = 50, distinc = 0.5, rhotol = pi, k = 50,
     reflection = FALSE, pro = c("morpho", "vcg"),
-    silent = FALSE)
+    silent = FALSE, mc.cores = detectCores())
 }
 \arguments{
   \item{mesh1}{object of class "mesh3d".}
@@ -59,6 +59,9 @@
   "morpho" is the stable but somewhat slower algorithm.}
 
   \item{silent}{logical: no verbosity}
+
+  \item{mc.cores}{integer: how many cores to use for
+  \code{closemeshKD} call.}
 }
 \value{
   Returns the rotated mesh1.

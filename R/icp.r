@@ -31,6 +31,7 @@
 #' reference, "vcg" can be really slow. Otherwise very fast. "morpho" is the
 #' stable but somewhat slower algorithm.
 #' @param silent logical: no verbosity
+#' @param mc.cores integer: how many cores to use for \code{closemeshKD} call.
 #' @return Returns the rotated mesh1.
 #' @author Stefan Schlager
 #' @seealso \code{\link{rotmesh.onto}}, \code{\link{rotonto}}
@@ -46,9 +47,9 @@
 #' rotnose <- icp(warpnose.long,shortnose.mesh,lm1=longnose.lm,lm2=shortnose.lm,rhotol=0.7,uprange=0.9)
 #' shade3d(rotnose,col=2,alpha=0.7)
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
-#' 
+#' @importFrom parallel detectCores
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"), silent=FALSE)
+icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"), silent=FALSE,mc.cores=detectCores())
   {
       mesh1 <- adnormals(mesh1)
       mesh2 <- adnormals(mesh2)
@@ -58,7 +59,7 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
       } else if (pro == "m") {
           tmpfun <- function(x,y,sign=F)
               {
-                  out <- closemeshKD(x,y,k=k,sign=sign)
+                  out <- closemeshKD(x,y,k=k,sign=sign,cores=mc.cores)
                   return(out)
               }
           project3d <- tmpfun
