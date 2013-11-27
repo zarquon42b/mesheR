@@ -16,6 +16,7 @@
 #' @param countbegin integer: number to start image sequence. 
 #' @param ask logical: if TRUE, the viewpoint can be selected manually.
 #' @param mixcolor logical: if available existing colors are subsequently mixed using \code{\link{mixColorMesh}}.
+#' @param shade select shade: "s"=shade3d, "w"= wire3d, "b"=both
 #' @examples
 #' require(Morpho)
 #' data(nose)
@@ -26,7 +27,7 @@
 #' warpmovieMulti(bluemesh, redmesh, n=15)
 #' @importFrom rgl open3d points3d shade3d rgl.snapshot rgl.pop rgl.close
 #' @export warpmovieMulti
-warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE)
+warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE, shade=c("s","w","b"))
 {	
     args <- list(...)
     if (length(args) == 1 && !inherits(args[[1]],"mesh3d"))
@@ -45,7 +46,10 @@ warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",a
     }
     if (!add)
         open3d()
-    
+
+    render3d <- shade3d
+    if (shade[1] == "w")
+        render3d <- wire3d
     ## get bbox
     ##bbox <- apply(rbind(vert2points(x),vert2points(y)),2,range)
     bbox0 <- lapply(args,function(x) x <- apply(vert2points(x),2,range))
@@ -82,7 +86,12 @@ warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",a
             }
                     
                 
-            a <- shade3d(mesh,col=col,specular=1)
+            a <- render3d(mesh,col=col,specular=1)
+            if (shade[1] == "b"){
+                tmesh <- mesh
+                tmesh$material$color <- NULL
+                a <- append(a,wire3d(tmesh,col=1,lwd=2,specular=1))
+            }
             if (i ==0 && j == 1 && ask==TRUE)
                 readline("please select view and press return\n")
                                      

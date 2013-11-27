@@ -1,8 +1,8 @@
 Package: mesheR
 Type: Package
 Title: Meshing operations on triangular meshes.
-Version: 0.4.131108
-Date: 2013-11-08
+Version: 0.4.131127
+Date: 2013-11-27
 Author: Stefan Schlager
 Maintainer: Stefan Schlager <stefan.schlager@uniklinik-freiburg.de>
 Description: Meshing operations on triangular meshes.
@@ -43,3 +43,4 @@ Collate:
     'warpmovieMulti.R'
     'restrict.deform.r'
     'bary2point.r'
+    'colorMesh.r'

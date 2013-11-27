@@ -5,7 +5,8 @@
   warpmovieMulti(..., n, col = "green", folder = NULL,
     movie = "warpmovie", add = FALSE, close = TRUE,
     countbegin = 0, ask = TRUE, whichcolor = NULL,
-    align = TRUE, scale = FALSE, mixcolor = TRUE)
+    align = TRUE, scale = FALSE, mixcolor = TRUE,
+    shade = c("s", "w", "b"))
 }
 \arguments{
   \item{\dots}{registered meshes or a list containing
@@ -44,6 +45,9 @@
 
   \item{mixcolor}{logical: if available existing colors are
   subsequently mixed using \code{\link{mixColorMesh}}.}
+
+  \item{shade}{select shade: "s"=shade3d, "w"= wire3d,
+  "b"=both}
 }
 \description{
   make a warpmovie with multiple registered meshes - this

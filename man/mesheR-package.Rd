@@ -10,8 +10,8 @@
 }
 \details{
   \tabular{ll}{ Package: \tab mesheR\cr Type: \tab
-  Package\cr Version: \tab 0.4.131108\cr Date: \tab
-  2013-11-08\cr License: \tab GPL\cr LazyLoad: \tab yes\cr
+  Package\cr Version: \tab 0.4.131127\cr Date: \tab
+  2013-11-27\cr License: \tab GPL\cr LazyLoad: \tab yes\cr
   }
 }
 \author{
