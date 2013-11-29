@@ -4,7 +4,19 @@
 \usage{
   colorMesh(mesh, col)
 }
+\arguments{
+  \item{mesh}{triangular mesh of class \code{mesh3d}}
+
+  \item{col}{color}
+}
+\value{
+  mesh with material adequately set.
+}
 \description{
   Assign a color to a mesh globally
+}
+\examples{
+data(humface)
+humcol <- colorMesh(humface, "red")
 }
 

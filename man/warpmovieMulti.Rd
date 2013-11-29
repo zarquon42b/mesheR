@@ -2,7 +2,7 @@
 \alias{warpmovieMulti}
 \title{make a warpmovie with multiple registered meshes}
 \usage{
-  warpmovieMulti(..., n, col = "green", folder = NULL,
+  warpmovieMulti(..., n, col = NULL, folder = NULL,
     movie = "warpmovie", add = FALSE, close = TRUE,
     countbegin = 0, ask = TRUE, whichcolor = NULL,
     align = TRUE, scale = FALSE, mixcolor = TRUE,
@@ -15,7 +15,8 @@
   \item{n}{amount of intermediate images between two
   meshes}
 
-  \item{col}{mesh color}
+  \item{col}{mesh color - overrides options
+  \code{whichcolor} and \code{mixcolor}}
 
   \item{folder}{character: output folder for created images
   (optional)}

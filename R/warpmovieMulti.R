@@ -4,7 +4,7 @@
 #'
 #' @param \dots registered meshes or a list containing registered meshes.
 #' @param n amount of intermediate images between two meshes
-#' @param col mesh color
+#' @param col mesh color - overrides options \code{whichcolor} and \code{mixcolor}
 #' @param folder character: output folder for created images (optional)
 #' @param movie character: name of the output files
 #' @param add logical: if TRUE, the movie will be added to the focussed rgl-windows.
@@ -27,7 +27,7 @@
 #' warpmovieMulti(bluemesh, redmesh, n=15)
 #' @importFrom rgl open3d points3d shade3d rgl.snapshot rgl.pop rgl.close
 #' @export warpmovieMulti
-warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE, shade=c("s","w","b"))
+warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE, shade=c("s","w","b"))
 {	
     args <- list(...)
     if (length(args) == 1 && !inherits(args[[1]],"mesh3d"))
@@ -44,6 +44,13 @@ warpmovieMulti <- function(..., n, col="green", folder=NULL, movie="warpmovie",a
             movie <- paste(folder,movie,sep="")
         }
     }
+    if (!is.null(col)) {
+        args[[1]] <- colorMesh(args[[1]],col)
+        mixcolor <- FALSE
+        whichcolor <- 1
+    }  else
+        col <- "white"
+    
     if (!add)
         open3d()
 
