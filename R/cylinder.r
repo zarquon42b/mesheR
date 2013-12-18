@@ -69,7 +69,7 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
         cyl$normals <- NULL
         cyl <- translate3d(cyl,x[1],x[2],x[3])
         if (adNormals)
-            cyl <- adnormals(cyl)
+            cyl <- updateNormals(cyl)
             
         return(cyl)
     }

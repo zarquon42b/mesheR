@@ -2,7 +2,7 @@
 \alias{normcheck}
 \title{compare normal directions between two states of a mesh}
 \usage{
-  normcheck(mesh1, mesh2, circle = TRUE)
+normcheck(mesh1, mesh2, circle = TRUE)
 }
 \arguments{
   \item{mesh1}{triangular mesh}
@@ -13,10 +13,10 @@
   the angel}
 }
 \value{
-  numeric vector containing angles between corresponding
-  normals
+numeric vector containing angles between corresponding
+normals
 }
 \description{
-  compare normal directions between two states of a mesh
+compare normal directions between two states of a mesh
 }
 

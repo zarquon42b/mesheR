@@ -2,7 +2,7 @@
 \alias{AijklWeights}
 \title{subfunction of AmbergDeformSpam}
 \usage{
-  AijklWeights(mesh, arcnode)
+AijklWeights(mesh, arcnode)
 }
 \arguments{
   \item{mesh}{triangular mesh}
@@ -10,6 +10,6 @@
   \item{arcnode}{output from createArcNode(mesh)}
 }
 \description{
-  calculate per face-deform weights for approx. derivation
+calculate per face-deform weights for approx. derivation
 }
 

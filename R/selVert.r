@@ -151,7 +151,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 #' @export cutMesh
 cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=c("shade","wire"),offset=1e-3,...)
     {
-        mesh <- adnormals(mesh)
+        mesh <- updateNormals(mesh)
         render <- substr(render[1],1L,1L)
         do3d <- wire3d
         if (render == "s")

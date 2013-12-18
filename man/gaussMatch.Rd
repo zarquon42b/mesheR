@@ -2,16 +2,13 @@
 \alias{gaussMatch}
 \title{map two surface meshes using smoothed displacement fields}
 \usage{
-  gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL,
-    smoothit = 10,
-    smoothtype = c("taubin", "laplace", "HClaplace"),
-    sigma = 20, gamma = 2, f = 1.2, oneway = F, lm1 = NULL,
-    lm2 = NULL, icp = FALSE, icpiter = 3, uprange = 0.95,
-    rhotol = 1, nh = NULL, toldist = 0, patch = NULL,
-    repro = FALSE, cores = detectCores(),
-    pro = c("morpho", "vcg"), k0 = 50, prometh = 1,
-    angtol = NULL, border = FALSE, horiz.disp = NULL,
-    Amberg = NULL, silent = FALSE, ...)
+gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
+  smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2,
+  f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, icp = FALSE,
+  icpiter = 3, uprange = 0.95, rhotol = 1, nh = NULL, toldist = 0,
+  patch = NULL, repro = FALSE, cores = detectCores(), pro = c("morpho",
+  "vcg"), k0 = 50, prometh = 1, angtol = NULL, border = FALSE,
+  horiz.disp = NULL, Amberg = NULL, silent = FALSE, ...)
 }
 \arguments{
   \item{mesh1}{An object of class mesh3d used as atlas mesh
@@ -128,19 +125,19 @@
   \item{\dots}{Further arguments passed to \code{nn2}.}
 }
 \value{
-  If a patch is specified: \item{mesh}{matched mesh}
-  \item{patch}{displaced patch as specified in input.} else
-  a mesh of class "mesh3d" is returned.
+If a patch is specified: \item{mesh}{matched mesh}
+\item{patch}{displaced patch as specified in input.} else a
+mesh of class "mesh3d" is returned.
 }
 \description{
-  Map a reference mesh onto a target surface using
-  displacement fields.
+Map a reference mesh onto a target surface using
+displacement fields.
 }
 \details{
-  This function implements the mesh matching method
-  suggested by Moshfeghi et al. and Bryan et al..
-  Additional mechanisms for controlling and restricting the
-  displacement smoothing are implemented
+This function implements the mesh matching method suggested
+by Moshfeghi et al. and Bryan et al.. Additional mechanisms
+for controlling and restricting the displacement smoothing
+are implemented
 }
 \examples{
 require(Morpho)
@@ -151,24 +148,23 @@ warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=3,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \references{
-  Bryan, R., Mohan, P. S., Hopkins, A., Galloway, F.,
-  Taylor, M., and Nair, P. B. 2010. Statistical modelling
-  of the whole human femur incorporating geometric and
-  material properties. Medical Engineering &amp; Physics,
-  32(1):57-65.
+Bryan, R., Mohan, P. S., Hopkins, A., Galloway, F., Taylor,
+M., and Nair, P. B. 2010. Statistical modelling of the
+whole human femur incorporating geometric and material
+properties. Medical Engineering &amp; Physics, 32(1):57-65.
 
-  Moshfeghi, M., Ranganath, S., and Nawyn, K. 1994.
-  Three-dimensional elastic matching of volumes. IEEE
-  Transactions on Image Processing: A Publication of the
-  IEEE Signal Processing Society, 3(2):128-138.
+Moshfeghi, M., Ranganath, S., and Nawyn, K. 1994.
+Three-dimensional elastic matching of volumes. IEEE
+Transactions on Image Processing: A Publication of the IEEE
+Signal Processing Society, 3(2):128-138.
 }
 \seealso{
-  \code{\link{meshres}}, \code{\link{vcgClost}},
-  \code{\link{vcgBorder}}, \code{\link{icp}},
-  \code{\link{vcgSmooth}}
+\code{\link{meshres}}, \code{\link{vcgClost}},
+\code{\link{vcgBorder}}, \code{\link{icp}},
+\code{\link{vcgSmooth}}
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

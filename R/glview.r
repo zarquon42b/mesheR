@@ -35,7 +35,7 @@ glView <- function()
 #' @export glVisible
 glVisible <- function(mesh, offset=1e-3)
 {
-  mesh <- adnormals(mesh)
+  mesh <- updateNormals(mesh)
   mesh0 <- meshOffset(mesh, offset)
   viewpoint <- c(glView(),0)
   normals <- viewpoint-mesh0$vb

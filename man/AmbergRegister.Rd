@@ -2,13 +2,11 @@
 \alias{AmbergRegister}
 \title{Register two triangular meshes based on smooth deformation.}
 \usage{
-  AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL,
-    k = 1, lambda = 1, iterations = 15, rho = pi/2,
-    dist = 2, border = FALSE, smooth = TRUE, smoothit = 1,
-    smoothtype = "t", tol = 1e-10, useiter = TRUE,
-    minclost = 50, distinc = 1, scale = TRUE,
-    reflection = FALSE, icp = NULL, nn = 20, cores = 1,
-    silent = FALSE)
+AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
+  iterations = 15, rho = pi/2, dist = 2, border = FALSE,
+  smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
+  useiter = TRUE, minclost = 50, distinc = 1, scale = TRUE,
+  reflection = FALSE, icp = NULL, nn = 20, cores = 1, silent = FALSE)
 }
 \arguments{
   \item{mesh1}{reference mesh: triangular mesh of class
@@ -94,35 +92,34 @@
   \item{silent}{logical: no verbosity}
 }
 \value{
-  \item{mesh}{registered mesh} \item{meshrot }{mesh1,
-  rotated onto mesh2} \item{lm1rot }{lm1, rotated onto lm2}
-  \item{lmtmp1 }{correspondences on updated reference mesh
-  of last iteration} \item{lmtmp2 }{correspondences on
-  updated target mesh of last iteration}
+\item{mesh}{registered mesh} \item{meshrot }{mesh1, rotated
+onto mesh2} \item{lm1rot }{lm1, rotated onto lm2}
+\item{lmtmp1 }{correspondences on updated reference mesh of
+last iteration} \item{lmtmp2 }{correspondences on updated
+target mesh of last iteration}
 }
 \description{
-  Perform registration of two triangular meshes, minimizing
-  per-face distortions.
+Perform registration of two triangular meshes, minimizing
+per-face distortions.
 }
 \details{
-  This function runs an elastic-ICP surface matching
-  algorithm, that minimizes the original meshes internal
-  structure by solving a sparse equation system. The user
-  can control 2 parameters of mesh stiffness: \code{lambda}
-  and \code{k}. \code{lambda} controls the impact of the
-  control points (closest points) as it is a weight applied
-  to the equation system. The value of \code{lambda} should
-  be carefully selected depending on the object overall
-  size: i.e. to match two tiny meshes one will need a
-  higher value than a for a larger object (example: I found
-  values between 0 and 1 suitable for human faces and
-  values between 10 and 100 suitable for mice teeth).
-  \code{k} controls the normal slackness, i.e. the
-  deviation of normal direction. The larger, \code{k}, the
-  more elastic the deformation will be. \code{lambda} and
-  \code{k} can be specified as vectors of length
-  \code{iterations}, to assign a specific value for each
-  iteration.
+This function runs an elastic-ICP surface matching
+algorithm, that minimizes the original meshes internal
+structure by solving a sparse equation system. The user can
+control 2 parameters of mesh stiffness: \code{lambda} and
+\code{k}. \code{lambda} controls the impact of the control
+points (closest points) as it is a weight applied to the
+equation system. The value of \code{lambda} should be
+carefully selected depending on the object overall size:
+i.e. to match two tiny meshes one will need a higher value
+than a for a larger object (example: I found values between
+0 and 1 suitable for human faces and values between 10 and
+100 suitable for mice teeth). \code{k} controls the normal
+slackness, i.e. the deviation of normal direction. The
+larger, \code{k}, the more elastic the deformation will be.
+\code{lambda} and \code{k} can be specified as vectors of
+length \code{iterations}, to assign a specific value for
+each iteration.
 }
 \examples{
 require(Morpho)
@@ -150,14 +147,14 @@ meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
 wire3d(humface)
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \references{
-  Amberg, B. 2011. Editing faces in videos, University of
-  Basel.
+Amberg, B. 2011. Editing faces in videos, University of
+Basel.
 }
 \seealso{
-  \code{\link{gaussMatch}}
+\code{\link{gaussMatch}}
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

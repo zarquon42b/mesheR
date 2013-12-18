@@ -2,11 +2,10 @@
 \alias{warpmovieMulti}
 \title{make a warpmovie with multiple registered meshes}
 \usage{
-  warpmovieMulti(..., n, col = NULL, folder = NULL,
-    movie = "warpmovie", add = FALSE, close = TRUE,
-    countbegin = 0, ask = TRUE, whichcolor = NULL,
-    align = TRUE, scale = FALSE, mixcolor = TRUE,
-    shade = c("s", "w", "b"))
+warpmovieMulti(..., n, col = NULL, folder = NULL, movie = "warpmovie",
+  add = FALSE, close = TRUE, countbegin = 0, ask = TRUE,
+  whichcolor = NULL, align = TRUE, scale = FALSE, mixcolor = TRUE,
+  shade = c("s", "w", "b"))
 }
 \arguments{
   \item{\dots}{registered meshes or a list containing
@@ -51,8 +50,8 @@
   "b"=both}
 }
 \description{
-  make a warpmovie with multiple registered meshes - this
-  is a pimped version of warpmovie3d from package 'Morpho'
+make a warpmovie with multiple registered meshes - this is
+a pimped version of warpmovie3d from package 'Morpho'
 }
 \examples{
 require(Morpho)

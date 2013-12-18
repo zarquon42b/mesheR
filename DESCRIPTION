@@ -12,35 +12,10 @@ Imports:
     colorspace,
     Rvcg,
     parallel,
-    Morpho,
+    Morpho (>= 1.99),
     Matrix,
     rgl(>= 0.93.963),
     spam
 License: GPL-2
 Copyright: see COPYRIGHTS file
 LazyLoad: yes
-Collate:
-    'Amberg2011.r'
-    'AmbergMesh2Sparse.r'
-    'AmbergRegister.r'
-    'centermesh3d.r'
-    'colorTrans.r'
-    'cylinder.r'
-    'face.r'
-    'gaussDisplace.r'
-    'glview.r'
-    'icp.r'
-    'meshOffset.r'
-    'mixColorMesh.r'
-    'multisolve.r'
-    'placeDowels.r'
-    'plotBorder.r'
-    'plotspin.r'
-    'rmInternals.r'
-    'selVert.r'
-    'trivolume.r'
-    'mesheR-package.R'
-    'warpmovieMulti.R'
-    'restrict.deform.r'
-    'bary2point.r'
-    'colorMesh.r'

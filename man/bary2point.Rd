@@ -2,7 +2,7 @@
 \alias{bary2point}
 \title{transform barycentric coordinates into 3D-coordinates}
 \usage{
-  bary2point(bary, faceptr, mesh)
+bary2point(bary, faceptr, mesh)
 }
 \arguments{
   \item{bary}{3xn Matrix containing barycentric
@@ -14,10 +14,10 @@
   \item{mesh}{mesh to extract coordinates from}
 }
 \value{
-  a nx3 matrix containing 3D-coordinates
+a nx3 matrix containing 3D-coordinates
 }
 \description{
-  transform barycentric coordinates into 3D-coordinates
+transform barycentric coordinates into 3D-coordinates
 }
 \examples{
 require(rgl)

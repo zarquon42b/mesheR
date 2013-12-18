@@ -2,7 +2,7 @@
 \alias{colorTrans}
 \title{Transfers vertex colors between meshes.}
 \usage{
-  colorTrans(mesh1, mesh2, tol = 1, cores = 1)
+colorTrans(mesh1, mesh2, tol = 1, cores = 1)
 }
 \arguments{
   \item{mesh1}{triangular mesh of class "mesh3d".}
@@ -16,11 +16,11 @@
   to use.}
 }
 \value{
-  returns the mesh1 with transfered vertex colors.
+returns the mesh1 with transfered vertex colors.
 }
 \description{
-  colorTrans transfers the vertex color of mesh2 onto mesh1
-  by interpolating vertex colors of closest face.
+colorTrans transfers the vertex color of mesh2 onto mesh1
+by interpolating vertex colors of closest face.
 }
 \examples{
 require(rgl)
@@ -35,7 +35,7 @@ mixmesh <- colorTrans(nocolmesh, redmesh)
 shade3d(mixmesh)
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

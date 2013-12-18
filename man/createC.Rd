@@ -2,7 +2,7 @@
 \alias{createC}
 \title{subfunction of AmbergDeformSpam}
 \usage{
-  createC(lm1, mesh)
+createC(lm1, mesh)
 }
 \arguments{
   \item{lm1}{landmarks}
@@ -10,6 +10,6 @@
   \item{mesh}{triangular mesh}
 }
 \description{
-  create C - middle block of Jacobian matrix
+create C - middle block of Jacobian matrix
 }
 

@@ -2,8 +2,7 @@
 \alias{rmInternals}
 \title{remove vertices within a convex surface mesh}
 \usage{
-  rmInternals(mesh, mindist = NULL, explode = FALSE,
-    center = NULL)
+rmInternals(mesh, mindist = NULL, explode = FALSE, center = NULL)
 }
 \arguments{
   \item{mesh}{triangular mesh of class "mesh3d"}
@@ -19,21 +18,21 @@
   case "explode=TRUE", if another center is required.}
 }
 \value{
-  returns a cleaned mesh
+returns a cleaned mesh
 }
 \description{
-  remove vertices within a convex surface mesh by checking
-  if they intersect the mesh along their normals.
+remove vertices within a convex surface mesh by checking if
+they intersect the mesh along their normals.
 }
 \details{
-  This only works for convex meshes, for concave
-  substructures this might result in unwanted removals.
+This only works for convex meshes, for concave
+substructures this might result in unwanted removals.
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \seealso{
-  \code{\link{rmVertex}}
+\code{\link{rmVertex}}
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

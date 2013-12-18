@@ -2,13 +2,13 @@
 \alias{buildAffineAmberg}
 \title{subfunction of AmbergDeformSpam}
 \usage{
-  buildAffineAmberg(mesh)
+buildAffineAmberg(mesh)
 }
 \arguments{
   \item{mesh}{triangular mesh}
 }
 \description{
-  subroutine preparing vertex assortment in order to create
-  S using an 'arcface' matrix
+subroutine preparing vertex assortment in order to create S
+using an 'arcface' matrix
 }
 

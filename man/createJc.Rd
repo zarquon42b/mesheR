@@ -2,7 +2,7 @@
 \alias{createJc}
 \title{subfunction of AmbergDeformSpam}
 \usage{
-  createJc(lm1, ncol, mesh)
+createJc(lm1, ncol, mesh)
 }
 \arguments{
   \item{lm1}{landmarks}
@@ -12,6 +12,6 @@
   \item{mesh}{triangular mesh}
 }
 \description{
-  function to setup Jc Jacobian submatrix
+function to setup Jc Jacobian submatrix
 }
 

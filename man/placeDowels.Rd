@@ -2,9 +2,8 @@
 \alias{placeDowels}
 \title{Place Dowels representing tissue depth on a skull}
 \usage{
-  placeDowels(lm, mesh, ldowel, render = TRUE, col = 1,
-    radius = 1, meshcol = 3, fine = 50, smooth = TRUE,
-    dowelcol = NULL)
+placeDowels(lm, mesh, ldowel, render = TRUE, col = 1, radius = 1,
+  meshcol = 3, fine = 50, smooth = TRUE, dowelcol = NULL)
 }
 \arguments{
   \item{lm}{k x 3landmarks representing dowel locations}
@@ -32,17 +31,17 @@
   \item{dowelcol}{specify dowelcolor.}
 }
 \value{
-  an invisible list with \item{dowels }{a list containing
-  the meshes for all dowels} \item{endpoints }{a matrix
-  containing the coordinates of the dowels endpoints}
+an invisible list with \item{dowels }{a list containing the
+meshes for all dowels} \item{endpoints }{a matrix
+containing the coordinates of the dowels endpoints}
 }
 \description{
-  Place Dowels representing tissue depth on a skull by
-  using predefined tissue-values
+Place Dowels representing tissue depth on a skull by using
+predefined tissue-values
 }
 \details{
-  For orientation of the dowels, the (angle weighted)
-  normal vectors of the surface is used.
+For orientation of the dowels, the (angle weighted) normal
+vectors of the surface is used.
 }
 \examples{
 require(Rvcg)
@@ -52,6 +51,6 @@ lms <- matrix(c(17.6061 , 9.2072 , -6.9917 , 44.7959 , 37.1135 , 76.0469 , 3.773
 placeDowels(lms, humface, rep(5, 4),output = FALSE)
 }
 \seealso{
-  \code{\link{cylinder}}
+\code{\link{cylinder}}
 }
 

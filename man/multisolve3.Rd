@@ -2,7 +2,7 @@
 \alias{multisolve3}
 \title{Fortran routine for fast inversion of multiple 3x3 matrices}
 \usage{
-  multisolve3(A, trans = FALSE)
+multisolve3(A, trans = FALSE)
 }
 \arguments{
   \item{A}{m x 3 matrix, where m is a multiple of 3 %%
@@ -12,22 +12,21 @@
   ~~Describe \code{trans} here~~}
 }
 \value{
-  Returns matrix containing inverted submatrices.
+Returns matrix containing inverted submatrices.
 }
 \description{
-  Fortran routine for fast inversion of multiple 3x3
-  matrices
+Fortran routine for fast inversion of multiple 3x3 matrices
 }
 \details{
-  Be m=k*3. The matrix will then be interpreted as k 3x3
-  matrices, which are subsequently inverted
+Be m=k*3. The matrix will then be interpreted as k 3x3
+matrices, which are subsequently inverted
 }
 \examples{
 A <- matrix(rnorm(18),6,3)
 B <- multisolve3(A)
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

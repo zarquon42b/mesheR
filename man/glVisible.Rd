@@ -2,7 +2,7 @@
 \alias{glVisible}
 \title{determine visibility of mesh's vertices}
 \usage{
-  glVisible(mesh, offset = 0.001)
+glVisible(mesh, offset = 0.001)
 }
 \arguments{
   \item{mesh}{triangular mesh of class "mesh3d". Must be
@@ -12,12 +12,12 @@
   from the surface.}
 }
 \value{
-  returns logical vector, assigning TRUE/FALSE to each
-  vertex of a mesh.
+returns logical vector, assigning TRUE/FALSE to each vertex
+of a mesh.
 }
 \description{
-  Determine which vertices of a rendered mesh are visible
-  from the current viewpoint
+Determine which vertices of a rendered mesh are visible
+from the current viewpoint
 }
 \examples{
 require(rgl)
@@ -28,10 +28,10 @@ visi <- glVisible(shortnose.mesh)
 points3d(vert2points(shortnose.mesh)[which(visi),])
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \seealso{
-  \code{\link{selectVertex}}, \code{\link{cutMesh}}
+\code{\link{selectVertex}}, \code{\link{cutMesh}}
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

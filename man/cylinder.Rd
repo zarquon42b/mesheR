@@ -2,8 +2,7 @@
 \alias{cylinder}
 \title{create a mesh representation of a cylinder}
 \usage{
-  cylinder(x, dirs, length, radius = 1, fine = 20,
-    adNormals = FALSE)
+cylinder(x, dirs, length, radius = 1, fine = 20, adNormals = FALSE)
 }
 \arguments{
   \item{x}{coordinates of center of the cylinders base -
@@ -22,10 +21,10 @@
   each vertex are calculated.}
 }
 \value{
-  a triangular mesh of class 'mesh3d'
+a triangular mesh of class 'mesh3d'
 }
 \description{
-  create a mesh representation of a cylinder
+create a mesh representation of a cylinder
 }
 \examples{
 require(rgl)

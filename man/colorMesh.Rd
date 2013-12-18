@@ -2,7 +2,7 @@
 \alias{colorMesh}
 \title{Assign a color to a mesh globally}
 \usage{
-  colorMesh(mesh, col)
+colorMesh(mesh, col)
 }
 \arguments{
   \item{mesh}{triangular mesh of class \code{mesh3d}}
@@ -10,10 +10,10 @@
   \item{col}{color}
 }
 \value{
-  mesh with material adequately set.
+mesh with material adequately set.
 }
 \description{
-  Assign a color to a mesh globally
+Assign a color to a mesh globally
 }
 \examples{
 data(humface)

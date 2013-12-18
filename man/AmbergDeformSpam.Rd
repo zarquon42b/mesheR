@@ -2,8 +2,7 @@
 \alias{AmbergDeformSpam}
 \title{Deform triangular mesh based on correspondences}
 \usage{
-  AmbergDeformSpam(mesh, lm1, lm2, k0 = 1, lambda = 1,
-    S = NULL)
+AmbergDeformSpam(mesh, lm1, lm2, k0 = 1, lambda = 1, S = NULL)
 }
 \arguments{
   \item{mesh}{triangular mesh of class "mesh3d". No loose
@@ -25,30 +24,30 @@
   previous calculation.}
 }
 \value{
-  \item{mesh}{deformed mesh} \item{Jn}{Jacobi submatrix Jn}
-  \item{Jc}{Jacobi submatrix Jc} \item{J }{Jacobian matrix}
-  \item{H }{Hessian of J, class "spam"}
-  \item{Hchol}{Cholesky decomposition of H; class"spam"}
+\item{mesh}{deformed mesh} \item{Jn}{Jacobi submatrix Jn}
+\item{Jc}{Jacobi submatrix Jc} \item{J }{Jacobian matrix}
+\item{H }{Hessian of J, class "spam"} \item{Hchol}{Cholesky
+decomposition of H; class"spam"}
 }
 \description{
-  Perform smooth deformation of a triangular mesh,
-  minimizing per-face distortions.
+Perform smooth deformation of a triangular mesh, minimizing
+per-face distortions.
 }
 \details{
-  Perform smooth deformation of a triangular mesh,
-  minimizing per-face distortions.No loose vertices, edges
-  and degenerated faces are allowed, as they lead to
-  singular equation system.
+Perform smooth deformation of a triangular mesh, minimizing
+per-face distortions.No loose vertices, edges and
+degenerated faces are allowed, as they lead to singular
+equation system.
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \references{
-  Amberg, B. 2011. Editing faces in videos, University of
-  Basel.
+Amberg, B. 2011. Editing faces in videos, University of
+Basel.
 }
 \seealso{
-  \code{\link{gaussMatch}}
+\code{\link{gaussMatch}}
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

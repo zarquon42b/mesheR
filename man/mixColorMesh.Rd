@@ -2,7 +2,7 @@
 \alias{mixColorMesh}
 \title{mix vertex colors of two registered meshes.}
 \usage{
-  mixColorMesh(mesh1, mesh2, alpha = 0.5)
+mixColorMesh(mesh1, mesh2, alpha = 0.5)
 }
 \arguments{
   \item{mesh1}{triangular mesh of class "mesh3d".}
@@ -13,11 +13,11 @@
   associated with mesh2.}
 }
 \value{
-  returns mesh1 with mixed vertex colors.
+returns mesh1 with mixed vertex colors.
 }
 \description{
-  mixColorMesh mixes the vertex colors of two registered
-  meshes (identical faces and corresponding vertices).
+mixColorMesh mixes the vertex colors of two registered
+meshes (identical faces and corresponding vertices).
 }
 \examples{
 require(rgl)
@@ -31,7 +31,7 @@ mixmesh <- mixColorMesh(bluemesh,redmesh)
 shade3d(mixmesh)
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \keyword{~kwd1}
 \keyword{~kwd2}

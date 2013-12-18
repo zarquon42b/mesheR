@@ -50,8 +50,8 @@
 #' @export icp
 icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"), silent=FALSE,mc.cores=1)
   {
-      mesh1 <- adnormals(mesh1)
-      mesh2 <- adnormals(mesh2)
+      mesh1 <- updateNormals(mesh1)
+      mesh2 <- updateNormals(mesh2)
       pro <- substring(pro[1],1L,1L)
       if (pro == "v") {
           project3d <- vcgClost

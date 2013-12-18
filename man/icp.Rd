@@ -2,11 +2,10 @@
 \alias{icp}
 \title{Iterative closest point matching between two triangular meshes.}
 \usage{
-  icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL,
-    lm2 = NULL, uprange = 0.9, maxdist = NULL,
-    minclost = 50, distinc = 0.5, rhotol = pi, k = 50,
-    reflection = FALSE, pro = c("morpho", "vcg"),
-    silent = FALSE, mc.cores = 1)
+icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
+  uprange = 0.9, maxdist = NULL, minclost = 50, distinc = 0.5,
+  rhotol = pi, k = 50, reflection = FALSE, pro = c("morpho", "vcg"),
+  silent = FALSE, mc.cores = 1)
 }
 \arguments{
   \item{mesh1}{object of class "mesh3d".}
@@ -64,16 +63,16 @@
   \code{closemeshKD} call.}
 }
 \value{
-  Returns the rotated mesh1.
+Returns the rotated mesh1.
 }
 \description{
-  performs rigid body transformations (and scaling if
-  requested) to map a reference mesh onto a target mesh
+performs rigid body transformations (and scaling if
+requested) to map a reference mesh onto a target mesh
 }
 \details{
-  the registration is done by minimising squared distances
-  between reference vertices and closest points on the
-  target surface (a.k.a. Procrustes registration)
+the registration is done by minimising squared distances
+between reference vertices and closest points on the target
+surface (a.k.a. Procrustes registration)
 }
 \examples{
 require(rgl)
@@ -85,15 +84,15 @@ shade3d(rotnose,col=2,alpha=0.7)
 shade3d(shortnose.mesh,col=3,alpha=0.7)
 }
 \author{
-  Stefan Schlager
+Stefan Schlager
 }
 \references{
-  Zhang Z. 1994. Iterative point matching for registration
-  of free-form curves and surfaces International Journal of
-  Computer Vision 13:119-152.
+Zhang Z. 1994. Iterative point matching for registration of
+free-form curves and surfaces International Journal of
+Computer Vision 13:119-152.
 }
 \seealso{
-  \code{\link{rotmesh.onto}}, \code{\link{rotonto}}
+\code{\link{rotmesh.onto}}, \code{\link{rotonto}}
 }
 \keyword{~kwd1}
 \keyword{~kwd2}
