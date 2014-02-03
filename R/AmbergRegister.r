@@ -41,7 +41,6 @@
 #' result in 3 icp iterations, condidering the closest 60\% of correspondences
 #' with normal deviation of pi/2 and include scaling.
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.
-#' @param cores integer: how many cores to use for closest point search
 #' @param silent logical: no verbosity
 #' @return 
 #' \item{mesh}{registered mesh}
@@ -140,7 +139,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                     mesh1 <- tmp$mesh
                 }
                 vert_old <- vert2points(tmp$mesh)
-                clost <- closemeshKD(tmp$mesh,mesh2, cores=cores,k=nn)
+                clost <- vcgClostKD(tmp$mesh,mesh2,k=nn)
                 verts1 <- vert2points(clost)
                 nc <- normcheck(clost,tmp$mesh)                        
                 

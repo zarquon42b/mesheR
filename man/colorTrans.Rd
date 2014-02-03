@@ -2,7 +2,7 @@
 \alias{colorTrans}
 \title{Transfers vertex colors between meshes.}
 \usage{
-colorTrans(mesh1, mesh2, tol = 1, cores = 1)
+colorTrans(mesh1, mesh2, tol = 1)
 }
 \arguments{
   \item{mesh1}{triangular mesh of class "mesh3d".}
@@ -11,9 +11,6 @@ colorTrans(mesh1, mesh2, tol = 1, cores = 1)
 
   \item{tol}{maximal distance of closest point included in
   color transfer.}
-
-  \item{cores}{maximum cores for \code{\link{closemeshKD}}
-  to use.}
 }
 \value{
 returns the mesh1 with transfered vertex colors.

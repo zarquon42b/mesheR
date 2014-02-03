@@ -86,9 +86,6 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   probed. The larger \code{nn} is , the more accurate the
   closest point search but also the more time consuming.}
 
-  \item{cores}{integer: how many cores to use for closest
-  point search}
-
   \item{silent}{logical: no verbosity}
 }
 \value{

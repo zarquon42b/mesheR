@@ -5,7 +5,7 @@
 icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
   uprange = 0.9, maxdist = NULL, minclost = 50, distinc = 0.5,
   rhotol = pi, k = 50, reflection = FALSE, pro = c("morpho", "vcg"),
-  silent = FALSE, mc.cores = 1)
+  silent = FALSE)
 }
 \arguments{
   \item{mesh1}{object of class "mesh3d".}
@@ -58,9 +58,6 @@ icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
   "morpho" is the stable but somewhat slower algorithm.}
 
   \item{silent}{logical: no verbosity}
-
-  \item{mc.cores}{integer: how many cores to use for
-  \code{closemeshKD} call.}
 }
 \value{
 Returns the rotated mesh1.
