@@ -23,7 +23,7 @@
 #' data(humface)
 #' lms <- matrix(c(17.6061 , 9.2072 , -6.9917 , 44.7959 , 37.1135 , 76.0469 , 3.7734 , 12.8234 , 81.3138 , 63.4207 , 47.5009 , 44.6468), 4, 3)
 #' #place markers of 5mm length
-#' placeDowels(lms, humface, rep(5, 4),output = FALSE)
+#' placeDowels(lms, humface, rep(5, 4))
 #' @seealso \code{\link{cylinder}}
 #' @importFrom rgl shade3d
 #' @export placeDowels
@@ -69,6 +69,6 @@ placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3, 
             }
         if (render) ## render mesh ##
             shade3d(mesh,col=meshcol)
-        if (output)
-            invisible(list(dowels=dowels, endpoints=endpoints))
+
+        invisible(list(dowels=dowels, endpoints=endpoints))
     }
