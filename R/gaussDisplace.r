@@ -213,8 +213,9 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 #' ### result won't be too good as the surfaces do stronly differ.
 #' match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=3,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
-#' 
-#' @export gaussMatch
+#' @importFrom Rvcg vcgClostKD
+#' @export
+#'
 #' @useDynLib mesheR
 gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,Amberg=NULL,silent=FALSE, ...)
     {
@@ -230,7 +231,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
         ## set projection function according to input request
         pro <- substring(pro[1],1L,1L)
         if (pro == "v") {
-            project3d <- vcgClost
+            project3d <- vcgClostKD
         } else if (pro == "m") {
             protmp <- function(x,y,sign=F) {
                 out <- closemeshKD(x,y,k=k0,sign=sign)

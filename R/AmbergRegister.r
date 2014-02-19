@@ -78,6 +78,7 @@
 #' meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
 #' # render original mesh as wireframe
 #' wire3d(humface)
+#' @importFrom Rvcg vcgClean
 #' @export AmbergRegister
 AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, cores=1, silent=FALSE)
     {
@@ -149,7 +150,10 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 bordergood <- 1
                 if (!border) 
                     bordgood <- as.logical(!meshbord$borderit[clost$faceptr])
-                good <- sort(which(as.logical(normgood*distgood*bordergood)))
+                #dupes <- !(as.logical(vcgClean(clost)$remvert))
+                dupes <- TRUE
+                good <- sort(which(as.logical(normgood*distgood*bordergood*dupes)))
+               
                         
 ### in case no good hit is found within the given distance we increase the distance by 1mm until valid references are found:
                 increase <- distinc
@@ -159,6 +163,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                     increase <- increase+distinc
                     cat(paste("distance increased to",dist+increase,"\n"))
                 }
+               
                 
                 ## update reference points
                 lmtmp1 <- verts0[good,]
