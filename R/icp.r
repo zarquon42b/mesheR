@@ -84,10 +84,10 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
           ## check distances of remaining points and select points
           if (is.null(maxdist)) {
               qud <- quantile(dists,probs=uprange)
-              good <- which(dists < qud)
+              good <- which(dists <= qud)
           } else { 
               qud <- maxdist
-              good <- which(dists < qud)
+              good <- which(dists <= qud)
               increase <- distinc
               while (length(good) < minclost) {
                   ## distgood <- as.logical(abs(clost$quality) <= (dist+increase))
