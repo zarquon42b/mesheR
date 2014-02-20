@@ -253,7 +253,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
         if (icp) {
             if (!silent)
                 cat("performing icp matching\n")
-            mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,uprange=uprange,rhotol=rhotol,iterations=icpiter,pro=pro,k=k0)
+            mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,uprange=uprange,rhotol=rhotol,iterations=icpiter,pro=pro,k=k0,silent=silent)
         }
         ## elastic matching starts
         if (!silent)
