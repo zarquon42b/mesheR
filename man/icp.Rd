@@ -4,7 +4,7 @@
 \usage{
 icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
   uprange = 0.9, maxdist = NULL, minclost = 50, distinc = 0.5,
-  rhotol = pi, k = 50, reflection = FALSE, pro = c("morpho", "vcg"),
+  rhotol = pi, k = 50, reflection = FALSE, pro = c("vcg", "morpho"),
   silent = FALSE)
 }
 \arguments{
@@ -45,17 +45,16 @@ icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
   neglected.}
 
   \item{k}{integer: number of closest triangles on target
-  that will be searched for hits. Only used when
-  pro="morpho".}
+  that will be searched for hits.}
 
   \item{reflection}{logical: allow reflection.}
 
   \item{pro}{character: algorithm for closest point search
   "morpho" calls closemeshKD from the package Morpho, while
-  vcg calls vcgClost from mesheR. If the region of the
-  targetmesh is much smaller than the region of the
-  reference, "vcg" can be really slow. Otherwise very fast.
-  "morpho" is the stable but somewhat slower algorithm.}
+  vcg calls vcgClostKD from Rvcg. If the tow meshes have
+  only little or no overlap, "vcg" can be really slow.
+  Otherwise very fast. "morpho" is the stable but somewhat
+  slower algorithm.}
 
   \item{silent}{logical: no verbosity}
 }

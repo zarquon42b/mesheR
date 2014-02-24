@@ -23,13 +23,11 @@
 #' between reference points and hit target points. Hit points above this
 #' threshold will be neglected.
 #' @param k integer: number of closest triangles on target that will be
-#' searched for hits. Only used when pro="morpho".
+#' searched for hits.
 #' @param reflection logical: allow reflection.
 #' @param pro character: algorithm for closest point search "morpho" calls
-#' closemeshKD from the package Morpho, while vcg calls vcgClost from mesheR.
-#' If the region of the targetmesh is much smaller than the region of the
-#' reference, "vcg" can be really slow. Otherwise very fast. "morpho" is the
-#' stable but somewhat slower algorithm.
+#' closemeshKD from the package Morpho, while vcg calls vcgClostKD from Rvcg.
+#' If the tow meshes have only little or no overlap, "vcg" can be really slow. Otherwise very fast. "morpho" is the stable but somewhat slower algorithm.
 #' @param silent logical: no verbosity
 #' @return Returns the rotated mesh1.
 #' @author Stefan Schlager
@@ -47,20 +45,15 @@
 #' shade3d(rotnose,col=2,alpha=0.7)
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("morpho","vcg"), silent=FALSE)
+icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE)
   {
       mesh1 <- updateNormals(mesh1)
       mesh2 <- updateNormals(mesh2)
       pro <- substring(pro[1],1L,1L)
       if (pro == "v") {
-          project3d <- vcgClost
+          project3d <- vcgClostKD
       } else if (pro == "m") {
-          tmpfun <- function(x,y,sign=F)
-              {
-                  out <- vcgClostKD(x,y,k=k,sign=sign)
-                  return(out)
-              }
-          project3d <- tmpfun
+          project3d <- closemeshKD
       }
       if (!is.null(lm1))## perform initial rough registration
           mesh1 <- rotmesh.onto(mesh1,lm1,lm2,scale=scale,reflection=reflection)$mesh
@@ -68,7 +61,7 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
       for( i in 1:iterations) {
           if (!silent)
               cat("*")
-          proMesh <- project3d(mesh1,mesh2,sign=F) ## project mesh1 onto mesh2
+          proMesh <- project3d(mesh1,mesh2,sign=F,k=k) ## project mesh1 onto mesh2
           x1 <- vert2points(mesh1)
           x2 <- vert2points(proMesh)
           dists <- abs(proMesh$quality)
