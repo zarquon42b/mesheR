@@ -185,7 +185,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' (independent of its orientation) and the distance vector between hit point
 #' and starting points exceeds this threshold, the displacement vector will be
 #' discarded. Reduces distortion especially at mesh borders.
-#' @param Amberg vector containing 2 arguments invoking a smooth Deformation using \code{\link{AmbergDeformSpam}}. Layout: Amgerg=c(lambda, k0)
+#' @param AmbergK a single integer or an integer vector vector containing the \code{k0}-value (normal slackness) for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
+#'  @param AmbergLambda as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
 #' @param silent logical suppress messages
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
@@ -217,8 +218,24 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,Amberg=NULL,silent=FALSE, ...)
+gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, ...)
     {
+        Amberg <- FALSE
+        ##setup variables
+        if (!is.null(AmbergK) && !is.null(AmbergLambda)) {
+            AmbergK <- round(AmbergK)# make sure k is integer - otherwise RAM overkill
+            if (length(AmbergK) == 1)
+                AmbergK <- rep(AmbergK,iterations)
+            else if (length(AmbergK) != iterations)
+                stop("AmbergK must be vector of length 'iterations'")
+            
+            if (length(AmbergLambda) == 1)
+                AmbergLambda <- rep(AmbergLambda,iterations)
+            else if (length(AmbergLambda) != iterations)
+                stop("AmbergLambda must be vector of length 'iterations'")
+            Amberg <- TRUE
+        }
+            
         ## clean input mesh
         if(length(unrefVertex(mesh1)) > 0 )
             mesh1 <- rmUnrefVertex(mesh1)
@@ -276,11 +293,11 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
             ## call the workhorse doing the displacement
             tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
             
-            if (!is.null(Amberg)) {#smooth deformation
+            if (Amberg) {#smooth deformation
                 tmpmesh <- mesh1
                 tmpmesh$vb[1:3,] <- t(tmp$addit)
                 tmpmesh <- updateNormals(mesh1)
-                mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=Amberg[1],k0=Amberg[2])$mesh
+                mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i])$mesh
             } else
                 mesh1$vb[1:3,] <- t(tmp$addit)
             mesh1 <- updateNormals(mesh1)

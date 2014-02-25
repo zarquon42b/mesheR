@@ -8,7 +8,8 @@ gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   icpiter = 3, uprange = 0.95, rhotol = 1, nh = NULL, toldist = 0,
   patch = NULL, repro = FALSE, cores = detectCores(), pro = c("morpho",
   "vcg"), k0 = 50, prometh = 1, angtol = NULL, border = FALSE,
-  horiz.disp = NULL, Amberg = NULL, silent = FALSE, ...)
+  horiz.disp = NULL, AmbergK = NULL, AmbergLambda = NULL,
+  silent = FALSE, ...)
 }
 \arguments{
   \item{mesh1}{An object of class mesh3d used as atlas mesh
@@ -116,9 +117,15 @@ gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   discarded. Reduces distortion especially at mesh
   borders.}
 
-  \item{Amberg}{vector containing 2 arguments invoking a
-  smooth Deformation using \code{\link{AmbergDeformSpam}}.
-  Layout: Amgerg=c(lambda, k0)}
+  \item{AmbergK}{a single integer or an integer vector
+  vector containing the \code{k0}-value (normal slackness)
+  for each iteration for a smooth Deformation using
+  \code{\link{AmbergDeformSpam}}.}
+
+  \item{AmbergLambda}{as single numeric value or a numeric
+  vector containing the \code{lambda}-value for each
+  iteration for a smooth Deformation using
+  \code{\link{AmbergDeformSpam}}.}
 
   \item{silent}{logical suppress messages}
 
