@@ -1,62 +1,85 @@
-restrict <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL)
-  {
+#' restrict a landmark config or mesh to probabilistic bounds from a sample of landmarks/vertices
+#'
+#' restrict a landmark config or mesh to probabilistic bounds from a sample of landmarks/vertices
+#' @param x matrix or triangular mesh of class "mesh3d"
+#' @param model object of class "nosymproc" (output from \code{\link{procSym}} run on a set of corresponding landmarks/vertices), serving as a priori knowledge about vertex/landmark distribution.
+#' @param sd standard deviation of PCscores defining boundaries
+#' @param maxVar percentage to be explained by the PCs used for the restriction. E.g. if you want to include PCs explaining 95\% of the variance, set maxVar=95.
+#' @param scale logical: if FALSE, configuration will be restricted within a probablistic hypercube, otherwise Chi-Square distribution will be used.
+#' @param nPC number of PCs used in restricting (overrides maxVar)
+#' @param probab if TRUE only the probability will be returned.
+#' @param reference integer vector specifiying those landmarks that should be set to meanshape
+#' @return
+#' restricted landmarks/mesh
+#'
+#' @importFrom Morpho rotonto rotreverse vert2points updateNormals
+#' @export
+restrict <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL) UseMethod("restrict")
+
+#' @rdname restrict
+#' @export
+restrict.mesh3d <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL) {
+    mesh <- x
+    x <- vert2points(mesh)
+    out <- restrict(x,model=model,sd=sd,maxVar=maxVar,scale=scale,nPC=nPC,probab=FALSE,reference=NULL)
+    mesh$vb[1:3,] <- t(out$restr.x)
+    mesh <- updateNormals(mesh)
+    return(mesh)
+}
+#' @rdname restrict
+#' @export
+restrict.matrix <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL) {
+   
     dims <- dim(x)
     mshape <- model$mshape
     PCs <- model$PCs
+    xorig <- x
+    xrot <- rotonto(model$mshape,x,scale=T)
+    x <- xrot$yrot
     restr.x <- NULL
-    if (is.null(nPC)) ### select first # of PCs below threshold of total variance
-      {
-        pc.used <-which(model$Variance[,3] < maxVar)
-      }
-    else
-      {
+    if (is.null(nPC)) { ### select first # of PCs below threshold of total variance
+        pc.used <- which(model$Variance[,3] < maxVar)
+    } else {
         pc.used <- 1:nPC ## use predefined # of PCs
-      }
+    }
     sds <-model$Variance[pc.used,1]
     prob <- TRUE
     sdl <- length(pc.used)
     xtmp <- x-mshape
-    if (!is.null(reference))
-      {       
+    if (!is.null(reference)) {       
         xtmp[reference,] <- 0 ## set reference=mshape
-      }
+    }
     
     xscore <- t(PCs[,pc.used])%*%as.vector(xtmp)
 
-    if (scale) ### use chisquare distribution of mahalanobis distance
-      {
+    if (scale) { ### use chisquare distribution of mahalanobis distance
         Mt <- qchisq(1-2*pnorm(sd,lower.tail=F),df=sdl)
         probs <- sum(xscore^2/sds)
-        if (probs > Mt )
-        {
-          prob=FALSE
-          sca <- Mt/probs
-          xscore <- xscore*sqrt(sca)
+        if (probs > Mt ) {
+            prob=FALSE
+            sca <- Mt/probs
+            xscore <- xscore*sqrt(sca)
         }
-      }
-    else ### use probability hypercuboid
-      {
+    } else { ### use probability hypercuboid
         sq.sds <- sqrt(sds)        
-        for (i in 1:length(xscore)) ## check if PCscores are below threshold
-          {
+        for (i in 1:length(xscore)) {## check if PCscores are below threshold
             signum <- sign(xscore[i])
-            if (abs(xscore[i]) > (sd*sq.sds[i]))
-              {
+            if (abs(xscore[i]) > (sd*sq.sds[i])) {
                 prob=FALSE
                 xscore[i] <- sd*sq.sds[i]*signum
-              }
-          }
-      }
-    if (!probab)
-      {
+            }
+        }
+    }
+    if (!probab) {
         restr.x <- matrix(PCs[,pc.used]%*%xscore,dims[1],dims[2])+mshape
-        if (!is.null(reference))
-          {
+        if (!is.null(reference)) {
             restr.x[reference,] <- x[reference,]
-          }
-      }
-    return(list(restr.x=restr.x,prob=prob))
-  }
+        }
+    }
+    restr.x <- rotreverse(restr.x,xrot)
+    return(restr.x)
+    #return(list(restr.x=restr.x,prob=prob))
+}
 
 warpRestrict <- function(x,which,tar.lm,model,tol=1e-5,sd=3,maxVar=95,scale=F,recurse=T,uniform=TRUE,iterations=NULL,nPC=NULL,stop.prob=TRUE,spline=TRUE,useReference=FALSE)
   {

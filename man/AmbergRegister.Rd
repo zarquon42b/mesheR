@@ -6,7 +6,8 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   iterations = 15, rho = pi/2, dist = 2, border = FALSE,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
   useiter = TRUE, minclost = 50, distinc = 1, scale = TRUE,
-  reflection = FALSE, icp = NULL, nn = 20, cores = 1, silent = FALSE)
+  reflection = FALSE, icp = NULL, nn = 20, cores = 1, silent = FALSE,
+  Bayes = NULL)
 }
 \arguments{
   \item{mesh1}{reference mesh: triangular mesh of class
@@ -87,6 +88,10 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   closest point search but also the more time consuming.}
 
   \item{silent}{logical: no verbosity}
+
+  \item{Bayes}{optional: object of class BayesDeform
+  created by createBayes to restrict based on a known
+  distribution}
 }
 \value{
 \item{mesh}{registered mesh} \item{meshrot }{mesh1, rotated

@@ -1,0 +1,51 @@
+\name{restrict}
+\alias{restrict}
+\alias{restrict.matrix}
+\alias{restrict.mesh3d}
+\title{restrict a landmark config or mesh to probabilistic bounds from a sample of landmarks/vertices}
+\usage{
+restrict(x, model, sd = 3, maxVar = 95, scale = FALSE, nPC = NULL,
+  probab = FALSE, reference = NULL)
+
+\method{restrict}{mesh3d}(x, model, sd = 3, maxVar = 95, scale = FALSE,
+  nPC = NULL, probab = FALSE, reference = NULL)
+
+\method{restrict}{matrix}(x, model, sd = 3, maxVar = 95, scale = FALSE,
+  nPC = NULL, probab = FALSE, reference = NULL)
+}
+\arguments{
+  \item{x}{matrix or triangular mesh of class "mesh3d"}
+
+  \item{model}{object of class "nosymproc" (output from
+  \code{\link{procSym}} run on a set of corresponding
+  landmarks/vertices), serving as a priori knowledge about
+  vertex/landmark distribution.}
+
+  \item{sd}{standard deviation of PCscores defining
+  boundaries}
+
+  \item{maxVar}{percentage to be explained by the PCs used
+  for the restriction. E.g. if you want to include PCs
+  explaining 95\% of the variance, set maxVar=95.}
+
+  \item{scale}{logical: if FALSE, configuration will be
+  restricted within a probablistic hypercube, otherwise
+  Chi-Square distribution will be used.}
+
+  \item{nPC}{number of PCs used in restricting (overrides
+  maxVar)}
+
+  \item{probab}{if TRUE only the probability will be
+  returned.}
+
+  \item{reference}{integer vector specifiying those
+  landmarks that should be set to meanshape}
+}
+\value{
+restricted landmarks/mesh
+}
+\description{
+restrict a landmark config or mesh to probabilistic bounds
+from a sample of landmarks/vertices
+}
+

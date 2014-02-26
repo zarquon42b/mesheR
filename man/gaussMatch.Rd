@@ -6,10 +6,10 @@ gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, icp = FALSE,
   icpiter = 3, uprange = 0.95, rhotol = 1, nh = NULL, toldist = 0,
-  patch = NULL, repro = FALSE, cores = detectCores(), pro = c("morpho",
-  "vcg"), k0 = 50, prometh = 1, angtol = NULL, border = FALSE,
-  horiz.disp = NULL, AmbergK = NULL, AmbergLambda = NULL,
-  silent = FALSE, ...)
+  patch = NULL, repro = FALSE, cores = parallel::detectCores(),
+  pro = c("morpho", "vcg"), k0 = 50, prometh = 1, angtol = NULL,
+  border = FALSE, horiz.disp = NULL, AmbergK = NULL,
+  AmbergLambda = NULL, silent = FALSE, Bayes = NULL, ...)
 }
 \arguments{
   \item{mesh1}{An object of class mesh3d used as atlas mesh
@@ -128,6 +128,10 @@ gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   \code{\link{AmbergDeformSpam}}.}
 
   \item{silent}{logical suppress messages}
+
+  \item{Bayes}{optional: object of class BayesDeform
+  created by createBayes to restrict based on a known
+  distribution}
 
   \item{\dots}{Further arguments passed to \code{nn2}.}
 }

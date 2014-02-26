@@ -42,6 +42,7 @@
 #' with normal deviation of pi/2 and include scaling.
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.
 #' @param silent logical: no verbosity
+#' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
 #' @return 
 #' \item{mesh}{registered mesh}
 #' \item{meshrot }{mesh1, rotated onto mesh2}
@@ -80,7 +81,7 @@
 #' wire3d(humface)
 #' @importFrom Rvcg vcgClean
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, cores=1, silent=FALSE)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, cores=1, silent=FALSE, Bayes=NULL)
     {
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
@@ -176,8 +177,15 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                                         #oo <- wire3d(tmp$mesh,col=count)
                 gc()
                 ## calculate error
+                if (!is.null(Bayes) && length(Bayes$sd) >= i) {
+                    x <- vert2points(tmp$mesh)
+                    x <- restrict(x,Bayes$model, sd=Bayes$sd[i],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar=Bayes$maxVar)$restr.x
+                    tmp$mesh$vb[1:3,] <- t(x)
+                    
+                }
                 if (smooth)
                     tmp$mesh <- vcgSmooth(tmp$mesh,iteration = smoothit,type=smoothtype)
+                
                 error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
                 time1 <- Sys.time()
                 if (!silent) {
