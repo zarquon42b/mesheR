@@ -22,14 +22,13 @@ restrict.mesh3d <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=F
     mesh <- x
     x <- vert2points(mesh)
     out <- restrict(x,model=model,sd=sd,maxVar=maxVar,scale=scale,nPC=nPC,probab=FALSE,reference=NULL)
-    mesh$vb[1:3,] <- t(out$restr.x)
+    mesh$vb[1:3,] <- t(out)
     mesh <- updateNormals(mesh)
     return(mesh)
 }
 #' @rdname restrict
 #' @export
-restrict.matrix <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL) {
-   
+restrict.matrix <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL) {   
     dims <- dim(x)
     mshape <- model$mshape
     PCs <- model$PCs
@@ -49,9 +48,8 @@ restrict.matrix <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=F
     if (!is.null(reference)) {       
         xtmp[reference,] <- 0 ## set reference=mshape
     }
-    
     xscore <- t(PCs[,pc.used])%*%as.vector(xtmp)
-
+    
     if (scale) { ### use chisquare distribution of mahalanobis distance
         Mt <- qchisq(1-2*pnorm(sd,lower.tail=F),df=sdl)
         probs <- sum(xscore^2/sds)
@@ -78,7 +76,7 @@ restrict.matrix <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=F
     }
     restr.x <- rotreverse(restr.x,xrot)
     return(restr.x)
-    #return(list(restr.x=restr.x,prob=prob))
+    ##return(list(restr.x=restr.x,prob=prob))
 }
 
 warpRestrict <- function(x,which,tar.lm,model,tol=1e-5,sd=3,maxVar=95,scale=F,recurse=T,uniform=TRUE,iterations=NULL,nPC=NULL,stop.prob=TRUE,spline=TRUE,useReference=FALSE)

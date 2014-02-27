@@ -7,7 +7,7 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
   useiter = TRUE, minclost = 50, distinc = 1, scale = TRUE,
   reflection = FALSE, icp = NULL, nn = 20, cores = 1, silent = FALSE,
-  Bayes = NULL)
+  Bayes = NULL, forceLM = FALSE)
 }
 \arguments{
   \item{mesh1}{reference mesh: triangular mesh of class
@@ -74,13 +74,13 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
 
   \item{icp}{vector of length 4. Passing parameters to
   \code{\link{icp}}, which is performed after intial
-  landmark based registration. The parameters are
-  icp[1]=iterations; icp[2]=rhotol; icp[3]=uprange, and
-  icp[4]=scale. If icp=NULL, no ICP-matching is performed.
-  E.g. icp=c(3,pi/2,0.6,TRUE) will result in 3 icp
-  iterations, condidering the closest 60\% of
-  correspondences with normal deviation of pi/2 and include
-  scaling.}
+  landmark based registration (scaling, rotation and
+  translation). The parameters are icp[1]=iterations;
+  icp[2]=rhotol; icp[3]=uprange, and icp[4]=scale. If
+  icp=NULL, no ICP-matching is performed.  E.g.
+  icp=c(3,pi/2,0.6,TRUE) will result in 3 icp iterations,
+  condidering the closest 60\% of correspondences with
+  normal deviation of pi/2 and include scaling.}
 
   \item{nn}{integer: closest barycenters. During search for
   closest points on target, the closest \code{nn} faces are
@@ -92,6 +92,10 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   \item{Bayes}{optional: object of class BayesDeform
   created by createBayes to restrict based on a known
   distribution}
+
+  \item{forceLM}{logical: if icp=TRUE landmark based
+  deformation will be applied after icp-based
+  transformation.}
 }
 \value{
 \item{mesh}{registered mesh} \item{meshrot }{mesh1, rotated

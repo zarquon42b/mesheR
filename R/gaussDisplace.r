@@ -306,7 +306,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
 
             if (!is.null(Bayes) && length(Bayes$sd) >= i) {
                 x <- vert2points(mesh1)
-                x <- restrict(x,Bayes$model, sd=Bayes$sd[i],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar = Bayes$maxVar)$restr.x
+                x <- restrict(x,Bayes$model, sd=Bayes$sd[i],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar = Bayes$maxVar)
                 mesh1$vb[1:3,] <- t(x)
 
             }

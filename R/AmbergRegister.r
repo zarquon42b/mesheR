@@ -35,7 +35,7 @@
 #' @param reflection logical: if TRUE, initial landmark based rigid registration
 #' allows reflections.
 #' @param icp vector of length 4. Passing parameters to \code{\link{icp}},
-#' which is performed after intial landmark based registration. The parameters
+#' which is performed after intial landmark based registration (scaling, rotation and translation). The parameters
 #' are icp[1]=iterations; icp[2]=rhotol; icp[3]=uprange, and icp[4]=scale. If
 #' icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,TRUE) will
 #' result in 3 icp iterations, condidering the closest 60\% of correspondences
@@ -43,6 +43,7 @@
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.
 #' @param silent logical: no verbosity
 #' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
+#' @param forceLM logical: if icp=TRUE landmark based deformation will be applied after icp-based transformation.
 #' @return 
 #' \item{mesh}{registered mesh}
 #' \item{meshrot }{mesh1, rotated onto mesh2}
@@ -79,9 +80,9 @@
 #' meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
 #' # render original mesh as wireframe
 #' wire3d(humface)
-#' @importFrom Rvcg vcgClean
+#' @importFrom Rvcg vcgClean vcgClost
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, cores=1, silent=FALSE, Bayes=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, cores=1, silent=FALSE, Bayes=NULL,forceLM=FALSE)
     {
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
@@ -102,12 +103,21 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         stopit <- FALSE
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
             if (!is.null(icp)) {##perform initial icp-matching
+                bary <- vcgClost(lm1,mesh1,barycentric = T)
                 meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp[1],rhotol=icp[2],uprange=icp[3],scale=icp[4],reflection=reflection, silent=silent)
                 tmp <- list()
                 tmp$mesh <- mesh1
-                if (!useiter)
+                if (!useiter && !forceLM)
                     tmp$S <- createS(mesh1)
-                verts0 <- vert2points(mesh1)
+                if (forceLM) {
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                    tmp <- AmbergDeformSpam(mesh1,lm1,lm2,k0=k[1],lambda=lambda[1])
+                    count <- count+1
+                    if (iterations == 1)
+                        stopit <- TRUE
+                    
+                }
+                
             } else {
                 mesh1rot <- rotmesh.onto(mesh1,lm1,lm2,scale=scale, reflection=reflection,adnormals=TRUE)
                 lm1 <- mesh1rot$yrot
@@ -179,7 +189,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 ## calculate error
                 if (!is.null(Bayes) && length(Bayes$sd) >= i) {
                     x <- vert2points(tmp$mesh)
-                    x <- restrict(x,Bayes$model, sd=Bayes$sd[i],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar=Bayes$maxVar)$restr.x
+                    x <- restrict(x,Bayes$model, sd=Bayes$sd[i],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar=Bayes$maxVar)
                     tmp$mesh$vb[1:3,] <- t(x)
                     
                 }
