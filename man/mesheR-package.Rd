@@ -9,7 +9,7 @@ Iteratively closest point matching, vertex selection, ...,
 }
 \details{
 \tabular{ll}{ Package: \tab mesheR\cr Type: \tab Package\cr
-Version: \tab 0.4.140203\cr Date: \tab 2014-02-03\cr
+Version: \tab 0.4.140228\cr Date: \tab 2014-02-28\cr
 License: \tab GPL\cr LazyLoad: \tab yes\cr }
 }
 \author{
