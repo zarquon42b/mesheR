@@ -37,6 +37,9 @@ warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=
     if (argc < 2)
             stop("at least two arguments needed")
 
+    npics <- nchar(as.character(argc*n))+1
+    ndec <- paste0("%s%0",npics,"d.png")
+
     if(!is.null(folder)) {
         if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") {
             folder<-paste(folder,"/",sep="")
@@ -102,7 +105,7 @@ warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=
             if (i ==0 && j == 1 && ask==TRUE)
                 readline("please select view and press return\n")
                                      
-            filename <- sprintf("%s%04d.png", movie, countbegin+i)
+            filename <- sprintf(ndec, movie, countbegin+i)
             rgl.snapshot(filename,fmt="png")
             rgl.pop("shapes",id=a)
         }
