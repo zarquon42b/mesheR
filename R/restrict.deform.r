@@ -12,7 +12,7 @@
 #' @return
 #' restricted landmarks/mesh
 #'
-#' @importFrom Morpho rotonto rotreverse vert2points updateNormals
+#' @importFrom Morpho rotonto rotreverse vert2points updateNormals cSize
 #' @export
 restrict <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL) UseMethod("restrict")
 
@@ -30,10 +30,18 @@ restrict.mesh3d <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=F
 #' @export
 restrict.matrix <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL) {   
     dims <- dim(x)
+    modAtt <- attributes(model)
+    CSinit <- modAtt$CSinit
+    rotscale <- modAtt$scale
     mshape <- model$mshape
     PCs <- model$PCs
     xorig <- x
-    xrot <- rotonto(model$mshape,x,scale=T)
+    if (CSinit) {
+        orsize <- cSize(x)
+        x <- x/orsize
+    }
+    
+    xrot <- rotonto(model$mshape,x,scale=rotscale)
     x <- xrot$yrot
     restr.x <- NULL
     if (is.null(nPC)) { ### select first # of PCs below threshold of total variance
@@ -51,12 +59,14 @@ restrict.matrix <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=F
     xscore <- t(PCs[,pc.used])%*%as.vector(xtmp)
     
     if (scale) { ### use chisquare distribution of mahalanobis distance
+        ##project into inverted eigenspace
         Mt <- qchisq(1-2*pnorm(sd,lower.tail=F),df=sdl)
-        probs <- sum(xscore^2/sds)
+        xscorePro <- xscore/sqrt(sds)
+        probs <- sum(xscorePro^2)
         if (probs > Mt ) {
             prob=FALSE
             sca <- Mt/probs
-            xscore <- xscore*sqrt(sca)
+            xscore <- xscorePro*sqrt(sca)*sqrt(sds)
         }
     } else { ### use probability hypercuboid
         sq.sds <- sqrt(sds)        
@@ -75,6 +85,9 @@ restrict.matrix <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=F
         }
     }
     restr.x <- rotreverse(restr.x,xrot)
+    if (CSinit) {
+        restr.x <- (restr.x/cSize(restr.x))*orsize
+    }
     return(restr.x)
     ##return(list(restr.x=restr.x,prob=prob))
 }
