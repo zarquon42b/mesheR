@@ -1,17 +1,15 @@
 \name{pPCAcond}
 \alias{pPCAcond}
-\alias{restrictMissing}
 \alias{setMod}
 \alias{setMod.pPCAcond}
 \title{calculate or modify a conditional PCA based on 3D-coordinates}
 \usage{
-pPCAcond(array, missingIndex, sigma = NULL, exVar = 1)
+pPCAcond(array, missingIndex, sigma = NULL, exVar = 1, refmesh = NULL,
+  scale = TRUE)
 
 setMod(procMod, sigma, exVar)
 
 \method{setMod}{pPCAcond}(procMod, sigma = NULL, exVar = 1)
-
-restrictMissing(x, model)
 }
 \arguments{
   \item{array}{array of dimensions k x 3 x n, where
@@ -30,7 +28,11 @@ restrictMissing(x, model)
   specifying the PCs to be included by their cumulative
   explained Variance}
 
-  \item{cores}{integer how many cores to use.}
+  \item{refmesh}{a triangular mesh, where the vertices
+  correspond to the coordinates in \code{array}}
+
+  \item{scale}{logical: allow scaling in Procrustes
+  fitting}
 }
 \value{
 return a probabilistic PCA model of class "procMod"
