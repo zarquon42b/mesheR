@@ -41,7 +41,6 @@ pPCAcond <- function(array, missingIndex, sigma=NULL, exVar=1,refmesh=NULL,scale
     procMod$scale <- scale
     procMod$mshape <- arrMean3(tmp1)
     procMod$missingIndex <- missingIndex
-    print(1)
     PCA <- prcomp(vecx(procMod$rotated,byrow = T))
     sel <- missingIndex*3
     sel <- sort(c(sel, sel-1, sel-2))
@@ -98,7 +97,7 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
     procMod$M <- M
     procMod$sigma <- sigma
     procMod$alphamean <- siginv*solve(M)%*%t(Wb)
-    print(model,Variance=FALSE)
+    print(procMod,Variance=FALSE)
     return(procMod)
 }
 
@@ -210,6 +209,7 @@ setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
     return(procMod)
 }
 
+#' @export
 restrictpPCA <- function(x,model,sdmax=2) {
     mshape <- model$mshape
     rotsb <- rotonto(mshape,x,scale=model$scale)
