@@ -26,7 +26,7 @@ writeh5.pPCA <- function(model,filename) {
     createH5Dataset(modgroup,"pcaVariance",pcaVariance)
     createH5Dataset(modgroup,"noiseVariance",noiseVariance)
     modinfo <- createH5Group(h5,"modelinfo")
-    createH5Dataset(modinfo,"scores",model$PCA$x[,usePC])
+    createH5Dataset(modinfo,"scores",t(model$PCA$x[,usePC]))
     representergroup <- createH5Group(h5,"representer")
     
     if (is.null(model$refmesh)) {
@@ -57,6 +57,8 @@ h5model.read <- function(filename) {
     model$PCA$sdev <- sqrt(Variance)
     model$sigma <- getH5Dataset(modgroup, "noiseVariance")[]
     model <- setMod(model,model$sigma,exVar=1)
+    modelinfogroup <- getH5Group(h5, "modelinfo")
+    model$PCA$x <- getH5Dataset(modelinfogroup,"scores")
     model$scale <- TRUE
     referencetype <- getH5Attribute(getH5Group(h5, "representer"), "datasetType")[]
     if (referencetype == "POLYGON_MESH"){
@@ -82,7 +84,7 @@ rh5model.read <- function(filename) {
     } else
         stop("you will need to install rhdf5 first (Bioconductor only)")
     } else {
-        require(rhdf5)
+        require(rhdf5,quietly = T)
     }
     h5 <- H5Fopen(filename)
     model <- list()
@@ -92,11 +94,13 @@ rh5model.read <- function(filename) {
    
     Variance <- as.vector(H5Dread(H5Dopen(modgroup,"pcaVariance"),compoundAsDataFrame=F))
     model$PCA <- list()
-    model$PCA$rotation <- as.matrix(H5Dread(H5Dopen(modgroup,"pcaBasis"),compoundAsDataFrame=F))
+    model$PCA$rotation <- t(as.matrix(H5Dread(H5Dopen(modgroup,"pcaBasis"),compoundAsDataFrame=F)))
     model$PCA$sdev <- sqrt(Variance)
     model$sigma <-  as.vector(H5Dread(H5Dopen(modgroup,"noiseVariance"),compoundAsDataFrame=F))
-   
+    modelinfogroup <-  H5Gopen(h5, "modelinfo")
+    model$PCA$x <- as.matrix(H5Dread(H5Dopen(modelinfogroup,"scores"),compoundAsDataFrame=F))
     model$scale <- TRUE
+    H5Gclose(modgroup)
     representergroup <-  H5Gopen(h5, "representer")
     referencetype <- as.character(H5Aread(H5Aopen(representergroup,"datasetType")))
     if (referencetype == "POLYGON_MESH"){
@@ -114,6 +118,8 @@ rh5model.read <- function(filename) {
     model$mshape <- matrix(mshape,length(mshape)/3,3,byrow = T)
         
     model <- setMod(model,model$sigma,exVar=1)
+    H5Fclose(h5)
+    gc()
     return(model)
     
 }

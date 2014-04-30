@@ -6,6 +6,7 @@
 \alias{predictPCAcond.matrix}
 \alias{predictPCAcond.mesh3d}
 \alias{predictpPCA}
+\alias{predictpPCA.matrix}
 \alias{setMod}
 \alias{setMod.pPCA}
 \alias{setMod.pPCAcond}
@@ -29,6 +30,8 @@ predictPCAcond(x, model, refmesh, sdmax)
 \method{predictPCAcond}{mesh3d}(x, model, refmesh = FALSE, sdmax)
 
 predictpPCA(x, model, refmesh = FALSE, sdmax = 2)
+
+\method{predictpPCA}{matrix}(x, model, refmesh = FALSE, sdmax = 2)
 }
 \arguments{
   \item{array}{array of dimensions k x 3 x n, where
