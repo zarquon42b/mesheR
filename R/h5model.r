@@ -50,11 +50,12 @@ h5model.read <- function(filename) {
     class(model) <- "pPCA"
     mshape <- getH5Dataset(getH5Group(h5, "model"), "mean")[]
     model$mshape <- matrix(mshape,length(mshape)/3,3,byrow = T)
+    modgroup <- getH5Group(h5, "model")
     Variance <- getH5Dataset(getH5Group(h5, "model"), "pcaVariance")[]
     model$PCA <- list()
     model$PCA$rotation <- getH5Dataset(getH5Group(h5, "model"), "pcaBasis")[]
     model$PCA$sdev <- sqrt(Variance)
-    model$sigma <- getH5Dataset(getH5Group(h5, "model"), "noiseVariance")[]
+    model$sigma <- getH5Dataset(modgroup, "noiseVariance")[]
     model <- setMod(model,model$sigma,exVar=1)
     model$scale <- TRUE
     referencetype <- getH5Attribute(getH5Group(h5, "representer"), "datasetType")[]
@@ -64,6 +65,55 @@ h5model.read <- function(filename) {
         refmesh$it <- getH5Dataset(getH5Group(h5, "representer"), "cells")[]+1
         model$refmesh <- refmesh
     }        
+    return(model)
+    
+}
+#' @export
+rh5model.read <- function(filename) {
+    IP <- as.data.frame(installed.packages(),stringsAsFactors = F)$Package
+
+    check <- "rhdf5" %in% IP
+    if (!check) {
+        ask <- readline("do you want to install missing package from Biconductor (internet required)? (y/n)\n")
+    if (ask == "y") {
+        source("http://bioconductor.org/biocLite.R")
+        biocLite("rhdf5")
+        require(rhdf5)
+    } else
+        stop("you will need to install rhdf5 first (Bioconductor only)")
+    } else {
+        require(rhdf5)
+    }
+    h5 <- H5Fopen(filename)
+    model <- list()
+    class(model) <- "pPCA"
+    modgroup <-  H5Gopen(h5, "model")
+    mshape <- H5Dread(H5Dopen(modgroup,"mean"))
+   
+    Variance <- as.vector(H5Dread(H5Dopen(modgroup,"pcaVariance"),compoundAsDataFrame=F))
+    model$PCA <- list()
+    model$PCA$rotation <- as.matrix(H5Dread(H5Dopen(modgroup,"pcaBasis"),compoundAsDataFrame=F))
+    model$PCA$sdev <- sqrt(Variance)
+    model$sigma <-  as.vector(H5Dread(H5Dopen(modgroup,"noiseVariance"),compoundAsDataFrame=F))
+   
+    model$scale <- TRUE
+    representergroup <-  H5Gopen(h5, "representer")
+    referencetype <- as.character(H5Aread(H5Aopen(representergroup,"datasetType")))
+    if (referencetype == "POLYGON_MESH"){
+        refmesh <- list(); class(refmesh) <- "mesh3d"
+        refmesh$vb <- rbind(t(H5Dread(H5Dopen(representergroup, "points"),compoundAsDataFrame=F)),1)
+        m <- ncol(refmesh$vb)-1
+        refmesh$it <- t(H5Dread(H5Dopen(representergroup, "cells"),compoundAsDataFrame=F)+1)
+        if (nrow(refmesh$it) == 2)
+            refmesh$it <- rbind(refmesh$it,refmesh$it[2,])
+        model$refmesh <- refmesh
+        k <- dim(refmesh$vb)
+    } else {
+        
+    }
+    model$mshape <- matrix(mshape,length(mshape)/3,3,byrow = T)
+        
+    model <- setMod(model,model$sigma,exVar=1)
     return(model)
     
 }
