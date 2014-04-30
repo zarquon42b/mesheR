@@ -86,40 +86,39 @@ rh5model.read <- function(filename) {
     } else {
         require(rhdf5,quietly = T)
     }
-    h5 <- H5Fopen(filename)
     model <- list()
     class(model) <- "pPCA"
-    modgroup <-  H5Gopen(h5, "model")
-    mshape <- H5Dread(H5Dopen(modgroup,"mean"))
-   
-    Variance <- as.vector(H5Dread(H5Dopen(modgroup,"pcaVariance"),compoundAsDataFrame=F))
+    ##read model
+    modread <- h5read(filename,"model",read.attributes = T)
+    mshape <- modread$mean
+    Variance <- as.vector(modread$pcaVariance)
     model$PCA <- list()
-    model$PCA$rotation <- t(as.matrix(H5Dread(H5Dopen(modgroup,"pcaBasis"),compoundAsDataFrame=F)))
+    model$PCA$rotation <- t(as.matrix(modread$pcaBasis))
     model$PCA$sdev <- sqrt(Variance)
-    model$sigma <-  as.vector(H5Dread(H5Dopen(modgroup,"noiseVariance"),compoundAsDataFrame=F))
-    modelinfogroup <-  H5Gopen(h5, "modelinfo")
-    model$PCA$x <- as.matrix(H5Dread(H5Dopen(modelinfogroup,"scores"),compoundAsDataFrame=F))
+    model$sigma <-  as.vector(modread$noiseVariance)
+    ## read  modelinfo
+    modelinfo <-  h5read(filename, "modelinfo")
+    model$PCA$x <- as.matrix(modelinfo$scores)
     model$scale <- TRUE
-    H5Gclose(modgroup)
-    representergroup <-  H5Gopen(h5, "representer")
-    referencetype <- as.character(H5Aread(H5Aopen(representergroup,"datasetType")))
+    ## get representer
+    representergroup <-  h5read(filename, "representer",read.attributes = T)
+    referencetype <- as.character(attributes(representergroup)$datasetType)
     if (referencetype == "POLYGON_MESH"){
         refmesh <- list(); class(refmesh) <- "mesh3d"
-        refmesh$vb <- rbind(t(H5Dread(H5Dopen(representergroup, "points"),compoundAsDataFrame=F)),1)
+        refmesh$vb <- rbind(t(representergroup$points),1)
         m <- ncol(refmesh$vb)-1
-        refmesh$it <- t(H5Dread(H5Dopen(representergroup, "cells"),compoundAsDataFrame=F)+1)
+        refmesh$it <- t(representergroup$cells)+1
         if (nrow(refmesh$it) == 2)
             refmesh$it <- rbind(refmesh$it,refmesh$it[2,])
         model$refmesh <- refmesh
         k <- dim(refmesh$vb)
-    } else {
+    } else {## to be filled with alternatives
         
     }
     model$mshape <- matrix(mshape,length(mshape)/3,3,byrow = T)
-        
     model <- setMod(model,model$sigma,exVar=1)
-    H5Fclose(h5)
     gc()
+    H5garbage_collect()
     return(model)
     
 }
