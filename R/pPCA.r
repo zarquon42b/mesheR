@@ -1,7 +1,8 @@
-#' calculate or modify a conditional PCA based on 3D-coordinates
+#' calculate or modify a probablistic PCA based on 3D-coordinates
 #'
-#' calculate or modify a conditional PCA based on 3D-coordinates
+#' calculate or modify a probablistic PCA based on 3D-coordinates
 #' 
+#' @encoding utf8
 #' @param array array of dimensions k x 3 x n, where k=number of coordinates and n=sample size.
 #' @param missingIndex integer vector: specifies which points are missing in the conditional model
 #' @param procMod object of class "procMod" as returned by pPCAcond or setMod
@@ -9,10 +10,12 @@
 #' @param exVar numeric value with \code{0 < exVar <= 1} specifying the PCs to be included by their cumulative explained Variance
 #' @param refmesh a triangular mesh, where the vertices correspond to the coordinates in \code{array}
 #' @param scale logical: allow scaling in Procrustes fitting
-#' 
-#' @return return a probabilistic PCA model of class "procMod"
-#' 
-#'
+#' @param x matrix or triangular mesh of class "mesh3d" to be predicted.
+#' @param sdmax maximum allowed standard deviation (per Principal axis) within the model space. Defines the probabilistic boundaries.
+#' @param model probabilistic model of class "pPCA" or "pPCAcond"
+#' @return \code{pPCA} and \code{pPCAcond} return a probabilistic PCA model of class "pPCA" or "pPCAcond" respectively. 
+#' \code{predictPCA} and \code{predictPCAcond} select the most probable shape within a given model (within defined boundaries),
+#' \code{setMod} is used to modify existing models without recomputing Procrustes registration and subsequent PCA.
 #' @examples
 #' require(Morpho)
 #' data(boneData)
@@ -21,10 +24,32 @@
 #' model1 <- setMod(model, sigma=1, exVar=0.8)
 #' 
 #'
-#'
-#' @importFrom Morpho ProcGPA rotonmat arrMean3
+#' @references
+#' \enc{Lüthi}{Luethi} M, Albrecht T, Vetter T. 2009. Probabilistic modeling and visualization of the flexibility in morphable models. In: Mathematics of Surfaces XIII. Springer. p 251-264
+#' 
+#' @importFrom Morpho ProcGPA rotonmat arrMean3 vecx
 #' @importFrom parallel mclapply detectCores
-#' @rdname pPCAcond
+#' @importFrom Rvcg vcgUpdateNormals
+#' @rdname pPCA
+#' @export
+pPCA <- function(array, sigma=NULL,exVar=1,scale=TRUE,refmesh=NULL) {
+    k <- dim(array)[1]
+    procMod <- ProcGPA(array,scale=scale,CSinit=F,reflection=F)
+    PCA <- prcomp(vecx(procMod$rotated,byrow = T))
+    sds <- PCA$sdev^2
+    good <- which(sds > 1e-19)
+    sds <- sds[good]
+    PCA$rotation <- PCA$rotation[,good]
+    PCA$sdev <- PCA$sdev[good]
+    procMod$PCA <- PCA
+    procMod$scale <- scale
+    class(procMod) <- "pPCA"
+    procMod$refmesh <- refmesh
+    procMod <- setMod(procMod,sigma=sigma,exVar=exVar)
+    return(procMod)
+
+}
+#' @rdname pPCA
 #' @export
 pPCAcond <- function(array, missingIndex, sigma=NULL, exVar=1,refmesh=NULL,scale=TRUE) {
     k <- dim(array)[1]
@@ -56,14 +81,48 @@ pPCAcond <- function(array, missingIndex, sigma=NULL, exVar=1,refmesh=NULL,scale
     procMod$refmesh <- refmesh
     return(procMod)
 }
-#' @rdname pPCAcond
+#' @rdname pPCA
 #' @export
 setMod <- function(procMod, sigma, exVar)UseMethod("setMod")
 
-#' @rdname pPCAcond
+#' #' @rdname pPCA
+#' @export
+setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
+    k <- dim(procMod$mshape)[1]
+    PCA <- procMod$PCA
+    sds <- PCA$sdev^2
+    sel <- procMod$sel
+    sdsum <- sum(sds)
+    sdVar <- sds/sdsum
+    sdCum <- cumsum(sdVar)
+    usePC <- which(sdCum <= exVar)
+    Variance <- data.frame(eigenvalue=sds,exVar=sdVar, cumVar=sdCum)
+    procMod$Variance <- Variance
+    procMod$exVar <- exVar
+    if (is.null(sigma))
+        sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
+
+    if (sigma == 0)
+        siginv <- 1e13
+    else
+        siginv <- sigma^-2
+
+    sigest <- (sds - sigma^2)
+    sigest <- sigest[which(sigest > 0)]
+    usePC <- 1:min(length(usePC),length(sigest))
+    procMod$usePC <- usePC
+    procMod$sigma <- sigma
+    W <- t(t(PCA$rotation[,usePC])*sqrt(sigest[usePC]))
+    Win <- (t(PCA$rotation[,usePC])*(1/sqrt(sigest[usePC])))
+    procMod$W <- W
+    procMod$Win <- Win
+    return(procMod)
+}
+
+#' @rdname pPCA
 #' @export
 setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
-    k <- dim(procMod$rotated)[1]
+    k <- dim(procMod$mshape)[1]
     PCA <- procMod$PCA
     sds <- PCA$sdev^2
     sel <- procMod$sel
@@ -102,7 +161,7 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
 }
 
 #' @export
-print.pPCAcond <- function(x, digits = getOption("digits"), Variance=TRUE){
+print.pPCAcond <- function(x, digits = getOption("digits"), Variance=TRUE,...){
     cat(paste("   sigma =",x$sigma,"\n"))
     cat(paste("   exVar =",x$exVar,"\n\n"))
     cat(paste(" first",length(x$usePC),"of",ncol(x$PCA$rotation),"PCs used\n"))
@@ -112,7 +171,7 @@ print.pPCAcond <- function(x, digits = getOption("digits"), Variance=TRUE){
     }
 }
 #' @export
-print.pPCA <- function(x, digits = getOption("digits"), Variance=TRUE){
+print.pPCA <- function(x, digits = getOption("digits"), Variance=TRUE,...){
     cat(paste("   sigma =",x$sigma,"\n"))
     cat(paste("   exVar =",x$exVar,"\n\n"))
     cat(paste(" first",length(x$usePC),"of",ncol(x$PCA$rotation),"PCs used\n"))
@@ -121,10 +180,13 @@ print.pPCA <- function(x, digits = getOption("digits"), Variance=TRUE){
         print(x$Variance)
     }
 }
+#' @rdname pPCA
 #' @export
-restrictMissing <- function(x, model, refmesh,sdmax) UseMethod("restrictMissing")
+predictPCAcond <- function(x, model, refmesh,sdmax) UseMethod("restrictMissing")
 
-restrictMissing.matrix <- function(x, model,refmesh=FALSE,sdmax) {
+#' #' @rdname pPCA
+#' @export
+predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax) {
     
     mshape <- model$mshape
     missingIndex <- model$missingIndex
@@ -139,10 +201,7 @@ restrictMissing.matrix <- function(x, model,refmesh=FALSE,sdmax) {
         alpha[outlier] <- sdmax
         alpha <- alpha*signalpha
     }
-    
-  
-    
-    #as.vector(W[,good]%*%alpha)
+    ##as.vector(W[,good]%*%alpha)
     estim <- t(as.vector(model$W%*%alpha)+t(mshape))
     estim <- rotreverse(estim,rotsb)
     if (!is.null(model$refmesh) && refmesh) {
@@ -154,63 +213,23 @@ restrictMissing.matrix <- function(x, model,refmesh=FALSE,sdmax) {
     
     return(estim)
 }
-#restrictMissing.mesh3d <- function(x,model)
-#    mat <- t(x$vb[1:3,])
-#    estim <- restrictMissing(mat,model)
-    
 
+#' @rdname pPCA
 #' @export
-pPCA <- function(array, sigma=NULL,exVar=1,scale=TRUE) {
-    k <- dim(array)[1]
-    procMod <- ProcGPA(array,scale=scale,CSinit=F,reflection=F)
-    PCA <- prcomp(vecx(procMod$rotated,byrow = T))
-    sds <- PCA$sdev^2
-    good <- which(sds > 1e-19)
-    sds <- sds[good]
-    PCA$rotation <- PCA$rotation[,good]
-    PCA$sdev <- PCA$sdev[good]
-    procMod$PCA <- PCA
-    procMod$scale <- scale
-    class(procMod) <- "pPCA"
-    procMod <- setMod(procMod,sigma=sigma,exVar=exVar)
-    return(procMod)
-
-}
-#' @export
-setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
-    k <- dim(procMod$rotated)[1]
-    PCA <- procMod$PCA
-    sds <- PCA$sdev^2
-    sel <- procMod$sel
-    sdsum <- sum(sds)
-    sdVar <- sds/sdsum
-    sdCum <- cumsum(sdVar)
-    usePC <- which(sdCum <= exVar)
-    Variance <- data.frame(eigenvalue=sds,exVar=sdVar, cumVar=sdCum)
-    procMod$Variance <- Variance
-    procMod$exVar <- exVar
-    if (is.null(sigma))
-        sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
-
-    if (sigma == 0)
-        siginv <- 1e13
-    else
-        siginv <- sigma^-2
-
-    sigest <- (sds - sigma^2)
-    sigest <- sigest[which(sigest > 0)]
-    usePC <- 1:min(length(usePC),length(sigest))
-    procMod$usePC <- usePC
-    procMod$sigma <- sigma
-    W <- t(t(PCA$rotation[,usePC])*sqrt(sigest[usePC]))
-    Win <- (t(PCA$rotation[,usePC])*(1/sqrt(sigest[usePC])))
-    procMod$W <- W
-    procMod$Win <- Win
-    return(procMod)
+predictPCAcond.mesh3d <- function(x,model,refmesh=FALSE,sdmax) {
+    mat <- t(x$vb[1:3,])
+    estim <- predictPCAcond(x=mat,model=model,refmesh=refmesh,sdmax=sdmax)
+    return(estim)
 }
 
+
+#' @rdname pPCA
 #' @export
-restrictpPCA <- function(x,model,sdmax=2) {
+predictpPCA <- function(x,model,refmesh=FALSE,sdmax=2)UseMethod("predictpPCA")
+
+#' @rdname pPCA
+#' @export
+predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax=2) {
     mshape <- model$mshape
     rotsb <- rotonto(mshape,x,scale=model$scale)
     sb <- rotsb$yrot
@@ -220,13 +239,21 @@ restrictpPCA <- function(x,model,sdmax=2) {
     signalpha <- sign(alpha)
     alpha <- abs(alpha)
     outlier <- which(alpha > sdmax)
-    alpha[outlier] <- sdmax
-    
+    alpha[outlier] <- sdmax    
     alpha <- alpha*signalpha
     
-    res <- t(as.vector(model$W%*%alpha)+t(mshape))
-    res <- rotreverse(res,rotsb)
-    #res <- t(as.vector(W%*%t(W)%*%as.vector(t(sb)))+t(mshape))
-    return(list(res=res,alpha=alpha))
+    estim <- t(as.vector(model$W%*%alpha)+t(mshape))
+    estim <- rotreverse(estim,rotsb)
+     if (!is.null(model$refmesh) && refmesh) {
+        estimmesh <- model$refmesh
+        estimmesh$vb[1:3,] <- t(estim)
+        estimmesh <- vcgUpdateNormals(estimmesh)
+        estim <- estimmesh
+    }
+    return(estim)
 }
-    
+predictpPCA.mesh3d <- function(x,model,refmesh=FALSE,sdmax=2) {
+    mat <- t(x$vb[1:3,])
+    estim <- predictPCA(x=mat,model=model,refmesh=refmesh,sdmax=sdmax)
+    return(estim)
+}

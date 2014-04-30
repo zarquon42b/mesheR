@@ -31,7 +31,7 @@ rmInternals <- function(mesh,mindist=NULL,explode=FALSE,center=NULL)
         mesh$normals[1:3,] <- apply(mesh$normals[1:3,],2,function(x){x <- x/(sqrt(sum(x^2)))})
       }
     meshoff <- meshOffset(mesh,0.005)
-    check <- vcgIntersect(meshoff,mesh)
+    check <- vcgRaySearch(meshoff,mesh)
     if (is.null(mindist))
       intern <- which(as.logical(check$quality))
     else

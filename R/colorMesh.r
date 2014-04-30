@@ -8,6 +8,7 @@
 #' mesh with material adequately set.
 #'
 #' @examples
+#' require(Rvcg)
 #' data(humface)
 #' humcol <- colorMesh(humface, "red")
 #' @export colorMesh

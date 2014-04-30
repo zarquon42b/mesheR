@@ -16,6 +16,7 @@ mesh with material adequately set.
 Assign a color to a mesh globally
 }
 \examples{
+require(Rvcg)
 data(humface)
 humcol <- colorMesh(humface, "red")
 }

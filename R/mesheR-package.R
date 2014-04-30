@@ -5,8 +5,8 @@
 #' \tabular{ll}{
 #' Package: \tab mesheR\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.4.140228\cr
-#' Date: \tab 2014-02-28\cr
+#' Version: \tab 0.4.140430\cr
+#' Date: \tab 2014-04-30\cr
 #' License: \tab GPL\cr
 #' LazyLoad: \tab yes\cr }
 #' 
@@ -22,6 +22,7 @@
 #' @importFrom Morpho angle.calc closemeshKD conv2backf facenormals file2mesh mcNNindex meshcube meshDist meshres projRead rmUnrefVertex rmVertex rotmesh.onto rotonmat rotonto tanplan tps3d unrefVertex updateNormals vert2points warp.mesh
 #' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgRaySearch vcgNonBorderEdge vcgSmooth vcgClostKD
 #' @importFrom parallel detectCores mclapply
+#' @import h5r
 #' 
 
 NULL
