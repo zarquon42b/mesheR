@@ -16,7 +16,7 @@ Imports:
     Matrix,
     rgl(>= 0.93.963),
     spam,
-    h5r
+    rhdf5
 License: GPL-2
 Copyright: see COPYRIGHTS file
 LazyLoad: yes
