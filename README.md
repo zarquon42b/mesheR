@@ -8,7 +8,8 @@ __mesheR__ is an R-package providing methods for mesh manipulations in R. Its ma
      1. Make sure, you already have [Morpho](http://sourceforge.net/p/morpho-rpackage/wiki/Installation_Morpho/) and [Rvcg](http://sourceforge.net/p/morpho-rpackage/wiki/Installation_Rvcg/) installed.
      2. install additional dependencies from CRAN (type the following commands into your R terminal):: 
                
-               install.packages(c("spam","colorspace")
+               setRepositories(ind=1:2)
+               install.packages(c("spam","colorspace","rhdf5"))
 
 
    1. Download the version suitable for your OS Either the compiled package (for Windows and OS X) or the source tarball (Linux) from [here](https://sourceforge.net/projects/morpho-rpackage/files/mesheR/).
@@ -35,6 +36,7 @@ During installation of *Rtools* make sure to install the *toolchain*, and to sel
 
 
 3. In R run the command:
-       
-        require(devtools)
-        install_url("https://github.com/zarquon42b/mesheR/archive/master.zip")
+       					
+          require(devtools)
+			 setRepositories(ind=1:2)
+          install_github("zarquon42b/mesheR")
