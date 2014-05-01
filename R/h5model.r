@@ -110,8 +110,6 @@ h5model.read <- function(filename) {
     }
     model$mshape <- matrix(mshape,length(mshape)/3,3,byrow = T)
     model <- setMod(model,model$sigma,exVar=1)
-    gc()
-    H5garbage_collect()
     return(model)
     
 }
