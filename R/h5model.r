@@ -10,8 +10,8 @@
 #' @export
 writeh5 <- function(model,filename)UseMethod("writeh5")
 
-#' @export
-writeh5.pPCA <- function(model,filename) {
+# export
+oowriteh5.pPCA <- function(model,filename) {
     if (file.exists(filename))
         file.remove(filename)
     mean <- as.vector(t(model$mshape))
@@ -44,7 +44,7 @@ writeh5.pPCA <- function(model,filename) {
     }
         
 }
-h5model.read <- function(filename) {
+oh5model.read <- function(filename) {
     h5 <- H5File(filename)
     model <- list()
     class(model) <- "pPCA"
@@ -70,11 +70,12 @@ h5model.read <- function(filename) {
     return(model)
     
 }
-#' @export
-rh5model.read <- function(filename) {
-    IP <- as.data.frame(installed.packages(),stringsAsFactors = F)$Package
 
-    check <- "rhdf5" %in% IP
+checkrhdf5 <- function() {
+   # IP <- as.data.frame(installed.packages(),stringsAsFactors = F)$Package
+    
+    #check <- "rhdf5" %in% IP
+    check <- require(rhdf5,quietly=T)
     if (!check) {
         ask <- readline("do you want to install missing package from Biconductor (internet required)? (y/n)\n")
     if (ask == "y") {
@@ -86,6 +87,13 @@ rh5model.read <- function(filename) {
     } else {
         require(rhdf5,quietly = T)
     }
+ }
+#' read statistical model as defined by statismo
+#'
+#' read statistical model as defined by statismo
+#' @export
+h5model.read <- function(filename) {
+    checkrhdf5()
     model <- list()
     class(model) <- "pPCA"
     ##read model
@@ -122,3 +130,72 @@ rh5model.read <- function(filename) {
     return(model)
     
 }
+#' @export
+writeh5.pPCA <- function(model, filename) {
+    checkrhdf5()
+    if (file.exists(filename))
+        file.remove(filename)
+    h5createFile(filename)
+    modgroup <- list()
+    h5write(modgroup,filename,"model")
+    mean <- as.vector(t(model$mshape))
+    usePC <- model$usePC
+    pcaBasis <- t(model$PCA$rotation[,usePC])
+    pcaVariance <- as.vector(model$Variance[usePC,1])
+    noiseVariance <- model$sigma
+    h5createDataset(filename,"model/mean",dims=length(mean),H5type = "H5T_NATIVE_FLOAT")
+    h5write(mean,filename,"model/mean")
+
+    h5createDataset(filename,"model/pcaBasis",dims=dim(pcaBasis),H5type = "H5T_NATIVE_FLOAT")
+    h5write(pcaBasis,filename,"model/pcaBasis")
+    
+    h5createDataset(filename,"model/noiseVariance",dims=1,H5type = "H5T_NATIVE_FLOAT")
+    h5write(noiseVariance,filename,"model/noiseVariance")
+    h5createDataset(filename,"model/pcaVariance",dims=length(pcaVariance),H5type = "H5T_NATIVE_FLOAT")
+    h5write(pcaVariance,filename,"model/pcaVariance")
+    
+    modinfo <- list()
+    h5write(modinfo,filename,"modelinfo")
+    h5createDataset(filename,"modelinfo/scores",dims=dim(model$PCA$x),H5type = "H5T_NATIVE_FLOAT")
+      
+    h5write(model$PCA$x,filename,"modelinfo/scores")
+
+    representer <- list()
+    
+    if (is.null(model$refmesh)) {
+        attributes(representer) <- list(datasetType="POINT_SET",name="pointRepresenter")
+        h5write(representer,filename,"representer")
+        points <- model$mshape
+        h5createDataset(filename,"representer/points",dims=dim(points),H5type = "H5T_NATIVE_FLOAT")
+        h5write(points,filename,"representer/points")
+        fid <- H5Fopen(filename)
+        gid <- H5Gopen(fid,"representer")
+        H5Gcreate(gid,"pointData")
+        H5Gclose(gid)
+        H5close()
+        
+    } else {
+        attributes(representer) <- list(datasetType="POLYGON_MESH",name="meshRepresenter")
+        h5write(representer,filename,"representer",write.attributes=T)
+        points <- t(model$refmesh$vb[1:3,])
+        cells <- t(model$refmesh$it-1)
+        storage.mode(cells) <- "integer"
+        h5createDataset(filename,"representer/points",dims=dim(points),H5type = "H5T_NATIVE_FLOAT")
+        h5write(points,filename,"representer/points")
+        h5createDataset(filename,"representer/cells",dims=dim(cells),storage.mode="integer")
+        h5write(cells,filename,"representer/cells")
+        fid <- H5Fopen(filename)
+        gid <- H5Gopen(fid,"representer")
+        H5Gcreate(gid,"pointData")
+        H5Gcreate(gid,"cellData")
+        H5Gclose(gid)
+        H5close()
+    }
+
+    }
+
+
+
+
+
+
