@@ -7,6 +7,8 @@
 \alias{predictPCAcond.mesh3d}
 \alias{predictpPCA}
 \alias{predictpPCA.matrix}
+\alias{predictpPCA.mesh3d}
+\alias{predictpPCA.numeric}
 \alias{setMod}
 \alias{setMod.pPCA}
 \alias{setMod.pPCAcond}
@@ -23,15 +25,23 @@ setMod(procMod, sigma, exVar)
 
 \method{setMod}{pPCAcond}(procMod, sigma = NULL, exVar = 1)
 
-predictPCAcond(x, model, refmesh, sdmax)
+predictPCAcond(x, model, refmesh, sdmax, ...)
 
-\method{predictPCAcond}{matrix}(x, model, refmesh = FALSE, sdmax)
+\method{predictPCAcond}{matrix}(x, model, refmesh = FALSE, sdmax,
+  origSpace = TRUE, ...)
 
-\method{predictPCAcond}{mesh3d}(x, model, refmesh = FALSE, sdmax)
+\method{predictPCAcond}{mesh3d}(x, model, refmesh = FALSE, sdmax,
+  origSpace = TRUE, ...)
 
-predictpPCA(x, model, refmesh = FALSE, sdmax = 2)
+predictpPCA(x, model, refmesh = FALSE, ...)
 
-\method{predictpPCA}{matrix}(x, model, refmesh = FALSE, sdmax = 2)
+\method{predictpPCA}{matrix}(x, model, refmesh = FALSE, sdmax = 2,
+  origSpace = TRUE, ...)
+
+\method{predictpPCA}{mesh3d}(x, model, refmesh = FALSE, sdmax = 2,
+  origSpace = TRUE, ...)
+
+\method{predictpPCA}{numeric}(x, model, refmesh = FALSE, ...)
 }
 \arguments{
   \item{array}{array of dimensions k x 3 x n, where
@@ -56,12 +66,16 @@ predictpPCA(x, model, refmesh = FALSE, sdmax = 2)
   \item{scale}{logical: allow scaling in Procrustes
   fitting}
 
-  \item{x}{matrix or triangular mesh of class "mesh3d" to
+  \item{x}{vector of deviation in standard deviations,
+  coordinate matrix or triangular mesh of class "mesh3d" to
   be predicted.}
 
   \item{sdmax}{maximum allowed standard deviation (per
   Principal axis) within the model space. Defines the
   probabilistic boundaries.}
+
+  \item{origSpace}{logical: rotate the estimation back into
+  the original coordinate system.}
 
   \item{model}{probabilistic model of class "pPCA" or
   "pPCAcond"}

@@ -1,6 +1,8 @@
 S3method(predictPCAcond,matrix)
 S3method(predictPCAcond,mesh3d)
 S3method(predictpPCA,matrix)
+S3method(predictpPCA,mesh3d)
+S3method(predictpPCA,numeric)
 S3method(print,pPCA)
 S3method(print,pPCAcond)
 S3method(restrict,matrix)
