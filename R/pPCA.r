@@ -302,9 +302,15 @@ cond2pPCA <- function(cpPCA, newMean) {
     sdev <- Re(eigM$values)
     good <- which(sdev > 1e-13)
     sdev <- sdev[good]
+    procMod$usePC <- good
     procMod$PCA$sdev <- sqrt(sdev)
     newW <- procMod$W%*%Re(eigM$vectors[,good])
-    procMod$W <- newW
+    procMod$W <- t(t(newW)*sdev)
+    procMod$PCA$rotation <- newW
     class(procMod) <- "pPCA"
+    allNames <- names(procMod)
+    rem <- which(allNames %in% c("M","Minv","Wb","WbtWb","missingIndex","sel","alphamean"))
+    procMod[rem] <- NULL
+    procMod <- setMod(procMod,sigma=0,exVar=1)
     return(procMod)
 }
