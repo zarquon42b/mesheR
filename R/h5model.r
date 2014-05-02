@@ -73,6 +73,14 @@ writeh5.pPCA <- function(model, filename) {
         H5Gclose(gid)
         H5close()
     }
+    ## write version 0.9
+    version <- list()
+    h5write(version,filename,"version")
+    h5createDataset(filename,"version/majorVersion",dims=1,storage.mode="integer")
+    h5write(0,filename,"version/majorVersion")
+    h5createDataset(filename,"version/minorVersion",dims=1,storage.mode="integer")
+    h5write(9,filename,"version/minorVersion")
+    
 }
 
 #' @rdname h5
