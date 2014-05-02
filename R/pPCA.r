@@ -13,6 +13,7 @@
 #' @param x vector of deviation in standard deviations, coordinate matrix or triangular mesh of class "mesh3d" to be predicted.
 #' @param sdmax maximum allowed standard deviation (per Principal axis) within the model space. Defines the probabilistic boundaries.
 #' @param origSpace logical: rotate the estimation back into the original coordinate system.
+#' @param pPCA logical: if TRUE, a constrained pPCA model is returned.
 #' @param model probabilistic model of class "pPCA" or "pPCAcond"
 #' @return \code{pPCA} and \code{pPCAcond} return a probabilistic PCA model of class "pPCA" or "pPCAcond" respectively. 
 #' \code{predictPCA} and \code{predictPCAcond} select the most probable shape within a given model (within defined boundaries),
@@ -186,11 +187,11 @@ print.pPCA <- function(x, digits = getOption("digits"), Variance=TRUE,...){
 }
 #' @rdname pPCA
 #' @export
-predictPCAcond <- function(x, model, refmesh,sdmax,...) UseMethod("predictPCAcond")
+predictPCAcond <- function(x, model, refmesh,sdmax,pPCA=FALSE,...) UseMethod("predictPCAcond")
 
 #' #' @rdname pPCA
 #' @export
-predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,...) {
+predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,pPCA=FALSE,...) {
     mshape <- model$mshape
     missingIndex <- model$missingIndex
     rotsb <- rotonto(mshape[-missingIndex,],x,scale=model$scale)
@@ -206,22 +207,27 @@ predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,..
     }
     ##as.vector(W[,good]%*%alpha)
     estim <- t(as.vector(model$W%*%alpha)+t(mshape))
+    if (pPCA)
+        procMod <- cond2pPCA(model,estim)
+
     if (origSpace)
         estim <- rotreverse(estim,rotsb)
-
+    
     if (!is.null(model$refmesh) && class(model$refmesh) == "mesh3d" && refmesh) {
         estimmesh <- model$refmesh
         estimmesh$vb[1:3,] <- t(estim)
         estimmesh <- vcgUpdateNormals(estimmesh)
         estim <- estimmesh
     }
-    
-    return(estim)
+    if (pPCA)
+        return(list(estim=estim,pPCA=procMod))
+    else
+        return(estim)
 }
 
 #' @rdname pPCA
 #' @export
-predictPCAcond.mesh3d <- function(x,model,refmesh=FALSE,sdmax, origSpace=TRUE,...) {
+predictPCAcond.mesh3d <- function(x,model,refmesh=FALSE,sdmax, origSpace=TRUE,pPCA=FALSE,...) {
     mat <- t(x$vb[1:3,])
     estim <- predictPCAcond(x=mat,model=model,refmesh=refmesh,sdmax=sdmax,origSpace=origSpace)
     return(estim)

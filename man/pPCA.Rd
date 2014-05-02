@@ -25,13 +25,13 @@ setMod(procMod, sigma, exVar)
 
 \method{setMod}{pPCAcond}(procMod, sigma = NULL, exVar = 1)
 
-predictPCAcond(x, model, refmesh, sdmax, ...)
+predictPCAcond(x, model, refmesh, sdmax, pPCA = FALSE, ...)
 
 \method{predictPCAcond}{matrix}(x, model, refmesh = FALSE, sdmax,
-  origSpace = TRUE, ...)
+  origSpace = TRUE, pPCA = FALSE, ...)
 
 \method{predictPCAcond}{mesh3d}(x, model, refmesh = FALSE, sdmax,
-  origSpace = TRUE, ...)
+  origSpace = TRUE, pPCA = FALSE, ...)
 
 predictpPCA(x, model, refmesh = FALSE, ...)
 
@@ -76,6 +76,9 @@ predictpPCA(x, model, refmesh = FALSE, ...)
 
   \item{origSpace}{logical: rotate the estimation back into
   the original coordinate system.}
+
+  \item{pPCA}{logical: if TRUE, a constrained pPCA model is
+  returned.}
 
   \item{model}{probabilistic model of class "pPCA" or
   "pPCAcond"}
