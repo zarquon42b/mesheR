@@ -2,14 +2,17 @@ mesheR
 ====
 __mesheR__ is an R-package providing methods for mesh manipulations in R. Its main feature are advanced surface registration algorithms.
 
+##### Warning: #####
+This code is still under development, the API may change without further notice, so see commit log in case your old code does not work any more.
 
 ##### Installation of the R package "mesheR": ####
    0. Make sure to work with the latest version of R and install dependencies  
      1. Make sure, you already have [Morpho](http://sourceforge.net/p/morpho-rpackage/wiki/Installation_Morpho/) and [Rvcg](http://sourceforge.net/p/morpho-rpackage/wiki/Installation_Rvcg/) installed.
      2. install additional dependencies from CRAN (type the following commands into your R terminal):: 
                
-               setRepositories(ind=1:2)
-               install.packages(c("spam","colorspace","rhdf5"))
+		
+			setRepositories(ind=1:2)
+			install.packages(c("spam","colorspace","rhdf5"))
 
 
    1. Download the version suitable for your OS Either the compiled package (for Windows and OS X) or the source tarball (Linux) from [here](https://sourceforge.net/projects/morpho-rpackage/files/mesheR/).
@@ -26,7 +29,7 @@ __mesheR__ is an R-package providing methods for mesh manipulations in R. Its ma
 0. Make sure, you already have [Morpho](http://sourceforge.net/p/morpho-rpackage/wiki/Installation_Morpho/) and [Rvcg](http://sourceforge.net/p/morpho-rpackage/wiki/Installation_Rvcg/) installed.
 1. install *devtools* from within R (Ubuntu/Debian users will have to install *libcurl4-gnutls-dev* beforehand):
 
-	install.packages("devtools")
+		install.packages("devtools")
 
 
 2. Install build environment
@@ -38,6 +41,6 @@ During installation of *Rtools* make sure to install the *toolchain*, and to sel
 3. In R run the command:
 
 	
-	require(devtools)
-	setRepositories(ind=1:2)	
-	install_github("zarquon42b/mesheR")
+		require(devtools)
+		setRepositories(ind=1:2)
+		install_github("zarquon42b/mesheR")
