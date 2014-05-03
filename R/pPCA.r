@@ -39,7 +39,7 @@ pPCA <- function(array, sigma=NULL,exVar=1,scale=TRUE,refmesh=NULL) {
     procMod <- ProcGPA(array,scale=scale,CSinit=F,reflection=F)
     PCA <- prcomp(vecx(procMod$rotated,byrow = T))
     sds <- PCA$sdev^2
-    good <- which(sds > 1e-13)
+    good <- which(sds > 1e-18)
     sds <- sds[good]
     PCA$rotation <- PCA$rotation[,good]
     PCA$sdev <- PCA$sdev[good]
@@ -72,7 +72,7 @@ pPCAcond <- function(array, missingIndex, sigma=NULL, exVar=1,refmesh=NULL,scale
     sel <- missingIndex*3
     sel <- sort(c(sel, sel-1, sel-2))
     sds <- PCA$sdev^2
-    good <- which(sds > 1e-13)
+    good <- which(sds > 1e-18)
     sds <- sds[good]
     PCA$rotation <- PCA$rotation[,good]
     PCA$sdev <- PCA$sdev[good]
@@ -158,7 +158,7 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
     procMod$M <- M
     Minv <- solve(M)
     Minv <- (Minv+t(Minv))/2
-    procMod$Minv <- solve(M)
+    procMod$Minv <- Minv
     procMod$sigma <- sigma
     procMod$alphamean <- siginv*procMod$Minv%*%t(Wb)
     print(procMod,Variance=FALSE)
@@ -208,7 +208,7 @@ predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,pP
     ##as.vector(W[,good]%*%alpha)
     estim <- t(as.vector(model$W%*%alpha)+t(mshape))
     if (pPCA)
-        procMod <- cond2pPCA(model,estim)
+        procMod <- as.pPCA(model,estim)
 
     if (origSpace)
         estim <- rotreverse(estim,rotsb)
@@ -293,14 +293,19 @@ predictpPCA.numeric <- function(x,model,refmesh=FALSE,...) {
     }
     return(estim)
 }
-    
 
-cond2pPCA <- function(cpPCA, newMean) {
-    procMod <- cpPCA
+#' @export
+as.pPCA <- function(x,..)UseMethod("as.pPCA")
+
+#' #' @export
+as.pPCA.pPCAcond <- function(x, newMean,...) {
+    procMod <- x
     procMod$mshape <- newMean
     eigM <- eigen(procMod$Minv, symmetric = T)
     sdev <- Re(eigM$values)
-    good <- which(sdev > 1e-13)
+    good <- which(sdev > 1e-18)
+    if (!length(good)) 
+        good <- 1
     sdev <- sdev[good]
     procMod$usePC <- good
     procMod$PCA$sdev <- sqrt(sdev)
@@ -312,5 +317,20 @@ cond2pPCA <- function(cpPCA, newMean) {
     rem <- which(allNames %in% c("M","Minv","Wb","WbtWb","missingIndex","sel","alphamean"))
     procMod[rem] <- NULL
     procMod <- setMod(procMod,sigma=0,exVar=1)
+    return(procMod)
+}
+
+#' @export
+as.pPCAcond <- function(x,..)UseMethod("as.pPCAcond")
+
+#' @export
+as.pPCAcond.pPCA <- function(x,missingIndex) {
+    procMod <- x
+    procMod$missingIndex <- missingIndex
+    sel <- missingIndex*3
+    sel <- sort(c(sel, sel-1, sel-2))
+    procMod$sel <- sel
+    class(procMod) <- "pPCAcond"
+    procMod <- setMod(procMod,sigma=procMod$sigma,exVar=1)
     return(procMod)
 }
