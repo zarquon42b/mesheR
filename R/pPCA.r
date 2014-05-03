@@ -37,9 +37,9 @@
 pPCA <- function(array, sigma=NULL,exVar=1,scale=TRUE,refmesh=NULL) {
     k <- dim(array)[1]
     procMod <- ProcGPA(array,scale=scale,CSinit=F,reflection=F)
-    PCA <- prcomp(vecx(procMod$rotated,byrow = T))
+    PCA <- prcomp(vecx(procMod$rotated,byrow = T),tol = sqrt(.Machine$double.eps))
     sds <- PCA$sdev^2
-    good <- which(sds > 1e-18)
+    good <- which(sds > 1e-13)
     sds <- sds[good]
     PCA$rotation <- PCA$rotation[,good]
     PCA$sdev <- PCA$sdev[good]
@@ -68,11 +68,11 @@ pPCAcond <- function(array, missingIndex, sigma=NULL, exVar=1,refmesh=NULL,scale
     procMod$scale <- scale
     procMod$mshape <- arrMean3(tmp1)
     procMod$missingIndex <- missingIndex
-    PCA <- prcomp(vecx(procMod$rotated,byrow = T))
+    PCA <- prcomp(vecx(procMod$rotated,byrow = T),tol = sqrt(.Machine$double.eps))
     sel <- missingIndex*3
     sel <- sort(c(sel, sel-1, sel-2))
     sds <- PCA$sdev^2
-    good <- which(sds > 1e-18)
+    good <- which(sds > 1e-13)
     sds <- sds[good]
     PCA$rotation <- PCA$rotation[,good]
     PCA$sdev <- PCA$sdev[good]
@@ -97,10 +97,16 @@ setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
     sdsum <- sum(sds)
     sdVar <- sds/sdsum
     sdCum <- cumsum(sdVar)
+    if (sigma >= sdsum) {
+        warning(paste("sigma > overall variance set to",sdsum/2))
+        sigma <- sdsum/2
+    }
     usePC <- which(sdCum <= exVar)
+    
+        
     Variance <- data.frame(eigenvalue=sds,exVar=sdVar, cumVar=sdCum)
     procMod$Variance <- Variance
-    procMod$exVar <- exVar
+    
     if (is.null(sigma))
         sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
 
@@ -111,8 +117,9 @@ setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
 
     sigest <- (sds - sigma^2)
     sigest <- sigest[which(sigest > 0)]
-    usePC <- 1:min(length(usePC),length(sigest))
+    usePC <- 1:max(1,min(length(usePC),length(sigest)))
     procMod$usePC <- usePC
+    procMod$exVar <- sdCum[max(usePC)]
     procMod$sigma <- sigma
     W <- t(t(PCA$rotation[,usePC])*sqrt(sigest[usePC]))
     Win <- (t(PCA$rotation[,usePC])*(1/sqrt(sigest[usePC])))
@@ -131,6 +138,10 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
     sdsum <- sum(sds)
     sdVar <- sds/sdsum
     sdCum <- cumsum(sdVar)
+    if (sigma >= sdsum) {
+        warning(paste("sigma > overall variance set to",sdsum/2))
+        sigma <- sdsum/2
+    }
     usePC <- which(sdCum <= exVar)
     Variance <- data.frame(eigenvalues=sds,exVar=sdVar, cumVar=sdCum)
     procMod$Variance <- Variance
@@ -147,6 +158,8 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
     sigest <- sigest[which(sigest > 0)]
     usePC <- 1:min(length(usePC),length(sigest))
     procMod$usePC <- usePC
+    procMod$exVar <- sdCum[max(usePC)]
+
     W <- t(t(PCA$rotation[,usePC])*sqrt(sigest[usePC]))
     Wb <- W[-sel,]
     WbtWb <- crossprod(Wb)
@@ -156,7 +169,11 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
     procMod$Wb <- Wb
     procMod$WbtWb <- WbtWb
     procMod$M <- M
-    Minv <- solve(M)
+    stry <- try(Minv <- solve(M)) 
+    if (inherits(stry,"try-error")) {
+        Minv <- Morpho:::armaGinv(M)
+        message("singular Matrix")
+    }
     Minv <- (Minv+t(Minv))/2
     procMod$Minv <- Minv
     procMod$sigma <- sigma
@@ -331,6 +348,6 @@ as.pPCAcond.pPCA <- function(x,missingIndex) {
     sel <- sort(c(sel, sel-1, sel-2))
     procMod$sel <- sel
     class(procMod) <- "pPCAcond"
-    procMod <- setMod(procMod,sigma=procMod$sigma,exVar=1)
+    procMod <- setMod(procMod,sigma=procMod$sigma,exVar=procMod$exVar)
     return(procMod)
 }
