@@ -103,7 +103,6 @@ setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
     k <- dim(procMod$mshape)[1]
     PCA <- procMod$PCA
     sds <- PCA$sdev^2
-    sel <- procMod$sel
     sdsum <- sum(sds)
     sdVar <- sds/sdsum
     sdCum <- cumsum(sdVar)
@@ -253,7 +252,7 @@ predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,pP
         estim <- estimmesh
     }
     if (pPCA)
-        return(list(estim=estim,pPCA=procMod))
+        return(list(estim=estim,pPCA=procMod,rot=rotsb))
     else
         return(estim)
 }
@@ -303,6 +302,7 @@ predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,...)
         estimmesh <- vcgUpdateNormals(estimmesh)
         estim <- estimmesh
     }
+    estim$rot <- rotsb
     return(estim)
 }
 
@@ -341,22 +341,31 @@ as.pPCA <- function(x,..)UseMethod("as.pPCA")
 as.pPCA.pPCAcond <- function(x, newMean,...) {
     procMod <- x
     procMod$mshape <- newMean
-    eigM <- eigen(procMod$Minv, symmetric = T)
-    sdev <- Re(eigM$values)
-    good <- which(sdev > 1e-18)
-    if (!length(good)) 
-        good <- 1
-    sdev <- sdev[good]
+    sds <- procMod$PCA$sdev^2
+    usePC <- procMod$usePC
+    sigma <- procMod$sigma
+    sigest <- (sds[usePC] - sigma^2)
+    Minv <- procMod$Minv
+    udut <- t(t(Minv)*sigest)
+    eigM <- eigen(udut,symmetric = T)
+    sds <- Re(eigM$values)
+    good <- which(sds > 1e-15)
+    sds <- sds[good]
     procMod$usePC <- good
-    procMod$PCA$sdev <- sqrt(sdev)
-    newW <- procMod$W%*%Re(eigM$vectors[,good])
-    procMod$W <- t(t(newW)*sdev)
+    procMod$PCA$sdev <- sqrt(sds)
+    newW <- procMod$PCA$rotation[,usePC]%*%Re(eigM$vectors[,good])
+    procMod$W <- t(t(newW)*sqrt(sds))
+    procMod$Win <- t(newW)/sqrt(sds)
     procMod$PCA$rotation <- newW
     class(procMod) <- "pPCA"
     allNames <- names(procMod)
     rem <- which(allNames %in% c("M","Minv","Wb","WbtWb","missingIndex","sel","alphamean"))
     procMod[rem] <- NULL
-    procMod <- setMod(procMod,sigma=0,exVar=1)
+    sdsum <- sum(sds)
+    sdVar <- sds/sdsum
+    sdCum <- cumsum(sdVar)
+    Variance <- data.frame(eigenvalues=sds,exVar=sdVar, cumVar=sdCum)
+    procMod$Variance <- Variance
     return(procMod)
 }
 
