@@ -36,10 +36,10 @@ predictPCAcond(x, model, refmesh, sdmax, pPCA = FALSE, ...)
 predictpPCA(x, model, refmesh = FALSE, ...)
 
 \method{predictpPCA}{matrix}(x, model, refmesh = FALSE, sdmax = 2,
-  origSpace = TRUE, ...)
+  origSpace = TRUE, use.lm = NULL, ...)
 
 \method{predictpPCA}{mesh3d}(x, model, refmesh = FALSE, sdmax = 2,
-  origSpace = TRUE, ...)
+  origSpace = TRUE, use.lm = NULL...)
 
 \method{predictpPCA}{numeric}(x, model, refmesh = FALSE, ...)
 }
@@ -82,6 +82,10 @@ predictpPCA(x, model, refmesh = FALSE, ...)
 
   \item{origSpace}{logical: rotate the estimation back into
   the original coordinate system.}
+
+  \item{use.lm}{integer vector specifying row indices of
+  the coordinates to use for rigid registration on the
+  model's meanshape.}
 
   \item{pPCA}{logical: if TRUE, a constrained pPCA model is
   returned.}

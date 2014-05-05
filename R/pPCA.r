@@ -15,6 +15,7 @@
 #' @param x vector of deviation in standard deviations, coordinate matrix or triangular mesh of class "mesh3d" to be predicted.
 #' @param sdmax maximum allowed standard deviation (per Principal axis) within the model space. Defines the probabilistic boundaries.
 #' @param origSpace logical: rotate the estimation back into the original coordinate system.
+#' @param use.lm integer vector specifying row indices of the coordinates to use for rigid registration on the model's meanshape.
 #' @param pPCA logical: if TRUE, a constrained pPCA model is returned.
 #' @param model probabilistic model of class "pPCA" or "pPCAcond"
 #' @return \code{pPCA} and \code{pPCAcond} return a probabilistic PCA model of class "pPCA" or "pPCAcond" respectively. 
@@ -272,10 +273,15 @@ predictpPCA <- function(x,model,refmesh=FALSE,...)UseMethod("predictpPCA")
 
 #' @rdname pPCA
 #' @export
-predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,...) {
+predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,use.lm=NULL,...) {
     mshape <- model$mshape
-    rotsb <- rotonto(mshape,x,scale=model$scale,reflection = F)
-    sb <- rotsb$yrot
+    if (is.null(use.lm)) {
+        rotsb <- rotonto(mshape,x,scale=model$scale,reflection = F)
+        sb <- rotsb$yrot
+    } else {
+        rotsb <- rotonto(mshape[use.lm,],x[use.lm,],scale=model$scale,reflection=F)
+        sb <- rotonmat(x,x[use.lm,],rotsb$yrot)
+    }
     sbres <- sb-mshape
    # W <- model$W
     alpha <- model$Win%*%as.vector(t(sbres))
@@ -308,9 +314,9 @@ predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,...)
 
 #' @rdname pPCA
 #' @export
-predictpPCA.mesh3d <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,...) {
+predictpPCA.mesh3d <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,use.lm=NULL...) {
     mat <- t(x$vb[1:3,])
-    estim <- predictPCA(x=mat,model=model,refmesh=refmesh,sdmax=sdmax,origSpace=origSpace)
+    estim <- predictPCA(x=mat,model=model,refmesh=refmesh,sdmax=sdmax,origSpace=origSpace,use.lm=use.lm)
     return(estim)
 }
 
