@@ -16,8 +16,8 @@
 \usage{
 pPCA(array, sigma = NULL, exVar = 1, scale = TRUE, refmesh = NULL)
 
-pPCAcond(array, missingIndex, sigma = NULL, exVar = 1, refmesh = NULL,
-  scale = TRUE)
+pPCAcond(array, missingIndex, deselect = FALSE, sigma = NULL, exVar = 1,
+  refmesh = NULL, scale = TRUE, fullfit = FALSE)
 
 setMod(procMod, sigma, exVar)
 
@@ -50,6 +50,9 @@ predictpPCA(x, model, refmesh = FALSE, ...)
   \item{missingIndex}{integer vector: specifies which
   points are missing in the conditional model}
 
+  \item{deselect}{logical: if TRUE, missingIndex references
+  the existing coordinates instead of the missing ones.}
+
   \item{procMod}{object of class "procMod" as returned by
   pPCAcond or setMod}
 
@@ -65,6 +68,9 @@ predictpPCA(x, model, refmesh = FALSE, ...)
 
   \item{scale}{logical: allow scaling in Procrustes
   fitting}
+
+  \item{fullfit}{logical: if FALSE only the non-missing
+  points will be used for registration.}
 
   \item{x}{vector of deviation in standard deviations,
   coordinate matrix or triangular mesh of class "mesh3d" to

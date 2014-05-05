@@ -5,11 +5,13 @@
 #' @encoding utf8
 #' @param array array of dimensions k x 3 x n, where k=number of coordinates and n=sample size.
 #' @param missingIndex integer vector: specifies which points are missing in the conditional model
+#' @param deselect logical: if TRUE, missingIndex references the existing coordinates instead of the missing ones.
 #' @param procMod object of class "procMod" as returned by pPCAcond or setMod
 #' @param sigma estimate error variance (sensible is a value estimating coordinate error in terms of observer error)
 #' @param exVar numeric value with \code{0 < exVar <= 1} specifying the PCs to be included by their cumulative explained Variance
 #' @param refmesh a triangular mesh, where the vertices correspond to the coordinates in \code{array}
 #' @param scale logical: allow scaling in Procrustes fitting
+#' @param fullfit logical: if FALSE only the non-missing points will be used for registration.
 #' @param x vector of deviation in standard deviations, coordinate matrix or triangular mesh of class "mesh3d" to be predicted.
 #' @param sdmax maximum allowed standard deviation (per Principal axis) within the model space. Defines the probabilistic boundaries.
 #' @param origSpace logical: rotate the estimation back into the original coordinate system.
@@ -53,20 +55,28 @@ pPCA <- function(array, sigma=NULL,exVar=1,scale=TRUE,refmesh=NULL) {
 }
 #' @rdname pPCA
 #' @export
-pPCAcond <- function(array, missingIndex, sigma=NULL, exVar=1,refmesh=NULL,scale=TRUE) {
+pPCAcond <- function(array, missingIndex,deselect=FALSE,sigma=NULL, exVar=1,refmesh=NULL,scale=TRUE,fullfit=FALSE) {
     k <- dim(array)[1]
+    if (deselect)
+        missingIndex <- c(1:k)[-missingIndex]
+    
     use.lm=c(1:k)[-missingIndex]
-    procMod <- ProcGPA(array[use.lm,,],scale=scale,CSinit=F,reflection=F,silent = TRUE)
-    tmp <- array
-    a.list <-  1:(dim(array)[3])
-    tmp <- lapply(a.list, function(i) {mat <- rotonmat(array[,,i],array[use.lm,,i],procMod$rotated[,,i],scale=scale);return(mat)})
-    tmp1 <- array
-    for (i in 1:length(a.list))
-        tmp1[,,i] <- tmp[[i]]
-
-    procMod$rotated <- tmp1
+    if (!fullfit) {
+        procMod <- ProcGPA(array[use.lm,,],scale=scale,CSinit=F,reflection=F,silent = TRUE)
+        tmp <- array
+        a.list <-  1:(dim(array)[3])
+        tmp <- lapply(a.list, function(i) {mat <- rotonmat(array[,,i],array[use.lm,,i],procMod$rotated[,,i],scale=scale,reflection = F);return(mat)})
+        tmp1 <- array
+        for (i in 1:length(a.list))
+            tmp1[,,i] <- tmp[[i]]
+        procMod$rotated <- tmp1
+        procMod$mshape <- arrMean3(tmp1)
+    } else {
+        procMod <- ProcGPA(array,scale=scale,CSinit = F,reflection = F,silent = T)
+    }
+    
     procMod$scale <- scale
-    procMod$mshape <- arrMean3(tmp1)
+   
     procMod$missingIndex <- missingIndex
     PCA <- prcomp(vecx(procMod$rotated,byrow = T),tol = sqrt(.Machine$double.eps))
     sel <- missingIndex*3
@@ -211,16 +221,22 @@ predictPCAcond <- function(x, model, refmesh,sdmax,pPCA=FALSE,...) UseMethod("pr
 predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,pPCA=FALSE,...) {
     mshape <- model$mshape
     missingIndex <- model$missingIndex
-    rotsb <- rotonto(mshape[-missingIndex,],x,scale=model$scale)
+    rotsb <- rotonto(mshape[-missingIndex,],x,scale=model$scale,reflection = F)
     sb <- rotsb$yrot
     sbres <- sb-mshape[-missingIndex,]
     alpha <- model$alphamean%*%as.vector(t(sbres))
     if (!missing(sdmax)) {
-        signalpha <- sign(alpha)
-        alpha <- abs(alpha)
-        outlier <- which(alpha > sdmax)
-        alpha[outlier] <- sdmax
-        alpha <- alpha*signalpha
+        Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
+        probs <- sum(alpha^2)
+        if (probs > Mt ) {
+            sca <- Mt/probs
+            alpha <- alpha*sca
+        }
+        #signalpha <- sign(alpha)
+        #alpha <- abs(alpha)
+        #outlier <- which(alpha > sdmax)
+        #alpha[outlier] <- sdmax
+        #alpha <- alpha*signalpha
     }
     ##as.vector(W[,good]%*%alpha)
     estim <- t(as.vector(model$W%*%alpha)+t(mshape))
@@ -259,16 +275,23 @@ predictpPCA <- function(x,model,refmesh=FALSE,...)UseMethod("predictpPCA")
 #' @export
 predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,...) {
     mshape <- model$mshape
-    rotsb <- rotonto(mshape,x,scale=model$scale)
+    rotsb <- rotonto(mshape,x,scale=model$scale,reflection = F)
     sb <- rotsb$yrot
     sbres <- sb-mshape
    # W <- model$W
     alpha <- model$Win%*%as.vector(t(sbres))
-    signalpha <- sign(alpha)
-    alpha <- abs(alpha)
-    outlier <- which(alpha > sdmax)
-    alpha[outlier] <- sdmax    
-    alpha <- alpha*signalpha
+    sdl <- nrow(model$Win)
+    Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
+    probs <- sum(alpha^2)
+        if (probs > Mt ) {
+            sca <- Mt/probs
+            alpha <- alpha*sca
+        }
+    #signalpha <- sign(alpha)
+    #alpha <- abs(alpha)
+    #outlier <- which(alpha > sdmax)
+    #alpha[outlier] <- sdmax    
+    #alpha <- alpha*signalpha
     
     estim <- t(as.vector(model$W%*%alpha)+t(mshape))
     if (origSpace)
@@ -314,7 +337,7 @@ predictpPCA.numeric <- function(x,model,refmesh=FALSE,...) {
 #' @export
 as.pPCA <- function(x,..)UseMethod("as.pPCA")
 
-#' #' @export
+#' @export
 as.pPCA.pPCAcond <- function(x, newMean,...) {
     procMod <- x
     procMod$mshape <- newMean
