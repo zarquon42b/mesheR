@@ -107,6 +107,9 @@ setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
     sdsum <- sum(sds)
     sdVar <- sds/sdsum
     sdCum <- cumsum(sdVar)
+    if (is.null(sigma))
+        sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
+
     if (sigma >= sdsum) {
         warning(paste("sigma > overall variance set to",sdsum/2))
         sigma <- sdsum/2
@@ -117,9 +120,6 @@ setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
     Variance <- data.frame(eigenvalue=sds,exVar=sdVar, cumVar=sdCum)
     procMod$Variance <- Variance
     
-    if (is.null(sigma))
-        sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
-
     if (sigma == 0)
         siginv <- 1e13
     else
@@ -148,6 +148,10 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
     sdsum <- sum(sds)
     sdVar <- sds/sdsum
     sdCum <- cumsum(sdVar)
+
+    if (is.null(sigma))
+        sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
+
     if (sigma >= sdsum) {
         warning(paste("sigma > overall variance set to",sdsum/2))
         sigma <- sdsum/2
@@ -156,8 +160,7 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
     Variance <- data.frame(eigenvalues=sds,exVar=sdVar, cumVar=sdCum)
     procMod$Variance <- Variance
     procMod$exVar <- exVar
-    if (is.null(sigma))
-        sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
+   
 
     if (sigma == 0)
         siginv <- 1e13

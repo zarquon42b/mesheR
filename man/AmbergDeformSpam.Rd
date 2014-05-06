@@ -2,7 +2,8 @@
 \alias{AmbergDeformSpam}
 \title{Deform triangular mesh based on correspondences}
 \usage{
-AmbergDeformSpam(mesh, lm1, lm2, k0 = 1, lambda = 1, S = NULL)
+AmbergDeformSpam(mesh, lm1, lm2, k0 = 1, lambda = 1, S = NULL,
+  clean = TRUE)
 }
 \arguments{
   \item{mesh}{triangular mesh of class "mesh3d". No loose
@@ -22,6 +23,10 @@ AmbergDeformSpam(mesh, lm1, lm2, k0 = 1, lambda = 1, S = NULL)
 
   \item{S}{optional: object from function createS from
   previous calculation.}
+
+  \item{clean}{logical: if TRUE, \code{vcgClean} from
+  package Rvcg is run to remove duplicated and unreferenced
+  vertices from the mesh and preventing segfaults.}
 }
 \value{
 \item{mesh}{deformed mesh} \item{Jn}{Jacobi submatrix Jn}

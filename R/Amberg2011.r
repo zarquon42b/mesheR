@@ -195,6 +195,7 @@ createJc <- function(lm1,ncol,mesh)
 #' @param k0 integer: parameter regularizing face normal distortion.
 #' @param lambda numeric: parameter regularizing faces's distortion.  
 #' @param S optional: object from function createS from previous calculation.
+#' @param clean logical: if TRUE, \code{vcgClean} from package Rvcg is run to remove duplicated and unreferenced vertices from the mesh and preventing segfaults. 
 #' @return
 #' \item{mesh}{deformed mesh}
 #' \item{Jn}{Jacobi submatrix Jn}
@@ -206,9 +207,13 @@ createJc <- function(lm1,ncol,mesh)
 #' @seealso \code{\link{gaussMatch}}
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
 #' @keywords ~kwd1 ~kwd2
+#' @importFrom Rvcg vcgClean
 #' @export AmbergDeformSpam
-AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL)
+AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=TRUE)
     {
+        if (clean) {
+            mesh <- vcgClean(mesh,sel=c(0:1),silent=T)
+        }
         t0 <- Sys.time()
         out <- list()
         if (is.null(S))
