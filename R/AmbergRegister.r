@@ -43,7 +43,7 @@
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.
 #' @param silent logical: no verbosity
 #' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
-#' @param forceLM logical: if icp=TRUE landmark based deformation will be applied after icp-based transformation.
+#' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
 #' @return 
 #' \item{mesh}{registered mesh}
 #' \item{meshrot }{mesh1, rotated onto mesh2}
@@ -80,10 +80,17 @@
 #' meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
 #' # render original mesh as wireframe
 #' wire3d(humface)
-#' @importFrom Rvcg vcgClean vcgClost
+#' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
+#' @importFrom Morpho meshcube
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,visualize=FALSE)
     {
+        if (visualize) {
+            open3d()
+            shade3d(mesh2,col=2,specular=1)
+            rglid <- NULL
+            readline("please select viewpoint\n")
+        }
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
         count <- 0
@@ -164,7 +171,8 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 #dupes <- !(as.logical(vcgClean(clost)$remvert))
                 dupes <- TRUE
                 good <- sort(which(as.logical(normgood*distgood*bordergood*dupes)))
-               
+               if (visualize)
+                   points3d(meshcube(tmp$mesh),col="white",alpha=0)
                         
 ### in case no good hit is found within the given distance we increase the distance by 1mm until valid references are found:
                 increase <- distinc
@@ -195,7 +203,12 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 }
                 if (smooth)
                     tmp$mesh <- vcgSmooth(tmp$mesh,iteration = smoothit,type=smoothtype)
-                
+                if (visualize) {
+                   
+                    if (!is.null(rglid))
+                        rgl.pop(id=rglid)
+                    rglid <- wire3d(tmp$mesh,col="white")
+                }
                 error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
                 time1 <- Sys.time()
                 if (!silent) {
