@@ -228,18 +228,19 @@ predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,pP
     sb <- rotsb$yrot
     sbres <- sb-mshape[-missingIndex,]
     alpha <- model$alphamean%*%as.vector(t(sbres))
+    
     if (!missing(sdmax)) {
-        Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
-        probs <- sum(alpha^2)
-        if (probs > Mt ) {
-            sca <- Mt/probs
-            alpha <- alpha*sca
-        }
-        #signalpha <- sign(alpha)
-        #alpha <- abs(alpha)
-        #outlier <- which(alpha > sdmax)
-        #alpha[outlier] <- sdmax
-        #alpha <- alpha*signalpha
+   #     Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
+    #    probs <- sum(alpha^2)
+    #    if (probs > Mt ) {
+    #        sca <- Mt/probs
+    #        alpha <- alpha*sca
+    #    }
+       signalpha <- sign(alpha)
+       alpha <- abs(alpha)
+       outlier <- which(alpha > sdmax)
+       alpha[outlier] <- sdmax
+       alpha <- alpha*signalpha
     }
     ##as.vector(W[,good]%*%alpha)
     estim <- t(as.vector(model$W%*%alpha)+t(mshape))
@@ -288,18 +289,18 @@ predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,use.
     sbres <- sb-mshape
    # W <- model$W
     alpha <- model$Win%*%as.vector(t(sbres))
-    sdl <- nrow(model$Win)
-    Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
-    probs <- sum(alpha^2)
-        if (probs > Mt ) {
-            sca <- Mt/probs
-            alpha <- alpha*sca
-        }
-    #signalpha <- sign(alpha)
-    #alpha <- abs(alpha)
-    #outlier <- which(alpha > sdmax)
-    #alpha[outlier] <- sdmax    
-    #alpha <- alpha*signalpha
+    #sdl <- nrow(model$Win)
+    #Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
+    #probs <- sum(alpha^2)
+    #    if (probs > Mt ) {
+    #        sca <- Mt/probs
+    #        alpha <- alpha*sca
+    #    }
+    signalpha <- sign(alpha)
+    alpha <- abs(alpha)
+    outlier <- which(alpha > sdmax)
+    alpha[outlier] <- sdmax    
+    alpha <- alpha*signalpha
     
     estim <- t(as.vector(model$W%*%alpha)+t(mshape))
     if (origSpace)
@@ -311,7 +312,7 @@ predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,use.
         estimmesh <- vcgUpdateNormals(estimmesh)
         estim <- estimmesh
     }
-    estim$rot <- rotsb
+   # estim$rot <- rotsb
     return(estim)
 }
 
