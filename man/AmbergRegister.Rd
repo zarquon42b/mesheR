@@ -8,7 +8,7 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
   useiter = TRUE, minclost = 50, distinc = 1, scale = TRUE,
   reflection = FALSE, icp = NULL, nn = 20, silent = FALSE,
-  Bayes = NULL, forceLM = FALSE, visualize = FALSE)
+  Bayes = NULL, forceLM = FALSE, visualize = FALSE, folder = NULL)
 }
 \arguments{
 \item{mesh1}{reference mesh: triangular mesh of class "mesh3d". No loose
@@ -75,6 +75,10 @@ with normal deviation of pi/2 and include scaling.}
 \item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution}
 
 \item{forceLM}{logical: if icp is requested landmark based deformation will be applied after icp-based transformation.}
+
+\item{visualize}{logical request visualization of deformation process.}
+
+\item{folder}{logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.}
 }
 \value{
 \item{mesh}{registered mesh}

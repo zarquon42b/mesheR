@@ -44,6 +44,8 @@
 #' @param silent logical: no verbosity
 #' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
+#' @param visualize logical request visualization of deformation process.
+#' @param folder logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.
 #' @return 
 #' \item{mesh}{registered mesh}
 #' \item{meshrot }{mesh1, rotated onto mesh2}
@@ -83,14 +85,8 @@
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
 #' @importFrom Morpho meshcube
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,visualize=FALSE)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,visualize=FALSE, folder=NULL)
     {
-        if (visualize) {
-            open3d()
-            shade3d(mesh2,col=2,specular=1)
-            rglid <- NULL
-            readline("please select viewpoint\n")
-        }
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
         count <- 0
@@ -146,6 +142,33 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 tmp$S <- createS(mesh1)
             verts0 <- vert2points(mesh1)
         }
+        if (visualize) {
+             rglid <- NULL
+            open3d()
+            points3d(meshcube(tmp$mesh),col="white",alpha=0)
+            shade3d(mesh2,col=2,specular=1)
+            if (!is.null(rglid))
+                rgl.pop(id=rglid)
+            rglid <- wire3d(tmp$mesh,col="white")
+           
+            if (!is.null(folder)) {
+                if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") {
+                    folder <- paste(folder,"/",sep="")
+                    dir.create(folder,showWarnings=F)
+                    movie <- paste(folder,"deformation",sep="")
+                }
+                npics <- nchar(iterations+1)
+                ndec <- paste0("%s%0",npics,"d.png")
+            }
+            readline("please select viewpoint\n")
+            
+            
+            if (!is.null(folder)) {
+                filename <- sprintf("%s%04d.png", movie, 1)
+                rgl.snapshot(filename,fmt="png")
+                movcount <- 2
+            }
+                }
         
         if (!stopit) {
             ## set error and counter appropriately
@@ -168,12 +191,13 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 bordergood <- 1
                 if (!border) 
                     bordgood <- as.logical(!meshbord$borderit[clost$faceptr])
-                #dupes <- !(as.logical(vcgClean(clost)$remvert))
+                                        #dupes <- !(as.logical(vcgClean(clost)$remvert))
                 dupes <- TRUE
                 good <- sort(which(as.logical(normgood*distgood*bordergood*dupes)))
-               if (visualize)
-                   points3d(meshcube(tmp$mesh),col="white",alpha=0)
-                        
+                
+                
+                
+                
 ### in case no good hit is found within the given distance we increase the distance by 1mm until valid references are found:
                 increase <- distinc
                 while (length(good) < minclost) {
@@ -182,7 +206,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                     increase <- increase+distinc
                     cat(paste("distance increased to",dist+increase,"\n"))
                 }
-               
+                
                 
                 ## update reference points
                 lmtmp1 <- verts0[good,]
@@ -204,10 +228,15 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 if (smooth)
                     tmp$mesh <- vcgSmooth(tmp$mesh,iteration = smoothit,type=smoothtype)
                 if (visualize) {
-                   
+                    
                     if (!is.null(rglid))
                         rgl.pop(id=rglid)
                     rglid <- wire3d(tmp$mesh,col="white")
+                    if (!is.null(folder)) {
+                        filename <- sprintf("%s%04d.png", movie, movcount)
+                        movcount <- movcount+1
+                        rgl.snapshot(filename,fmt="png")
+                    }
                 }
                 error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
                 time1 <- Sys.time()
