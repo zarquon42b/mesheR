@@ -215,7 +215,11 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                                         #points3d(lmtmp2,col=count)
                 if (useiter)
                     tmp$S <- NULL
-                tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[count],lambda=lambda[count],S=tmp$S)
+
+                tmpold <- tmp
+                chk <- try(tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[count],lambda=lambda[count],S=tmp$S))
+                if (inherits(chk,"try-error"))
+                    tmp <- tmpold
                                         #oo <- wire3d(tmp$mesh,col=count)
                 gc()
                 ## calculate error
