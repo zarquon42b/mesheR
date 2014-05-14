@@ -61,13 +61,9 @@ pPCA <- function(array, sigma=NULL,exVar=1,scale=TRUE,refmesh=NULL) {
 pPCAcond <- function(array, missingIndex,deselect=FALSE,sigma=NULL, exVar=1,refmesh=NULL,scale=TRUE,fullfit=FALSE) {
     k <- dim(array)[1]
     if (deselect) {
-        #missingIndex <- c(1:k)[-missingIndex]
-        use.lm=missingIndex        
         missingIndex <- c(1:k)[-missingIndex]
-    } else {
-        use.lm=c(1:k)[-missingIndex]
     }
-    
+    use.lm=c(1:k)[-missingIndex]
     if (!fullfit) {
         procMod <- ProcGPA(array[use.lm,,],scale=scale,CSinit=F,reflection=F,silent = TRUE)
         tmp <- array
