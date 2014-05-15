@@ -214,6 +214,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=FALSE)
         if (clean) {
             mesh <- vcgClean(mesh,sel=c(0:1),silent=T)
         }
+        spam.options( "cholsymmetrycheck"=FALSE)
         t0 <- Sys.time()
         out <- list()
         if (is.null(S))
