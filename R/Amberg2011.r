@@ -2,7 +2,7 @@
 #' @importFrom Matrix sparseMatrix Matrix cBind
 #' @importClassesFrom Matrix dgCMatrix sparseMatrix
 #' @importMethodsFrom Matrix t
-#' @importFrom spam as.spam.dgCMatrix rbind.spam solve.spam spam.options
+#' @importFrom spam as.spam.dgCMatrix rbind.spam solve.spam spam.options diag.spam
 #' @importClassesFrom spam spam spam.chol.NgPeyton
 #' @importMethodsFrom spam t chol rbind diag
 NULL
@@ -240,12 +240,14 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=FALSE)
         J <- rbind.spam(J,Jn)
         ## calculate Hessian H
         H <- t(J)%*%J
-        diag(H) <- diag(H)
+        Hchk <- as.logical(length(which(!diff(H@rowpointers) > 0)))
+        if (Hchk)
+            diag(H) <- diag(H)
         Jtc <- t(Jc)%*%lm2
         ## Cholesky decomposition of Hessian H
         chk <- try(Hchol <- chol(H),silent = T)
         if (inherits(chk,"try-error")) {
-            diag(H) <- diag(H)+1e-12
+            diag.spam(H) <- diag.spam(H)+1e-12
             Hchol <- chol(H)
             warning("unreferenced vertices will be set to zero")
         }
