@@ -2,9 +2,9 @@
 #' @importFrom Matrix sparseMatrix Matrix cBind
 #' @importClassesFrom Matrix dgCMatrix sparseMatrix
 #' @importMethodsFrom Matrix t
-#' @importFrom spam as.spam.dgCMatrix rbind.spam solve.spam spam.options diag.spam
+#' @importFrom spam as.spam.dgCMatrix rbind.spam solve.spam spam.options diag.spam diag.spam<-
 #' @importClassesFrom spam spam spam.chol.NgPeyton
-#' @importMethodsFrom spam t chol rbind diag
+#' @importMethodsFrom spam t chol rbind diag 
 NULL
 
 #' subfunction of AmbergDeformSpam
@@ -247,9 +247,9 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=FALSE)
         ## Cholesky decomposition of Hessian H
         chk <- try(Hchol <- chol(H),silent = T)
         if (inherits(chk,"try-error")) {
-            diag.spam(H) <- diag.spam(H)+1e-12
+            diag(H) <- diag(H)+1e-12
             Hchol <- chol(H)
-            warning("unreferenced vertices will be set to zero")
+            warning("singularity avoided by adding 1e-12 to diagonal, please check result")
         }
         k <- solve.spam(Hchol,lambda*Jtc)
         v <- S$sel$allcoo
