@@ -14,7 +14,7 @@
 #' @param fullfit logical: if FALSE only the non-missing points will be used for registration.
 #' @param x vector of deviation in standard deviations, coordinate matrix or triangular mesh of class "mesh3d" to be predicted.
 #' @param sdmax maximum allowed standard deviation (per Principal axis) within the model space. Defines the probabilistic boundaries.
-#' @param mahaprob logical: use mahalanobis-distance to determine overall probability (of the shape projected into the model space. If FALSE the probability will be determined per PC separately.
+#' @param mahaprob character: if != "none", use mahalanobis-distance to determine overall probability (of the shape projected into the model space. "chisq" uses the Chi-Square distribution of the squared Mahalanobisdistance, while "dist" restricts the values to be within a multi-dimensional sphere of radius \code{sdmax}. If FALSE the probability will be determined per PC separately.
 #' @param reportProb logical: if TRUE, the output will be a list of the estimated probability and the (restricted) input.
 #' @param origSpace logical: rotate the estimation back into the original coordinate system.
 #' @param use.lm integer vector specifying row indices of the coordinates to use for rigid registration on the model's meanshape.
@@ -223,7 +223,7 @@ predictPCAcond <- function(x, model, refmesh,sdmax,pPCA=FALSE,...) UseMethod("pr
 
 #' #' @rdname pPCA
 #' @export
-predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,pPCA=FALSE,mahaprob=FALSE,...) {
+predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,pPCA=FALSE,...) {
     mshape <- model$mshape
     missingIndex <- model$missingIndex
     use.lm <- model$use.lm
@@ -232,24 +232,7 @@ predictPCAcond.matrix <- function(x, model,refmesh=FALSE,sdmax,origSpace=TRUE,pP
     sbres <- sb-mshape[use.lm,]
     alpha <- model$alphamean%*%as.vector(t(sbres))
     
-    if (!missing(sdmax)) {
-        if (mahaprob) {
-            sdl <- nrow(model$W)
-            Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
-            probs <- sum(alpha^2)
-            print(pchisq(probs,lower.tail=F,df=sdl))
-            if (probs > Mt ) {
-                sca <- Mt/probs
-                alpha <- alpha*sca
-            }
-        } else { 
-            signalpha <- sign(alpha)
-            alpha <- abs(alpha)
-            outlier <- which(alpha > sdmax)
-            alpha[outlier] <- sdmax
-            alpha <- alpha*signalpha
-        }
-    }
+   
     ##as.vector(W[,good]%*%alpha)
     estim <- t(as.vector(model$W%*%alpha)+t(mshape))
     if (pPCA)
@@ -285,7 +268,8 @@ predictpPCA <- function(x,model,refmesh=FALSE,...)UseMethod("predictpPCA")
 
 #' @rdname pPCA
 #' @export
-predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax,origSpace=TRUE,use.lm=NULL,mahaprob=FALSE,...) {
+predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax,origSpace=TRUE,use.lm=NULL,mahaprob=c("none","chisq","dist"),...) {
+    mahaprob <- substr(mahaprob[1],1L,1L)
     mshape <- model$mshape
     if (is.null(use.lm)) {
         rotsb <- rotonto(mshape,x,scale=model$scale,reflection = F)
@@ -298,43 +282,54 @@ predictpPCA.matrix <- function(x,model,refmesh=FALSE,sdmax,origSpace=TRUE,use.lm
    # W <- model$W
     alpha <- model$Win%*%as.vector(t(sbres))
     sdl <- nrow(model$Win)
-    Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
-    probs <- sum(alpha^2)
-    probout <- pchisq(probs,lower.tail = F,df=sdl)
-    if (!missing(sdmax)) {
-        if (mahaprob) {
+    
+     if (!missing(sdmax)) {
+         if (mahaprob != "n") {
+            sdl <- nrow(model$W)
+            probs <- sum(alpha^2)
+            if (mahaprob == "c") {
+                Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
+                probs <- sum(alpha^2)
+            } else if (mahaprob == "d") {
+                Mt <- sdmax
+                probs <- sqrt(probs)
+            }
             if (probs > Mt ) {
                 sca <- Mt/probs
                 alpha <- alpha*sca
             }
-        } else {
+        } else { 
             signalpha <- sign(alpha)
             alpha <- abs(alpha)
             outlier <- which(alpha > sdmax)
-            alpha[outlier] <- sdmax    
+            alpha[outlier] <- sdmax
             alpha <- alpha*signalpha
         }
     }
-    estim <- t(as.vector(model$W%*%alpha)+t(mshape))
-    if (origSpace)
-        estim <- rotreverse(estim,rotsb)
     
-    if (!is.null(model$refmesh) && class(model$refmesh) == "mesh3d" && refmesh) {
-        estimmesh <- model$refmesh
-        estimmesh$vb[1:3,] <- t(estim)
-        estimmesh <- vcgUpdateNormals(estimmesh)
-        estim <- estimmesh
-    }
-    
+    if ("coeffs" %in% names(list(...))) {
+        return(alpha)
+        
+    } else {
+        estim <- t(as.vector(model$W%*%alpha)+t(mshape))
+        if (origSpace)
+            estim <- rotreverse(estim,rotsb)
+        
+        if (!is.null(model$refmesh) && class(model$refmesh) == "mesh3d" && refmesh) {
+            estimmesh <- model$refmesh
+            estimmesh$vb[1:3,] <- t(estim)
+            estimmesh <- vcgUpdateNormals(estimmesh)
+            estim <- estimmesh
+        }
         return(estim)
-    
+    }
 }
 
 #' @rdname pPCA
 #' @export
-predictpPCA.mesh3d <- function(x,model,refmesh=FALSE,sdmax=2,origSpace=TRUE,use.lm=NULL,mahaprob=FALSE,...) {
+predictpPCA.mesh3d <- function(x,model,refmesh=FALSE,sdmax,origSpace=TRUE,use.lm=NULL,mahaprob=c("none","chisq","dist"),...) {
     mat <- t(x$vb[1:3,])
-    estim <- predictpPCA(vert2points(x),model=model,refmesh=refmesh,sdmax=sdmax,origSpace=origSpace,use.lm=use.lm,mahaprob=mahaprob)
+    estim <- predictpPCA(vert2points(x),model=model,refmesh=refmesh,sdmax=sdmax,origSpace=origSpace,use.lm=use.lm,mahaprob=mahaprob,...)
     return(estim)
 }
 
@@ -439,3 +434,12 @@ getProb.mesh3d <- function(x,model,use.lm=NULL) {
     out <- getProb(x,model=model,use.lm=use.lm)
     return(out)
 }
+
+#getCoefficients <- function(x, model) UseMethod("getCoefficients")
+#' @rdname pPCA
+#' @export
+getCoefficients <- function(x, model) {
+    out <- predictpPCA(x,model,coeffs=NULL)
+    return(out)
+}
+    
