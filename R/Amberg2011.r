@@ -247,7 +247,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=FALSE)
         if (inherits(chk,"try-error")) {
             diag(H) <- diag(H)+1e-12
             Hchol <- chol(H)
-            warning("unreferenced vertices are set to zero")
+            warning("unreferenced vertices will be set to zero")
         }
         k <- solve.spam(Hchol,lambda*Jtc)
         v <- S$sel$allcoo
