@@ -214,7 +214,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=FALSE)
         if (clean) {
             mesh <- vcgClean(mesh,sel=c(0:1),silent=T)
         }
-        spam.options( "cholsymmetrycheck"=FALSE)
+        spam.options(cholsymmetrycheck=FALSE)##disable symmetry check
         t0 <- Sys.time()
         out <- list()
         if (is.null(S))
@@ -222,7 +222,6 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=FALSE)
         ##convert S to class spam
         spamS <- as.spam.dgCMatrix(S$process)
         fn <- S$sel$normals
-        
         ## setup Jc Jacobian submatrix
         Jc <- createJc(lm1,ncol(spamS),mesh)
         Jc <- lambda*Jc
