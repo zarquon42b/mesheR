@@ -102,15 +102,15 @@ setMod.pPCA <- function(procMod,sigma=NULL,exVar=1) {
     sdsum <- sum(sds)
     sdVar <- sds/sdsum
     sdCum <- cumsum(sdVar)
-    if (is.null(sigma))
+   
+    usePC <- which(sdCum <= exVar)
+     if (is.null(sigma))
         sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
 
     if (sigma >= sdsum) {
         warning(paste("sigma > overall variance set to",sdsum/2))
         sigma <- sdsum/2
     }
-    usePC <- which(sdCum <= exVar)
-    
         
     Variance <- data.frame(eigenvalue=sds,exVar=sdVar, cumVar=sdCum) ##make Variance table 
     procMod$Variance <- Variance
@@ -143,7 +143,8 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
     sdsum <- sum(sds)
     sdVar <- sds/sdsum
     sdCum <- cumsum(sdVar)
-
+   
+    usePC <- which(sdCum <= exVar)
     if (is.null(sigma))
         sigma <- 1/(3*k)*sum(sds[-usePC]) ##estimate sigma from remaining Variance
 
@@ -151,7 +152,6 @@ setMod.pPCAcond <- function(procMod,sigma=NULL,exVar=1) {
         warning(paste("sigma > overall variance set to",sdsum/2))
         sigma <- sdsum/2
     }
-    usePC <- which(sdCum <= exVar)
     Variance <- data.frame(eigenvalues=sds,exVar=sdVar, cumVar=sdCum) ##make Variance table
     procMod$Variance <- Variance
     procMod$exVar <- exVar
@@ -460,5 +460,22 @@ getProb.mesh3d <- function(x,model,use.lm=NULL) {
 getCoefficients <- function(x, model,use.lm=NULL) {
     out <- predictpPCA(x,model,use.lm,coeffs=NULL)
     return(out)
+}
+
+#' get per coordinate variance from a statistical model
+#'
+#' get per coordinate variance from a statistical model
+#'
+#' @param model object of class pPCA
+#' @export
+getCoordVar <- function(model) {
+    if (!inherits(model,"pPCA"))
+        stop("please provide model of class pPCA")
+    W <- model$W
+    m <- ncol(model$mshape)
+    cov0 <- apply((W*W),1,function(x) sum(x))
+    mat <- matrix(cov0,nrow=(length(cov0)/m),m,byrow = T)
+    cov0 <- apply(mat,1,function(x) x <- sqrt(sum(x^2)))
+    return(cov0)
 }
     
