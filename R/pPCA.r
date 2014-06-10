@@ -467,8 +467,14 @@ getCoefficients <- function(x, model,use.lm=NULL) {
 #' get per coordinate variance from a statistical model
 #'
 #' @param model object of class pPCA
+#' @rdname getCoordVar
 #' @export
-getCoordVar <- function(model) {
+#'
+getCoordVar <- function(model)UseMethod("getCoordVar")
+
+#' @rdname getCoordVar
+#' @export
+getCoordVar.pPCA <- function(model) {
     if (!inherits(model,"pPCA"))
         stop("please provide model of class pPCA")
     W <- model$W
@@ -477,5 +483,13 @@ getCoordVar <- function(model) {
     mat <- matrix(cov0,nrow=(length(cov0)/m),m,byrow = T)
     cov0 <- apply(mat,1,function(x) x <- sqrt(sum(x^2)))
     return(cov0)
+}
+
+#' @rdname getCoordVar
+#' @export
+getCoordVar.pPCAcond <- function(model) {
+    pca <- as.pPCA(model,model$mshape)
+    out <- getCoordVar(pca)
+    return(out)
 }
     

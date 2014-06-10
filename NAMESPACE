@@ -2,6 +2,8 @@
 
 S3method(as.pPCA,pPCAcond)
 S3method(as.pPCAcond,pPCA)
+S3method(getCoordVar,pPCA)
+S3method(getCoordVar,pPCAcond)
 S3method(getProb,matrix)
 S3method(getProb,mesh3d)
 S3method(predictPCAcond,matrix)
