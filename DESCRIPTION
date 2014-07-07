@@ -15,8 +15,9 @@ Imports:
     Morpho (>= 2.0.2.140506),
     Matrix,
     rgl(>= 0.93.963),
-    spam,
-    rhdf5
+    spam
+Suggests:
+    RvtkStatismo
 License: GPL-2
 Copyright: see COPYRIGHTS file
 LazyLoad: yes

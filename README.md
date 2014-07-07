@@ -11,8 +11,7 @@ This code is still under development, the API may change without further notice,
      2. install additional dependencies from CRAN (type the following commands into your R terminal):: 
                
 		
-			setRepositories(ind=1:2)
-			install.packages(c("spam","colorspace","rhdf5"))
+				install.packages(c("spam","colorspace"))
 
 
    1. Download the version suitable for your OS Either the compiled package (for Windows and OS X) or the source tarball (Linux) from [here](https://sourceforge.net/projects/morpho-rpackage/files/mesheR/).
@@ -42,5 +41,4 @@ During installation of *Rtools* make sure to install the *toolchain*, and to sel
 
 	
 		require(devtools)
-		setRepositories(ind=1:2)
 		install_github("zarquon42b/mesheR")
