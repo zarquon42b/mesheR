@@ -64,6 +64,7 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
               cat("*")
           copymesh <- mesh1
           if (!is.null(subsample)) {
+              minclost <- min(minclost,subsample)
               nvb <- ncol(copymesh$vb)
               subs0 <- sort(sample(1:nvb)[1:min(subsample,nvb)])
               copymesh$vb <- copymesh$vb[,subs0]
