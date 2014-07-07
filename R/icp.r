@@ -29,6 +29,7 @@
 #' closemeshKD from the package Morpho, while vcg calls vcgClostKD from Rvcg.
 #' If the tow meshes have only little or no overlap, "vcg" can be really slow. Otherwise very fast. "morpho" is the stable but somewhat slower algorithm.
 #' @param silent logical: no verbosity
+#' @param subsample integer use a random subsample to find closest points for  - subsample specifies the size of this subsample.
 #' @return Returns the rotated mesh1.
 #' @author Stefan Schlager
 #' @seealso \code{\link{rotmesh.onto}}, \code{\link{rotonto}}
@@ -45,7 +46,7 @@
 #' shade3d(rotnose,col=2,alpha=0.7)
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE)
+icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL)
   {
       mesh1 <- updateNormals(mesh1)
       mesh2 <- updateNormals(mesh2)
@@ -61,14 +62,23 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
       for( i in 1:iterations) {
           if (!silent)
               cat("*")
-          proMesh <- project3d(mesh1,mesh2,sign=F,k=k) ## project mesh1 onto mesh2
-          x1 <- vert2points(mesh1)
+          copymesh <- mesh1
+          if (!is.null(subsample)) {
+              nvb <- ncol(copymesh$vb)
+              subs0 <- sort(sample(1:nvb)[1:min(subsample,nvb)])
+              copymesh$vb <- copymesh$vb[,subs0]
+              if (!is.null(copymesh$normals))
+                  copymesh$normals <- copymesh$normals[,subs0]
+              copymesh$it <- NULL
+          }
+          proMesh <- project3d(copymesh,mesh2,sign=F,k=k) ## project mesh1 onto mesh2
+          x1 <- vert2points(copymesh)
           x2 <- vert2points(proMesh)
           dists <- abs(proMesh$quality)
-          
+         
           ## check if normals angles are below rhotol
           
-          normchk <- normcheck(mesh1,proMesh)
+          normchk <- normcheck(copymesh,proMesh)
           goodnorm <- which(normchk < rhotol)
           x1 <- x1[goodnorm,]
           x2 <- x2[goodnorm,]

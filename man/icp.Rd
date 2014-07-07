@@ -6,7 +6,7 @@
 icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
   uprange = 0.9, maxdist = NULL, minclost = 50, distinc = 0.5,
   rhotol = pi, k = 50, reflection = FALSE, pro = c("vcg", "morpho"),
-  silent = FALSE)
+  silent = FALSE, subsample = NULL)
 }
 \arguments{
 \item{mesh1}{object of class "mesh3d".}
@@ -45,6 +45,8 @@ closemeshKD from the package Morpho, while vcg calls vcgClostKD from Rvcg.
 If the tow meshes have only little or no overlap, "vcg" can be really slow. Otherwise very fast. "morpho" is the stable but somewhat slower algorithm.}
 
 \item{silent}{logical: no verbosity}
+
+\item{subsample}{integer use a random subsample to find closest points for  - subsample specifies the size of this subsample.}
 }
 \value{
 Returns the rotated mesh1.
