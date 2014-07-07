@@ -29,7 +29,7 @@
 #' closemeshKD from the package Morpho, while vcg calls vcgClostKD from Rvcg.
 #' If the tow meshes have only little or no overlap, "vcg" can be really slow. Otherwise very fast. "morpho" is the stable but somewhat slower algorithm.
 #' @param silent logical: no verbosity
-#' @param subsample integer use a random subsample to find closest points for  - subsample specifies the size of this subsample.
+#' @param subsample integer use a subsample (using kmeans clustering) to find closest points for  - subsample specifies the size of this subsample.
 #' @return Returns the rotated mesh1.
 #' @author Stefan Schlager
 #' @seealso \code{\link{rotmesh.onto}}, \code{\link{rotonto}}
@@ -50,6 +50,8 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
   {
       mesh1 <- updateNormals(mesh1)
       mesh2 <- updateNormals(mesh2)
+      if (!is.null(subsample))
+          subs0 <- duplicated(sample(kmeans(vert2points(mesh1),center=subsample,iter.max =100)$cluster))
       pro <- substring(pro[1],1L,1L)
       if (pro == "v") {
           project3d <- vcgClostKD
@@ -66,10 +68,11 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
           if (!is.null(subsample)) {
               minclost <- min(minclost,subsample)
               nvb <- ncol(copymesh$vb)
-              subs0 <- sort(sample(1:nvb)[1:min(subsample,nvb)])
-              copymesh$vb <- copymesh$vb[,subs0]
+              
+              #subs0 <- sort(sample(1:nvb)[1:min(subsample,nvb)])
+              copymesh$vb <- copymesh$vb[,!subs0]
               if (!is.null(copymesh$normals))
-                  copymesh$normals <- copymesh$normals[,subs0]
+                  copymesh$normals <- copymesh$normals[,!subs0]
               copymesh$it <- NULL
           }
           proMesh <- project3d(copymesh,mesh2,sign=F,k=k) ## project mesh1 onto mesh2
