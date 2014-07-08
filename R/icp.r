@@ -51,7 +51,7 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
       mesh1 <- updateNormals(mesh1)
       mesh2 <- updateNormals(mesh2)
       if (!is.null(subsample))
-          subs0 <- duplicated(sample(kmeans(vert2points(mesh1),center=subsample,iter.max =100)$cluster))
+          subs0 <- duplicated(kmeans(vert2points(mesh1),center=subsample,iter.max =100)$cluster)
       pro <- substring(pro[1],1L,1L)
       if (pro == "v") {
           project3d <- vcgClostKD
