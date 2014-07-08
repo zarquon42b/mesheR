@@ -55,7 +55,8 @@ RcppExport SEXP displaceGauss(SEXP iomat_, SEXP Wvb_, SEXP Pvb_, SEXP D1_, SEXP 
   mat armaWvb(Wvb.begin(), Wvb.nrow(), Wvb.ncol());
   NumericMatrix Pvb(Pvb_);
   mat armaPvb(Pvb.begin(), Pvb.nrow(), Pvb.ncol());
-  
+  //int cores = as<int>(cores_);
+
   NumericMatrix D1(D1_);
   mat armaD1(D1.begin(), D1.nrow(), D1.ncol());
   
@@ -94,6 +95,7 @@ RcppExport SEXP displaceGauss(SEXP iomat_, SEXP Wvb_, SEXP Pvb_, SEXP D1_, SEXP 
       diff2[i] = 0;
   }
   mat out(iomat.begin(), iomat.nrow(), iomat.ncol());
+  // #pragma omp parallel num_threads(cores)
   #pragma omp parallel for schedule(static)
   for (uint i = 0; i < iomat.nrow(); i++) {
     rowvec pt = iomat(i,_);

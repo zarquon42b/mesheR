@@ -6,7 +6,7 @@
 areafun(x)
 }
 \arguments{
-\item{x}{n x 4  matrix containing cornerstones of area}
+\item{x}{n x 12  matrix containing cornerstones of area}
 }
 \description{
 calculate area between edge and barycenters of adjacent faces needed in AijkWeights

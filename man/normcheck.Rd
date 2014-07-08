@@ -3,7 +3,7 @@
 \alias{normcheck}
 \title{compare normal directions between two states of a mesh}
 \usage{
-normcheck(mesh1, mesh2, colwise = TRUE)
+normcheck(mesh1, mesh2)
 }
 \arguments{
 \item{mesh1}{triangular mesh}

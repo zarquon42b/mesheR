@@ -1,5 +1,5 @@
 ## @export gaussDisplace
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,cores=parallel::detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...)
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...)
 {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
     ## set projection function according to input request
@@ -88,32 +88,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     
     tol <- tol^2
 ### make multicore 
-    mclist <- list()
-    nx <- dim(W0)[1]
-    if (cores > 1) {
-        iter <-floor(nx/cores)    
-        for (i in 1:(cores-1)) {
-            mclist[[i]] <- list()
-            mclist[[i]][[1]] <- W0[(1:iter)+((i-1)*iter),]
-            mclist[[i]][[2]] <-c((1:iter)+((i-1)*iter))
-        }
-        mclist[[cores]] <-   list()
-        mclist[[cores]][[1]] <- W0[-c(1:((cores-1)*iter)),]
-        mclist[[cores]][[2]] <- c(1:dim(W0)[1])[-c(1:((cores-1)*iter))]
-    } else {
-        mclist[[1]] <- list()
-        mclist[[1]][[1]] <- W0
-        mclist[[1]][[2]] <- 1:nx
-    }
-    ## define function to be run in parallel
-    displacefun <- function(x,...) {
-        tmp0 <- .Call("displaceGauss",x[[1]],S0,M,D1,D2,sigma,gamma,clostIndW[x[[2]],],clostIndP[x[[2]],],tol=tol,rt0,rt1,rc,oneway,PACKAGE="mesheR")
-            return(tmp0)
-        }
-    tmp <- mclapply(mclist,displacefun,mc.cores=cores)
-    
-    for (i in 1:cores)
-        out <- rbind(out,tmp[[i]])
+        
+    out <- .Call("displaceGauss",W0,S0,M,D1,D2,sigma,gamma,clostIndW,clostIndP,tol=tol,rt0,rt1,rc,oneway,PACKAGE="mesheR")
     addit <- W0+out
     return(list(addit=addit))
 }
@@ -164,8 +140,6 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' latter.
 #' @param repro Logical: If TRUE, a reprojection of patch onto the iteratively
 #' estimated target surface will be performed after each iteration.
-#' @param cores integer: number of CPU cores to be used for multithreaded
-#' subroutines.
 #' @param pro which projection method to use: "m"= \code{\link{closemeshKD}}
 #' from Morpho; "v"= \code{\link{vcgClost}} from package Rvcg
 #' @param k0 Integer: argument passed to closemeshKD (will be argument "k" in
@@ -218,7 +192,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,cores=parallel::detectCores(),pro=c("morpho","vcg"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,...)
+gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,nh=NULL,toldist=0,patch=NULL,repro=FALSE,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,...)
     {
         Amberg <- FALSE
         ##setup variables
@@ -292,7 +266,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                 }
             }
             ## call the workhorse doing the displacement
-            tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,cores=cores,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
+            tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
             
             if (Amberg) {#smooth deformation
                 tmpmesh <- mesh1
