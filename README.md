@@ -11,7 +11,7 @@ This code is still under development, the API may change without further notice,
      2. install additional dependencies from CRAN (type the following commands into your R terminal):: 
                
 		
-				install.packages(c("spam","colorspace"))
+				install.packages(c("spam","colorspace", "Rcpp","RcppArmadillo"))
 
 
    1. Download the version suitable for your OS Either the compiled package (for Windows and OS X) or the source tarball (Linux) from [here](https://sourceforge.net/projects/morpho-rpackage/files/mesheR/).
