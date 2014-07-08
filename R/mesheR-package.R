@@ -22,6 +22,7 @@
 #' @importFrom Morpho angle.calc closemeshKD conv2backf facenormals file2mesh mcNNindex meshcube meshDist meshres projRead rmUnrefVertex rmVertex rotmesh.onto rotonmat rotonto tanplan tps3d unrefVertex updateNormals vert2points warp.mesh
 #' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgRaySearch vcgNonBorderEdge vcgSmooth vcgClostKD
 #' @importFrom parallel detectCores mclapply
+#' @importFrom Rcpp evalCpp
 #' @import rhdf5
 #' 
 

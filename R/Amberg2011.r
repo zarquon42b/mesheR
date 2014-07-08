@@ -81,15 +81,12 @@ createArcNode <- function(mesh)
 #' subfunction of AmbergDeformSpam
 #'
 #' calculate area between edge and barycenters of adjacent faces needed in AijkWeights
-#' @param x n x 4  matrix containing cornerstones of area 
+#' @param x n x 12  matrix containing cornerstones of area 
 #' @export areafun
 areafun <- function(x)
     {
-        m <- nrow(x)
-        storage.mode(x) <- "double"
-        out <- as.double(rep(0,m))
-        out <- .Fortran("areafun",x,m,out)
-        return(out[[3]])
+        out <- as.vector(.Call("areafun",x))
+        return(out)
     }
 
 #' subfunction of AmbergDeformSpam

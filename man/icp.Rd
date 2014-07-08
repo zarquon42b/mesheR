@@ -46,7 +46,7 @@ If the tow meshes have only little or no overlap, "vcg" can be really slow. Othe
 
 \item{silent}{logical: no verbosity}
 
-\item{subsample}{integer use a random subsample to find closest points for  - subsample specifies the size of this subsample.}
+\item{subsample}{integer use a subsample (using kmeans clustering) to find closest points for  - subsample specifies the size of this subsample.}
 }
 \value{
 Returns the rotated mesh1.

@@ -5,7 +5,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     ## set projection function according to input request
     pro <- substring(pro[1],1L,1L)
     if (pro == "v") {
-        project3d <- vcgClost
+        project3d <- vcgClostKD
      } else if (pro == "m") {
          protmp <- function(x,y,sign=F) {
              out <- closemeshKD(x,y,k=k0,sign=sign,method=prometh)
@@ -31,9 +31,9 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     }
     ## get neighbourhood for each point to minimize calculation time
     if (!is.null (nh)) {
-        clostIndW <- mcNNindex(S,W0,k=nh,cores=cores,...)
+        clostIndW <- vcgKDtree(S,W0,k=nh)$index-1
         if (!oneway)
-            clostIndP <- mcNNindex(M,W0,k=nh,cores=cores,...)
+            clostIndP <- vcgKDtree(M,W0,k=nh)$index-1
         else
             clostIndP <- matrix(0,dim(W0)[1],nh)
     }
@@ -106,9 +106,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
         mclist[[1]][[2]] <- 1:nx
     }
     ## define function to be run in parallel
-    displacefun <- function(x,...)
-        {
-            tmp0 <- .Fortran("displace_mesh_gauss",x[[1]],nrow(x[[1]]),S0,nrow(S0),M,nrow(M),D1,D2,sigma,gamma,oneway,clostIndW[x[[2]],],nh,clostIndP[x[[2]],],tol=tol,rt0,rt1,rc,PACKAGE="mesheR")[[1]]
+    displacefun <- function(x,...) {
+        tmp0 <- .Call("displaceGauss",x[[1]],S0,M,D1,D2,sigma,gamma,clostIndW[x[[2]],],clostIndP[x[[2]],],tol=tol,rt0,rt1,rc,oneway,PACKAGE="mesheR")
             return(tmp0)
         }
     tmp <- mclapply(mclist,displacefun,mc.cores=cores)
@@ -215,7 +214,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 #' ### result won't be too good as the surfaces do stronly differ.
 #' match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=3,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
-#' @importFrom Rvcg vcgClostKD
+#' @importFrom Rvcg vcgClostKD vcgKDtree
 #' @export
 #'
 #' @useDynLib mesheR

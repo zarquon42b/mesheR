@@ -115,23 +115,15 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
 #' compare normal directions between two states of a mesh
 #' @param mesh1 triangular mesh
 #' @param mesh2 triangular mesh
-#' @param circle logical: which method to use calculating the angel
+#' @param colwise logical: if TRUE, the columns will be compared.
 #'
 #' @return numeric vector containing angles between corresponding normals
 #' @export normcheck
 
-normcheck <- function(mesh1,mesh2,circle=TRUE)
+normcheck <- function(mesh1,mesh2)
   {
     x1norm <- mesh1$normals[1:3,]
     x2norm <- mesh2$normals[1:3,]
-    ln <- dim(x2norm)[[2]]
-    circle <- as.integer(circle)
-    normcheck <- rep(0,dim(x2norm)[2])
-    storage.mode(normcheck) <- "double"
-    storage.mode(x1norm) <- "double"
-    storage.mode(x2norm) <- "double"
-    storage.mode(ln) <- "integer"
-    storage.mode(circle) <- "integer"
-    normcheck <- .Fortran("angcheck",x1norm,ln,x2norm,normcheck,circle)[[4]]
+    normcheck <- .Call("angcheck",x1norm,x2norm)
     return(normcheck)
   }

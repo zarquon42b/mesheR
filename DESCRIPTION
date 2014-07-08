@@ -15,9 +15,11 @@ Imports:
     Morpho (>= 2.0.2.140506),
     Matrix,
     rgl(>= 0.93.963),
-    spam
+    spam,
+    Rcpp
 Suggests:
     RvtkStatismo
+LinkingTo: Rcpp, RcppArmadillo
 License: GPL-2
 Copyright: see COPYRIGHTS file
 LazyLoad: yes
