@@ -7,10 +7,10 @@ gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, icp = FALSE,
   icpiter = 3, uprange = 0.95, rhotol = 1, nh = NULL, toldist = 0,
-  patch = NULL, repro = FALSE, cores = parallel::detectCores(),
-  pro = c("morpho", "vcg"), k0 = 50, prometh = 1, angtol = NULL,
-  border = FALSE, horiz.disp = NULL, AmbergK = NULL,
-  AmbergLambda = NULL, silent = FALSE, Bayes = NULL, ...)
+  patch = NULL, repro = FALSE, pro = c("vcg", "morpho"), k0 = 50,
+  prometh = 1, angtol = NULL, border = FALSE, horiz.disp = NULL,
+  AmbergK = NULL, AmbergLambda = NULL, silent = FALSE, Bayes = NULL,
+  ...)
 }
 \arguments{
 \item{mesh1}{An object of class mesh3d used as atlas mesh to be deformed
@@ -67,9 +67,6 @@ latter.}
 
 \item{repro}{Logical: If TRUE, a reprojection of patch onto the iteratively
 estimated target surface will be performed after each iteration.}
-
-\item{cores}{integer: number of CPU cores to be used for multithreaded
-subroutines.}
 
 \item{pro}{which projection method to use: "m"= \code{\link{closemeshKD}}
 from Morpho; "v"= \code{\link{vcgClost}} from package Rvcg}
