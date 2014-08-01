@@ -152,11 +152,11 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
             rglid <- wire3d(tmp$mesh,col="white")
            
             if (!is.null(folder)) {
-                if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") {
+                if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") 
                     folder <- paste(folder,"/",sep="")
-                    dir.create(folder,showWarnings=F)
-                    movie <- paste(folder,"deformation",sep="")
-                }
+                dir.create(folder,showWarnings=F)
+                movie <- paste(folder,"deformation",sep="")
+                
                 npics <- nchar(iterations+1)
                 ndec <- paste0("%s%0",npics,"d.png")
             }
