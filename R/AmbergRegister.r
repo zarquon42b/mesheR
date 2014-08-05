@@ -34,9 +34,9 @@
 #' includes scaling.
 #' @param reflection logical: if TRUE, initial landmark based rigid registration
 #' allows reflections.
-#' @param icp list of length 4. Passing parameters to \code{\link{icp}},
+#' @param icp named list. Passing parameters to \code{\link{icp}},
 #' which is performed after intial landmark based registration (scaling, rotation and translation). The parameters
-#' are icp[[1]]=iterations; icp[[2]]=rhotol; icp[[3]]=uprange, and icp[[4]]=type. If
+#' are icp[[1]]=iterations; icp[[2]]=rhotol; icp[[3]]=uprange, and icp[[4]]=type icp[[5]= subsample. If
 #' icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,"affine") will
 #' result in 3 icp iterations, condidering the closest 60\% of correspondences
 #' with normal deviation of pi/2 and an affine transformation.
@@ -107,7 +107,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
             if (!is.null(icp)) {##perform initial icp-matching
                 bary <- vcgClost(lm1,mesh1,barycentric = T)
-                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp[[1]],rhotol=icp[[2]],uprange=icp[[3]],type=icp[[4]],reflection=reflection, silent=silent)
+                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp$iterations,rhotol=icp$rhotol,uprange=icp$uprange,type=icp$type, silent=silent,subsample = icp$subsample)
                 tmp <- list()
                 tmp$mesh <- mesh1
                 if (!useiter && !forceLM)
@@ -135,6 +135,13 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                     stopit <- TRUE
             }
             verts0 <- vert2points(mesh1)
+        } else if (!is.null(icp)) {
+            meshorig <- mesh1 <- icp(mesh1,mesh2,iterations=icp$iterations,rhotol=icp$rhotol,uprange=icp$uprange,type=icp$type, silent=silent,subsample = icp$subsample)
+             tmp <- list(mesh=mesh1)
+             if (!useiter)
+                tmp$S <- createS(mesh1)
+             verts0 <- vert2points(mesh1)
+        
         } else {   ## case: meshes are already aligned
             tmp <- list()
             tmp$mesh <- mesh1
