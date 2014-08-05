@@ -41,11 +41,11 @@ warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=
     ndec <- paste0("%s%0",npics,"d.png")
 
     if(!is.null(folder)) {
-        if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") {
+        if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") 
             folder<-paste(folder,"/",sep="")
-            dir.create(folder,showWarnings=F)
-            movie <- paste(folder,movie,sep="")
-        }
+        dir.create(folder,showWarnings=F)
+        movie <- paste(folder,movie,sep="")
+        
     }
     if (!is.null(col)) {
         args[[1]] <- colorMesh(args[[1]],col)

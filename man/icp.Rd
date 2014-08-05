@@ -3,10 +3,10 @@
 \alias{icp}
 \title{Iterative closest point matching between two triangular meshes.}
 \usage{
-icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
-  uprange = 0.9, maxdist = NULL, minclost = 50, distinc = 0.5,
-  rhotol = pi, k = 50, reflection = FALSE, pro = c("vcg", "morpho"),
-  silent = FALSE, subsample = NULL)
+icp(mesh1, mesh2, iterations = 3, lm1 = NULL, lm2 = NULL, uprange = 0.9,
+  maxdist = NULL, minclost = 50, distinc = 0.5, rhotol = pi, k = 50,
+  reflection = FALSE, pro = c("vcg", "morpho"), silent = FALSE,
+  subsample = NULL, type = c("rigid", "similarity", "affine"))
 }
 \arguments{
 \item{mesh1}{object of class "mesh3d".}
@@ -14,8 +14,6 @@ icp(mesh1, mesh2, iterations = 3, scale = T, lm1 = NULL, lm2 = NULL,
 \item{mesh2}{object of class "mesh3d".}
 
 \item{iterations}{integer}
-
-\item{scale}{lgoical: scale reference mesh to optimize fit.}
 
 \item{lm1}{optional: kx3 matrix containing reference points on mesh1.}
 
@@ -47,6 +45,8 @@ If the tow meshes have only little or no overlap, "vcg" can be really slow. Othe
 \item{silent}{logical: no verbosity}
 
 \item{subsample}{integer use a subsample (using kmeans clustering) to find closest points for  - subsample specifies the size of this subsample.}
+
+\item{type}{set type of affine transformation: options are "affine", "rigid" and "similarity" (rigid + scale)}
 }
 \value{
 Returns the rotated mesh1.
