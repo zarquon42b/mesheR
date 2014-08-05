@@ -10,7 +10,6 @@
 #' @param mesh1 object of class "mesh3d". 
 #' @param mesh2 object of class "mesh3d". 
 #' @param iterations integer
-#' @param scale lgoical: scale reference mesh to optimize fit.
 #' @param lm1 optional: kx3 matrix containing reference points on mesh1. 
 #' @param lm2 optional: kx3 matrix containing reference points on mesh2.
 #' @param uprange quantile of distances between vertices of mesh1 and closest
@@ -30,6 +29,7 @@
 #' If the tow meshes have only little or no overlap, "vcg" can be really slow. Otherwise very fast. "morpho" is the stable but somewhat slower algorithm.
 #' @param silent logical: no verbosity
 #' @param subsample integer use a subsample (using kmeans clustering) to find closest points for  - subsample specifies the size of this subsample.
+#' @param type set type of affine transformation: options are "affine", "rigid" and "similarity" (rigid + scale)
 #' @return Returns the rotated mesh1.
 #' @author Stefan Schlager
 #' @seealso \code{\link{rotmesh.onto}}, \code{\link{rotonto}}
@@ -46,7 +46,7 @@
 #' shade3d(rotnose,col=2,alpha=0.7)
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL)
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,type=c("rigid","similarity","affine"))
   {
       mesh1 <- updateNormals(mesh1)
       mesh2 <- updateNormals(mesh2)
@@ -58,8 +58,10 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
       } else if (pro == "m") {
           project3d <- closemeshKD
       }
-      if (!is.null(lm1))## perform initial rough registration
-          mesh1 <- rotmesh.onto(mesh1,lm1,lm2,scale=scale,reflection=reflection)$mesh
+      if (!is.null(lm1)){## perform initial rough registration
+          trafo <- computeTransform(lm2,lm1,type=type)
+          mesh1 <- applyTransform(mesh1,trafo)
+      }
       
       for( i in 1:iterations) {
           if (!silent)
@@ -104,7 +106,8 @@ icp <- function(mesh1, mesh2, iterations=3,scale=T, lm1=NULL, lm2=NULL, uprange=
                   increase <- increase+distinc
               }
           }
-          mesh1 <- rotmesh.onto(mesh1,x1[good,],x2[good,],scale=scale)$mesh
+          trafo <- computeTransform(x2[good,],x1[good,],type=type)
+          mesh1 <- applyTransform(mesh1,trafo)
       }
       if (!silent)
           cat("\n")

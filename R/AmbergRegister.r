@@ -34,12 +34,12 @@
 #' includes scaling.
 #' @param reflection logical: if TRUE, initial landmark based rigid registration
 #' allows reflections.
-#' @param icp vector of length 4. Passing parameters to \code{\link{icp}},
+#' @param icp list of length 4. Passing parameters to \code{\link{icp}},
 #' which is performed after intial landmark based registration (scaling, rotation and translation). The parameters
-#' are icp[1]=iterations; icp[2]=rhotol; icp[3]=uprange, and icp[4]=scale. If
-#' icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,TRUE) will
+#' are icp[[1]]=iterations; icp[[2]]=rhotol; icp[[3]]=uprange, and icp[[4]]=type. If
+#' icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,"affine") will
 #' result in 3 icp iterations, condidering the closest 60\% of correspondences
-#' with normal deviation of pi/2 and include scaling.
+#' with normal deviation of pi/2 and an affine transformation.
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.
 #' @param silent logical: no verbosity
 #' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
@@ -83,9 +83,9 @@
 #' # render original mesh as wireframe
 #' wire3d(humface)
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
-#' @importFrom Morpho meshcube
+#' @importFrom Morpho meshcube applyTransform computeTransform
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, scale=TRUE, reflection=FALSE, icp=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,visualize=FALSE, folder=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, type="rigid", reflection=FALSE, icp=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,visualize=FALSE, folder=NULL)
     {
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
@@ -107,7 +107,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
             if (!is.null(icp)) {##perform initial icp-matching
                 bary <- vcgClost(lm1,mesh1,barycentric = T)
-                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp[1],rhotol=icp[2],uprange=icp[3],scale=icp[4],reflection=reflection, silent=silent)
+                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp[[1]],rhotol=icp[[2]],uprange=icp[[3]],type=icp[[4]],reflection=reflection, silent=silent)
                 tmp <- list()
                 tmp$mesh <- mesh1
                 if (!useiter && !forceLM)
@@ -122,9 +122,9 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 }
                 
             } else {
-                mesh1rot <- rotmesh.onto(mesh1,lm1,lm2,scale=scale, reflection=reflection,adnormals=TRUE)
-                lm1 <- mesh1rot$yrot
-                meshorig <- mesh1 <- mesh1rot$mesh
+                trafo <- computeTransform(lm2,lm1,type=type)
+                lm1 <- applyTransform(lm1,trafo)
+                meshorig <- mesh1 <-applyTransform(mesh1,trafo)
                 lmtmp1 <- lm1
                 lmtmp2 <- lm2
                 if (!silent)
