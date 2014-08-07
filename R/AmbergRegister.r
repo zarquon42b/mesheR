@@ -107,7 +107,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
             if (!is.null(icp)) {##perform initial icp-matching
                 bary <- vcgClost(lm1,mesh1,barycentric = T)
-                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp$iterations,rhotol=icp$rhotol,uprange=icp$uprange,type=icp$type, silent=silent,subsample = icp$subsample)
+                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp$iterations,rhotol=icp$rhotol,uprange=max(icp$uprange,0.9),type=icp$type, silent=silent,subsample = icp$subsample)
                 tmp <- list()
                 tmp$mesh <- mesh1
                 if (!useiter && !forceLM)
@@ -136,7 +136,8 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
             }
             verts0 <- vert2points(mesh1)
         } else if (!is.null(icp)) {
-            meshorig <- mesh1 <- icp(mesh1,mesh2,iterations=icp$iterations,rhotol=icp$rhotol,uprange=icp$uprange,type=icp$type, silent=silent,subsample = icp$subsample)
+            print("a")
+            meshorig <- mesh1 <- icp(mesh1,mesh2,iterations=icp$iterations,rhotol=icp$rhotol,uprange=max(icp$uprange,0.9),type=icp$type, silent=silent,subsample = icp$subsample)
              tmp <- list(mesh=mesh1)
              if (!useiter)
                 tmp$S <- createS(mesh1)
