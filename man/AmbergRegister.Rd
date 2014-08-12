@@ -61,12 +61,12 @@ includes scaling.}
 \item{reflection}{logical: if TRUE, initial landmark based rigid registration
 allows reflections.}
 
-\item{icp}{vector of length 4. Passing parameters to \code{\link{icp}},
+\item{icp}{named list. Passing parameters to \code{\link{icp}},
 which is performed after intial landmark based registration (scaling, rotation and translation). The parameters
-are icp[1]=iterations; icp[2]=rhotol; icp[3]=uprange, and icp[4]=scale. If
-icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,TRUE) will
+are icp[[1]]=iterations; icp[[2]]=rhotol; icp[[3]]=uprange, and icp[[4]]=type icp[[5]= subsample. If
+icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,"affine") will
 result in 3 icp iterations, condidering the closest 60\% of correspondences
-with normal deviation of pi/2 and include scaling.}
+with normal deviation of pi/2 and an affine transformation.}
 
 \item{nn}{integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.}
 

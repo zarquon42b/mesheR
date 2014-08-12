@@ -6,11 +6,11 @@
 gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, icp = FALSE,
-  icpiter = 3, uprange = 0.95, rhotol = 1, nh = NULL, toldist = 0,
-  patch = NULL, repro = FALSE, pro = c("vcg", "morpho"), k0 = 50,
-  prometh = 1, angtol = NULL, border = FALSE, horiz.disp = NULL,
-  AmbergK = NULL, AmbergLambda = NULL, silent = FALSE, Bayes = NULL,
-  ...)
+  icpiter = 3, uprange = 0.95, rhotol = 1, type = "a",
+  subsample = NULL, nh = NULL, toldist = 0, patch = NULL,
+  repro = FALSE, pro = c("vcg", "morpho"), k0 = 50, prometh = 1,
+  angtol = NULL, border = FALSE, horiz.disp = NULL, AmbergK = NULL,
+  AmbergLambda = NULL, silent = FALSE, Bayes = NULL, ...)
 }
 \arguments{
 \item{mesh1}{An object of class mesh3d used as atlas mesh to be deformed
@@ -54,6 +54,8 @@ executed.}
 
 \item{rhotol}{Numeric: argument passed to \code{\link{icp}}.Exclude target
 points with deviation of normals larger than than rhotol.}
+
+\item{type}{character: argument passed to \code{\link{icp}}.Determines the type of transformation. can be one of "affine","rigid" or "similarity".}
 
 \item{nh}{Integer: neighbourhood (number vertices) for controlling
 displacement smoothing, default is 150/mesh resolution.}
