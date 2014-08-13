@@ -125,22 +125,14 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' initial rotation of mesh1 onto mesh2.
 #' @param lm2 A k x 3 matrix containing landmarks corrresponding to mesh2 for
 #' initial rotation of mesh1 onto mesh2.
-#' @param icp Logical: if TRUE, iterative closest point procedure will be
-#' executed.
-#' @param icpiter Integer: Number of iterations of icp.
-#' @param uprange argument passed to icp (see \code{\link{icp}})
-#' @param rhotol Numeric: argument passed to \code{\link{icp}}.Exclude target
-#' points with deviation of normals larger than than rhotol.
-#' @param type character: argument passed to \code{\link{icp}}.Determines the type of transformation. can be one of "affine","rigid" or "similarity".
+#' @param rigid named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.
+#' @param similarity named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).
+#'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
+#' @param reuseLM logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.
 #' @param nh Integer: neighbourhood (number vertices) for controlling
 #' displacement smoothing, default is 150/mesh resolution.
 #' @param toldist Integer: Exclude everything from the whole procedure with a
 #' greater distance from initial point than toldist. 0 disables this feature.
-#' @param patch A m x 3 matrix containing the atlas landmark configuration on
-#' mesh1 which is not present in mesh2 and will automatically placed on the
-#' latter.
-#' @param repro Logical: If TRUE, a reprojection of patch onto the iteratively
-#' estimated target surface will be performed after each iteration.
 #' @param pro which projection method to use: "m"= \code{\link{closemeshKD}}
 #' from Morpho; "v"= \code{\link{vcgClost}} from package Rvcg
 #' @param k0 Integer: argument passed to closemeshKD (will be argument "k" in
@@ -188,12 +180,14 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' ##warp a mesh onto another landmark configuration:
 #' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 #' ### result won't be too good as the surfaces do stronly differ.
-#' match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=3,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
+#' ## we start with an affine transformation initiated by landmarks
+#' affine <- list(iterations=200,subsample=100,rhotol=pi/2,uprange=0.9)
+#'  match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
 #' @importFrom Rvcg vcgClostKD vcgKDtree
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,icp=FALSE,icpiter=3,uprange=0.95,rhotol=1,type="a",subsample=NULL,nh=NULL,toldist=0,patch=NULL,repro=FALSE,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,...)
+gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,reuseLM=FALSE, nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,...)
     {
         Amberg <- FALSE
         ##setup variables
@@ -232,22 +226,45 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
             }
             project3d <- protmp
         }
-        ## set up patch 
-        rescue <- FALSE
-        if (!is.null(patch)) { ## append landmarks to meshes vertices
-            mesh1$vb <- cbind(mesh1$vb,rbind(t(patch),1))
-            colnames(mesh1$vb) <- NULL
-            mdim <- dim(mesh1$vb)
-            cols <- c((mdim[2]+1-dim(patch)[1]):mdim[2])
-            if (sum(substr(smoothtype,1L,1L) %in% c("h","H")) > 0 )
-                rescue <- TRUE
-        }
+        
         ## do icp matching
-        if (icp) {
-            if (!silent)
-                cat("performing icp matching\n")
-            mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,uprange=uprange,rhotol=rhotol,iterations=icpiter,pro=pro,k=k0,silent=silent,type=type,subsample=subsample)
+        if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
+            bary <- vcgClost(lm1,mesh1,barycentric = T) 
+            if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
+                if (!is.null(rigid)) { ##perform rigid icp-matching
+                    rigid$lm1 <- lm1
+                    rigid$lm2 <- lm2
+                    mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                }
+                if (!is.null(similarity)) {##similarity matching
+                   if (is.null(rigid) || reuseLM) {
+                        similarity$lm1 <- lm1
+                        similarity$lm2 <- lm2
+                    }
+                    mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+               }
+                if (!is.null(affine)) {##similarity matching
+                      if ((is.null(rigid) && is.null(similarity)) || reuseLM) {
+                         affine$lm1 <- lm1
+                         affine$lm2 <- lm2
+                     }
+                     mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                  }
+            }
+        } else {
+            if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
+                if (!is.null(rigid)) ##perform rigid icp-matching
+                    mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+                if (!is.null(similarity))##similarity matching
+                    mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+                if (!is.null(affine))##similarity matching
+                    mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+            }
         }
+        
         ## elastic matching starts
         if (!silent)
             cat("starting elastic matching\n****************\n")
@@ -255,15 +272,11 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
             time0 <- Sys.time()
             if (!is.null(smooth) && i > 1) {
                 if (i %% smooth == 0) {
-                    if(rescue && !is.null(patch))#keep patch from becoming NaN
-                        tmppatch <- mesh1$vb[1:3,cols]
                     if (!silent)
                         cat("smoothing step\n")
                     mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
                     if (!silent)
                         cat("smoothing finished\n")
-                    if (rescue && !is.null(patch))
-                        mesh1$vb[1:3,cols] <- tmppatch 
                 }
             }
             ## call the workhorse doing the displacement
@@ -287,20 +300,13 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
             mesh1 <- updateNormals(mesh1)
             
             
-            ## project the patch back on the temporary surface
-            if (!is.null(patch) && repro)
-                mesh1$vb[1:3,cols] <- project3d(t(mesh1$vb[1:3,cols]),mesh1)$vb[1:3,]
-            
             time1 <- Sys.time()
             if (!silent) {
                 cat(paste("completed iteration",i, "in", round(time1-time0,2), "seconds\n"))
                 cat("****************\n")
             }
         }
-        if (!is.null(patch))
-            invisible(list(mesh=mesh1,patch=vert2points(mesh1)[cols,]))
-        else
-            invisible(mesh1)
+        invisible(mesh1)
     }
 
 

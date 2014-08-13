@@ -6,9 +6,10 @@
 AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   iterations = 15, rho = pi/2, dist = 2, border = FALSE,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
-  useiter = TRUE, minclost = 50, distinc = 1, type = "rigid",
-  reflection = FALSE, icp = NULL, nn = 20, silent = FALSE,
-  Bayes = NULL, forceLM = FALSE, visualize = FALSE, folder = NULL)
+  useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
+  similarity = NULL, affine = NULL, nn = 20, silent = FALSE,
+  Bayes = NULL, forceLM = TRUE, reuseLM = FALSE, visualize = FALSE,
+  folder = NULL)
 }
 \arguments{
 \item{mesh1}{reference mesh: triangular mesh of class "mesh3d". No loose
@@ -16,9 +17,9 @@ vertices, edges and degenerated faces are allowed.}
 
 \item{mesh2}{target mesh: triangular mesh of class "mesh3d".}
 
-\item{lm1}{m x 3 matrix containing correspondences on "mesh1"}
+\item{lm1}{m x 3 matrix containing correspondences on "mesh1".}
 
-\item{lm2}{m x 3 matrix containing target correspondences on "mesh2"}
+\item{lm2}{m x 3 matrix containing target correspondences on "mesh2".}
 
 \item{k}{integer: parameter regularizing face normal distortion. Can be
 vector of length(iterations) or single value.}
@@ -55,20 +56,13 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 
 \item{distinc}{increment of dist, in case minclost is not reached.}
 
-\item{scale}{logical: if TRUE, initial landmark based rigid registration
-includes scaling.}
+\item{rigid}{named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.}
 
-\item{reflection}{logical: if TRUE, initial landmark based rigid registration
-allows reflections.}
+\item{similarity}{named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).}
 
-\item{icp}{named list. Passing parameters to \code{\link{icp}},
-which is performed after intial landmark based registration (scaling, rotation and translation). The parameters
-are icp[[1]]=iterations; icp[[2]]=rhotol; icp[[3]]=uprange, and icp[[4]]=type icp[[5]= subsample. If
-icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,"affine") will
-result in 3 icp iterations, condidering the closest 60\% of correspondences
-with normal deviation of pi/2 and an affine transformation.}
+\item{affine}{named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)}
 
-\item{nn}{integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.}
+\item{nn}{integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming. If landmarks are provided and only those should count, set rigid$iterations=0.}
 
 \item{silent}{logical: no verbosity}
 
@@ -76,16 +70,16 @@ with normal deviation of pi/2 and an affine transformation.}
 
 \item{forceLM}{logical: if icp is requested landmark based deformation will be applied after icp-based transformation.}
 
+\item{reuseLM}{logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.}
+
 \item{visualize}{logical request visualization of deformation process.}
 
 \item{folder}{logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.}
 }
 \value{
 \item{mesh}{registered mesh}
-\item{meshrot }{mesh1, rotated onto mesh2}
-\item{lm1rot }{lm1, rotated onto lm2}
-\item{lmtmp1 }{correspondences on updated reference mesh of last iteration}
-\item{lmtmp2 }{correspondences on updated target mesh of last iteration}
+\item{affine }{affine 4x4 transformation matrix mapping mesh1 onto mesh2}
+\item{lm1 }{lm1 mapped onto the registered template}
 }
 \description{
 Perform registration of two triangular meshes, minimizing per-face
@@ -111,13 +105,23 @@ params <- append(params, list(
    k=c(10,seq(from = 1,to=params$iterations-1,by=1)),
    useiter=FALSE # iteratively deform dummyhead onto humface
    ))
+#we also want the landmarks to be used in an initial similarity transform
+similarity <- list(iterations=0)
 map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
-                 lm2=humface.lm, iterations=params$iterations,
+                 lm2=humface.lm, iterations=params$iterations,similarity=similarity,
                  k=params$k, lambda=params$lambda, useiter=params$useiter)
 # compare matched and original face:
 meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
 # render original mesh as wireframe
 wire3d(humface)
+##example with different icp matchings:
+rigid <- list(iterations=30,subsample=200,rhotol=pi/2,uprange=0.6)
+similarity <- list(iterations=30, subsample=200,rhotol=pi/2,uprange=0.6)
+affine <- list(iterations=30,subsample=200,rhotol=pi/2,uprange=0.6)
+map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
+                      lm2=humface.lm, iterations=params$iterations,
+                      k=params$k, lambda=params$lambda, useiter=params$useiter,rigid=rigid,
+                      similarity=similarity,affine=affine,forceLM = TRUE)
 }
 \author{
 Stefan Schlager

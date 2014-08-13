@@ -5,10 +5,9 @@
 \usage{
 gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2,
-  f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, icp = FALSE,
-  icpiter = 3, uprange = 0.95, rhotol = 1, type = "a",
-  subsample = NULL, nh = NULL, toldist = 0, patch = NULL,
-  repro = FALSE, pro = c("vcg", "morpho"), k0 = 50, prometh = 1,
+  f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, rigid = NULL,
+  similarity = NULL, affine = NULL, reuseLM = FALSE, nh = NULL,
+  toldist = 0, pro = c("vcg", "morpho"), k0 = 50, prometh = 1,
   angtol = NULL, border = FALSE, horiz.disp = NULL, AmbergK = NULL,
   AmbergLambda = NULL, silent = FALSE, Bayes = NULL, ...)
 }
@@ -45,30 +44,19 @@ initial rotation of mesh1 onto mesh2.}
 \item{lm2}{A k x 3 matrix containing landmarks corrresponding to mesh2 for
 initial rotation of mesh1 onto mesh2.}
 
-\item{icp}{Logical: if TRUE, iterative closest point procedure will be
-executed.}
+\item{rigid}{named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.}
 
-\item{icpiter}{Integer: Number of iterations of icp.}
+\item{similarity}{named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).}
 
-\item{uprange}{argument passed to icp (see \code{\link{icp}})}
+\item{affine}{named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)}
 
-\item{rhotol}{Numeric: argument passed to \code{\link{icp}}.Exclude target
-points with deviation of normals larger than than rhotol.}
-
-\item{type}{character: argument passed to \code{\link{icp}}.Determines the type of transformation. can be one of "affine","rigid" or "similarity".}
+\item{reuseLM}{logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.}
 
 \item{nh}{Integer: neighbourhood (number vertices) for controlling
 displacement smoothing, default is 150/mesh resolution.}
 
 \item{toldist}{Integer: Exclude everything from the whole procedure with a
 greater distance from initial point than toldist. 0 disables this feature.}
-
-\item{patch}{A m x 3 matrix containing the atlas landmark configuration on
-mesh1 which is not present in mesh2 and will automatically placed on the
-latter.}
-
-\item{repro}{Logical: If TRUE, a reprojection of patch onto the iteratively
-estimated target surface will be performed after each iteration.}
 
 \item{pro}{which projection method to use: "m"= \code{\link{closemeshKD}}
 from Morpho; "v"= \code{\link{vcgClost}} from package Rvcg}
@@ -123,7 +111,9 @@ data(nose)##load data
 ##warp a mesh onto another landmark configuration:
 warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
 ### result won't be too good as the surfaces do stronly differ.
-match <- gaussMatch(shortnose.mesh,warpnose.long,gamma=4,iterations=3,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2)
+## we start with an affine transformation initiated by landmarks
+affine <- list(iterations=200,subsample=100,rhotol=pi/2,uprange=0.9)
+ match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
 }
 \author{
 Stefan Schlager
