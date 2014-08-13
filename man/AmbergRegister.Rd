@@ -8,7 +8,7 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
   useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
   similarity = NULL, affine = NULL, nn = 20, silent = FALSE,
-  Bayes = NULL, forceLM = TRUE, reuseLM = FALSE, visualize = FALSE,
+  Bayes = NULL, forceLM = FALSE, reuseLM = FALSE, visualize = FALSE,
   folder = NULL)
 }
 \arguments{

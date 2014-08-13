@@ -87,7 +87,7 @@
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
 #' @importFrom Morpho meshcube applyTransform computeTransform
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=TRUE,reuseLM=FALSE,visualize=FALSE, folder=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,reuseLM=FALSE,visualize=FALSE, folder=NULL)
     {
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
@@ -108,46 +108,50 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         meshorig <- mesh1
         stopit <- FALSE
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
-            bary <- vcgClost(lm1,mesh1,barycentric = T) 
-            if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
-                if (!is.null(rigid)) { ##perform rigid icp-matching
-                    rigid$lm1 <- lm1
-                    rigid$lm2 <- lm2
-                    mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            bary <- vcgClost(lm1,mesh1,barycentric = T)
+            if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
+                cat("\n landmarks but no transform specified, performing rigid transrorm\n")
+                rigid <- list(iterations=0)
+            }
+            if (!is.null(rigid)) { ##perform rigid icp-matching
+                rigid$lm1 <- lm1
+                rigid$lm2 <- lm2
+                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            if (!is.null(similarity)) {##similarity matching
+                if (is.null(rigid) || reuseLM) {
+                    similarity$lm1 <- lm1
+                    similarity$lm2 <- lm2
                 }
-                if (!is.null(similarity)) {##similarity matching
-                    if (is.null(rigid) || reuseLM) {
-                        similarity$lm1 <- lm1
-                        similarity$lm2 <- lm2
-                    }
-                    mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            if (!is.null(affine)) {##similarity matching
+                if ((is.null(rigid) && is.null(similarity)) || reuseLM) {
+                    affine$lm1 <- lm1
+                    affine$lm2 <- lm2
                 }
-                if (!is.null(affine)) {##similarity matching
-                     if ((is.null(rigid) && is.null(similarity)) || reuseLM) {
-                         affine$lm1 <- lm1
-                         affine$lm2 <- lm2
-                     }
-                     mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
-                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-                 }
-
-                affinemat <- computeTransform(vert2points(mesh1),vert2points(meshorig))
-                tmp <- list()
-                tmp$mesh <- mesh1
-                if (!useiter && !forceLM)
-                    tmp$S <- createS(mesh1)
-                
-                if (forceLM) {
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-                    tmp <- AmbergDeformSpam(mesh1,lm1,lm2,k0=k[1],lambda=lambda[1])
-                    count <- count+1
-                    if (iterations == 1)
-                        stopit <- TRUE
-                }
+                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            
+            affinemat <- computeTransform(vert2points(mesh1),vert2points(meshorig))
+            tmp <- list()
+            tmp$mesh <- mesh1
+            if (!useiter && !forceLM)
+                tmp$S <- createS(mesh1)
+            
+            if (forceLM) {
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                tmp <- AmbergDeformSpam(mesh1,lm1,lm2,k0=k[1],lambda=lambda[1])
+                count <- count+1
+                if (iterations == 1)
+                    stopit <- TRUE
             }
             verts0 <- vert2points(mesh1)
+            
+            
         } else if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
             if (!is.null(rigid)){ ##perform rigid icp-matching
                 mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
