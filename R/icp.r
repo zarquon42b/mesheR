@@ -62,8 +62,14 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
           trafo <- computeTransform(lm2,lm1,type=type)
           mesh1 <- applyTransform(mesh1,trafo)
       }
-      
-      for( i in 1:iterations) {
+      ttype <- substr(type[1],1L,1L)
+      mytrafo <- c("rigid","similarity","affine")
+      mytrafoshort <- substr(mytrafo,1,1)
+      mytrafo <- mytrafo[grep(ttype,mytrafoshort)]
+      if (!silent) 
+          cat(paste0("\n performing ",mytrafo," registration\n\n") )
+      count <- 0
+      while (count < iterations) {
           if (!silent)
               cat("*")
           copymesh <- mesh1
@@ -108,6 +114,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
           }
           trafo <- computeTransform(x2[good,],x1[good,],type=type)
           mesh1 <- applyTransform(mesh1,trafo)
+          count <- count+1
       }
       if (!silent)
           cat("\n")
