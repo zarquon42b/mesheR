@@ -2,8 +2,8 @@
 #'
 #' close two meshes where one is only an offset of the other
 #'
-#' @param mesh1 mesh
-#' @param mesh2 mesh
+#' @param mesh1 triangular mesh in first state
+#' @param mesh2 triangular mesh in second state
 #' @param invert logical: if TRUE the orientation of mesh1 will be flipped
 #' @importFrom Morpho mergeMeshes conv2backf
 #' @importFrom Rvcg vcgGetEdge vcgClean

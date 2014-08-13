@@ -6,8 +6,8 @@
 #' @param mesh1 reference mesh: triangular mesh of class "mesh3d". No loose
 #' vertices, edges and degenerated faces are allowed. 
 #' @param mesh2 target mesh: triangular mesh of class "mesh3d". 
-#' @param lm1 m x 3 matrix containing correspondences on "mesh1" 
-#' @param lm2 m x 3 matrix containing target correspondences on "mesh2" 
+#' @param lm1 m x 3 matrix containing correspondences on "mesh1". 
+#' @param lm2 m x 3 matrix containing target correspondences on "mesh2".
 #' @param k integer: parameter regularizing face normal distortion. Can be
 #' vector of length(iterations) or single value. 
 #' @param lambda numeric: parameter regularizing faces's distortion. Can be
@@ -30,28 +30,20 @@
 #' @param minclost minimum amount of correspondence points. If less
 #' correspondences are found, dist will be increased by "distinc" (see below).
 #' @param distinc increment of dist, in case minclost is not reached.
-#' @param scale logical: if TRUE, initial landmark based rigid registration
-#' includes scaling.
-#' @param reflection logical: if TRUE, initial landmark based rigid registration
-#' allows reflections.
-#' @param icp named list. Passing parameters to \code{\link{icp}},
-#' which is performed after intial landmark based registration (scaling, rotation and translation). The parameters
-#' are icp[[1]]=iterations; icp[[2]]=rhotol; icp[[3]]=uprange, and icp[[4]]=type icp[[5]= subsample. If
-#' icp=NULL, no ICP-matching is performed.  E.g. icp=c(3,pi/2,0.6,"affine") will
-#' result in 3 icp iterations, condidering the closest 60\% of correspondences
-#' with normal deviation of pi/2 and an affine transformation.
-#' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming.
+#' @param rigid named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.
+#' @param similarity named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).
+#'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
+#' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param silent logical: no verbosity
 #' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
+#' @param reuseLM logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.
 #' @param visualize logical request visualization of deformation process.
 #' @param folder logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.
 #' @return 
 #' \item{mesh}{registered mesh}
-#' \item{meshrot }{mesh1, rotated onto mesh2}
-#' \item{lm1rot }{lm1, rotated onto lm2}
-#' \item{lmtmp1 }{correspondences on updated reference mesh of last iteration}
-#' \item{lmtmp2 }{correspondences on updated target mesh of last iteration}
+#' \item{affine }{affine 4x4 transformation matrix mapping mesh1 onto mesh2}
+#' \item{lm1 }{lm1 mapped onto the registered template}
 #' 
 #' @details This function runs an elastic-ICP surface matching algorithm, that minimizes the original meshes internal structure by solving a sparse equation system. The user can control 2 parameters of mesh stiffness: \code{lambda} and \code{k}. \code{lambda} controls the impact of the control points (closest points) as it is a weight applied to the equation system. The value of \code{lambda} should be carefully selected depending on the object overall size: i.e. to match two tiny meshes one will need a higher value than a for a larger object (example: I found values between 0 and 1 suitable for human faces and values between 10 and 100 suitable for mice teeth). \code{k} controls the normal slackness, i.e. the deviation of normal direction. The larger, \code{k}, the more elastic the deformation will be. \code{lambda} and \code{k} can be specified as vectors of length \code{iterations}, to assign a specific value for each iteration. 
 #' @author Stefan Schlager
@@ -75,17 +67,27 @@
 #'    k=c(10,seq(from = 1,to=params$iterations-1,by=1)),
 #'    useiter=FALSE # iteratively deform dummyhead onto humface
 #'    ))
+#' #we also want the landmarks to be used in an initial similarity transform
+#' similarity <- list(iterations=0)
 #' map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
-#'                  lm2=humface.lm, iterations=params$iterations,
+#'                  lm2=humface.lm, iterations=params$iterations,similarity=similarity,
 #'                  k=params$k, lambda=params$lambda, useiter=params$useiter)
 #' # compare matched and original face:
 #' meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
 #' # render original mesh as wireframe
 #' wire3d(humface)
+#' ##example with different icp matchings:
+#' rigid <- list(iterations=30,subsample=200,rhotol=pi/2,uprange=0.6)
+#' similarity <- list(iterations=30, subsample=200,rhotol=pi/2,uprange=0.6)
+#' affine <- list(iterations=30,subsample=200,rhotol=pi/2,uprange=0.6)
+#' map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
+#'                       lm2=humface.lm, iterations=params$iterations,
+#'                       k=params$k, lambda=params$lambda, useiter=params$useiter,rigid=rigid,
+#'                       similarity=similarity,affine=affine,forceLM = TRUE)
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
 #' @importFrom Morpho meshcube applyTransform computeTransform
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, type="rigid", reflection=FALSE, icp=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,visualize=FALSE, folder=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,reuseLM=FALSE,visualize=FALSE, folder=NULL)
     {
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
@@ -101,49 +103,73 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
             k <- rep(k,iterations)
         else if (length(k) != iterations)
             stop("k must be vector of length 'iterations'")
-        
+
+        affinemat <- NULL
         meshorig <- mesh1
         stopit <- FALSE
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
-            if (!is.null(icp)) {##perform initial icp-matching
-                bary <- vcgClost(lm1,mesh1,barycentric = T)
-                meshorig <- mesh1 <- icp(mesh1,mesh2,lm1=lm1,lm2=lm2,iterations=icp$iterations,rhotol=icp$rhotol,uprange=max(icp$uprange,0.9),type=icp$type, silent=silent,subsample = icp$subsample)
-                tmp <- list()
-                tmp$mesh <- mesh1
-                if (!useiter && !forceLM)
-                    tmp$S <- createS(mesh1)
-                if (forceLM) {
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-                    tmp <- AmbergDeformSpam(mesh1,lm1,lm2,k0=k[1],lambda=lambda[1])
-                    count <- count+1
-                    if (iterations == 1)
-                        stopit <- TRUE
-                    
+            bary <- vcgClost(lm1,mesh1,barycentric = T)
+            if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
+                cat("\n landmarks but no transform specified, performing rigid transrorm\n")
+                rigid <- list(iterations=0)
+            }
+            if (!is.null(rigid)) { ##perform rigid icp-matching
+                rigid$lm1 <- lm1
+                rigid$lm2 <- lm2
+                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            if (!is.null(similarity)) {##similarity matching
+                if (is.null(rigid) || reuseLM) {
+                    similarity$lm1 <- lm1
+                    similarity$lm2 <- lm2
                 }
-                
-            } else {
-                trafo <- computeTransform(lm2,lm1,type=type)
-                lm1 <- applyTransform(lm1,trafo)
-                meshorig <- mesh1 <-applyTransform(mesh1,trafo)
-                lmtmp1 <- lm1
-                lmtmp2 <- lm2
-                if (!silent)
-                    cat(paste("-> performing landmark based matching 1\n"))
-                tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[1],lambda=lambda[1])
+                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            if (!is.null(affine)) {##similarity matching
+                if ((is.null(rigid) && is.null(similarity)) || reuseLM) {
+                    affine$lm1 <- lm1
+                    affine$lm2 <- lm2
+                }
+                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            
+            affinemat <- computeTransform(vert2points(mesh1),vert2points(meshorig))
+            tmp <- list()
+            tmp$mesh <- mesh1
+            if (!useiter && !forceLM)
+                tmp$S <- createS(mesh1)
+            
+            if (forceLM) {
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                tmp <- AmbergDeformSpam(mesh1,lm1,lm2,k0=k[1],lambda=lambda[1])
                 count <- count+1
                 if (iterations == 1)
                     stopit <- TRUE
             }
             verts0 <- vert2points(mesh1)
-        } else if (!is.null(icp)) {
-            print("a")
-            meshorig <- mesh1 <- icp(mesh1,mesh2,iterations=icp$iterations,rhotol=icp$rhotol,uprange=max(icp$uprange,0.9),type=icp$type, silent=silent,subsample = icp$subsample)
-             tmp <- list(mesh=mesh1)
-             if (!useiter)
+            
+            
+        } else if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
+            if (!is.null(rigid)){ ##perform rigid icp-matching
+                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+            }
+            if (!is.null(similarity)) {##similarity matching
+                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+            }
+            if (!is.null(affine)) {##similarity matching
+                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+            }
+            affinemat <- computeTransform(vert2points(mesh1),vert2points(meshorig))
+            tmp <- list(mesh=mesh1)
+            if (!useiter)
                 tmp$S <- createS(mesh1)
-             verts0 <- vert2points(mesh1)
-        
+            verts0 <- vert2points(mesh1)
+            
         } else {   ## case: meshes are already aligned
+            affinemat <- diag(4)
             tmp <- list()
             tmp$mesh <- mesh1
             if (!useiter)
@@ -261,5 +287,26 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 count <- count+1
             }
         }
-        return(list(mesh=tmp$mesh,meshrot=meshorig,lm1rot=lm1,lmtmp1=lmtmp1,lmtmp2=lmtmp2))
+        lm1map <- NULL
+        if (!is.null(lm1))
+            lm1map <- lm1 <- bary2point(bary$barycoords,bary$faceptr,tmp$mesh)
+        return(list(mesh=tmp$mesh,affine=affinemat,lm1=lm1map))
     }
+
+
+rigSimAff <- function(mesh1,mesh2,args,type="r",silent=TRUE) {
+    iterations <- args$iterations; if (is.null(iterations)) iterations <- 3
+    lm1=args$lm1
+    lm2 <- args$lm2
+    uprange <- args$uprange; if (is.null(uprange)) uprange <- 0.9
+    maxdist <- args$maxdist
+    minclost <- args$minclost; if (is.null(minclost)) minclost <- 50
+    distinc <- args$distinc;
+    rhotol <- args$rhotol; if (is.null(rhotol)) rhotol <- pi
+    k <- args$k; if (is.null(k)) k <- 50
+    reflection <- args$reflection;  if (is.null(reflection)) reflection <- FALSE
+    pro <- "vcg"
+    subsample <- args$subsample
+    out <- icp(mesh1, mesh2, iterations, lm1, lm2, uprange,maxdist, minclost, distinc, rhotol, k, reflection, pro, silent = silent,subsample, type)
+    return(out)
+}
