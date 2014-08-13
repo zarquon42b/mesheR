@@ -10,7 +10,7 @@ trivolume <- function(mesh1,mesh2)
   {
       if (missing(mesh2)) {
           mesh2 <- mesh1
-          
+      }
     #mesh2 <- conv2backf(mesh2)
     vb1 <- mesh1$vb
     vb2 <- mesh2$vb
