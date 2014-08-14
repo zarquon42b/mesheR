@@ -6,13 +6,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     pro <- substring(pro[1],1L,1L)
     if (pro == "v") {
         project3d <- vcgClostKD
-     } else if (pro == "m") {
-         protmp <- function(x,y,sign=F) {
-             out <- closemeshKD(x,y,k=k0,sign=sign,method=prometh)
-             return(out)
-         }
-         project3d <- protmp
-     }
+    } else if (pro == "m") {
+        protmp <- function(x,y,sign=F) {
+            out <- closemeshKD(x,y,k=k0,sign=sign,method=prometh)
+            return(out)
+        }
+        project3d <- protmp
+    }
     rc <- 0
     out <- NULL
     t0 <- Sys.time()
@@ -88,7 +88,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     
     tol <- tol^2
 ### make multicore 
-        
+    
     out <- .Call("displaceGauss",W0,S0,M,D1,D2,sigma,gamma,clostIndW,clostIndP,tol=tol,rt0,rt1,rc,oneway,PACKAGE="mesheR")
     addit <- W0+out
     return(list(addit=addit))
@@ -203,8 +203,8 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                 stop("AmbergLambda must be vector of length 'iterations'")
             Amberg <- TRUE
         }
-       
-            
+        
+        
         ## clean input mesh
         if(length(unrefVertex(mesh1)) > 0 )
             mesh1 <- rmUnrefVertex(mesh1)
@@ -234,30 +234,31 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                 mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }           
-            if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
-                if (!is.null(rigid)) { ##perform rigid icp-matching
-                    rigid$lm1 <- lm1
-                    rigid$lm2 <- lm2
-                    mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-                }
-                if (!is.null(similarity)) {##similarity matching
-                   if (is.null(rigid)) {
-                        similarity$lm1 <- lm1
-                        similarity$lm2 <- lm2
-                    }
-                    mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-               }
-                if (!is.null(affine)) {##similarity matching
-                      if (is.null(rigid) && is.null(similarity)) {
-                         affine$lm1 <- lm1
-                         affine$lm2 <- lm2
-                     }
-                     mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
-                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-                  }
+            if (is.null(rigid) || is.null(affine) || is.null(similarity))
+                rigid <- list(iterations=0)
+            if (!is.null(rigid)) { ##perform rigid icp-matching
+                rigid$lm1 <- lm1
+                rigid$lm2 <- lm2
+                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
+            if (!is.null(similarity)) {##similarity matching
+                if (is.null(rigid)) {
+                    similarity$lm1 <- lm1
+                    similarity$lm2 <- lm2
+                }
+                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            if (!is.null(affine)) {##similarity matching
+                if (is.null(rigid) && is.null(similarity)) {
+                    affine$lm1 <- lm1
+                    affine$lm2 <- lm2
+                }
+                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            
         } else {
             if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
                 if (!is.null(rigid)) ##perform rigid icp-matching
@@ -296,7 +297,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
 
 
             if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
-                mesh1 <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
+                mesh1 <- PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=TRUE)
 
             }
             mesh1 <- updateNormals(mesh1)
