@@ -1,4 +1,5 @@
 ## @export gaussDisplace
+#' @importFrom Rvcg vcgUpdateNormals
 gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...)
 {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
@@ -188,6 +189,14 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @useDynLib mesheR
 gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,...)
     {
+        if (!is.null(Bayes)) {
+            if (!require(RvtkStatismo))
+                stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
+        }
+        if (!is.null(angtol)) {
+            mesh1 <- vcgUpdateNormals(mesh1)
+            mesh2 <- vcgUpdateNormals(mesh2)
+        }
         Amberg <- FALSE
         ##setup variables
         if (!is.null(AmbergK) && !is.null(AmbergLambda)) {
@@ -230,11 +239,11 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
             bary <- vcgClost(lm1,mesh1,barycentric = T)
             if (!is.null(Bayes)) {
-                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale)$yrot
+                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection = FALSE)$yrot
                 mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }           
-            if (is.null(rigid) || is.null(affine) || is.null(similarity))
+            if (is.null(rigid) && is.null(affine) && is.null(similarity))
                 rigid <- list(iterations=0)
             if (!is.null(rigid)) { ##perform rigid icp-matching
                 rigid$lm1 <- lm1
