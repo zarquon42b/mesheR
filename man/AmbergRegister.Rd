@@ -8,8 +8,7 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
   useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
   similarity = NULL, affine = NULL, nn = 20, silent = FALSE,
-  Bayes = NULL, forceLM = FALSE, reuseLM = FALSE, visualize = FALSE,
-  folder = NULL)
+  Bayes = NULL, forceLM = FALSE, visualize = FALSE, folder = NULL)
 }
 \arguments{
 \item{mesh1}{reference mesh: triangular mesh of class "mesh3d". No loose
@@ -69,8 +68,6 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 \item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution}
 
 \item{forceLM}{logical: if icp is requested landmark based deformation will be applied after icp-based transformation.}
-
-\item{reuseLM}{logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.}
 
 \item{visualize}{logical request visualization of deformation process.}
 

@@ -128,7 +128,6 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param rigid named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param similarity named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).
 #'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
-#' @param reuseLM logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.
 #' @param nh Integer: neighbourhood (number vertices) for controlling
 #' displacement smoothing, default is 150/mesh resolution.
 #' @param toldist Integer: Exclude everything from the whole procedure with a
@@ -187,7 +186,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,reuseLM=FALSE, nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,...)
+gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,...)
     {
         Amberg <- FALSE
         ##setup variables
@@ -238,7 +237,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
                 }
                 if (!is.null(similarity)) {##similarity matching
-                   if (is.null(rigid) || reuseLM) {
+                   if (is.null(rigid)) {
                         similarity$lm1 <- lm1
                         similarity$lm2 <- lm2
                     }
@@ -246,7 +245,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
                }
                 if (!is.null(affine)) {##similarity matching
-                      if ((is.null(rigid) && is.null(similarity)) || reuseLM) {
+                      if (is.null(rigid) && is.null(similarity)) {
                          affine$lm1 <- lm1
                          affine$lm2 <- lm2
                      }

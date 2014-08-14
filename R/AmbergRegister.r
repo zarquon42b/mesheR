@@ -37,7 +37,6 @@
 #' @param silent logical: no verbosity
 #' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
-#' @param reuseLM logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.
 #' @param visualize logical request visualization of deformation process.
 #' @param folder logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.
 #' @return 
@@ -87,7 +86,7 @@
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
 #' @importFrom Morpho meshcube applyTransform computeTransform
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,reuseLM=FALSE,visualize=FALSE, folder=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,visualize=FALSE, folder=NULL)
     {
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
@@ -120,7 +119,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(similarity)) {##similarity matching
-                if (is.null(rigid) || reuseLM) {
+                if (is.null(rigid)) {
                     similarity$lm1 <- lm1
                     similarity$lm2 <- lm2
                 }
@@ -128,7 +127,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(affine)) {##similarity matching
-                if ((is.null(rigid) && is.null(similarity)) || reuseLM) {
+                if (is.null(rigid) && is.null(similarity)) {
                     affine$lm1 <- lm1
                     affine$lm2 <- lm2
                 }
