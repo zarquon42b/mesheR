@@ -114,7 +114,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
             bary <- vcgClost(lm1,mesh1,barycentric = T)
             if (!is.null(Bayes)) {
                 ##register landmarks on model and constrain reference
-                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale)$yrot
+                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
                 mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }                
