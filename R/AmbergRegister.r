@@ -35,7 +35,7 @@
 #'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param silent logical: no verbosity
-#' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
+#' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed.
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
 #' @param visualize logical request visualization of deformation process.
 #' @param folder logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.
@@ -88,6 +88,10 @@
 #' @export AmbergRegister
 AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,visualize=FALSE, folder=NULL)
     {
+        if (!is.null(Bayes)) {
+            if (!require(RvtkStatismo))
+                stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
+        }
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
         count <- 0
@@ -106,8 +110,15 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         affinemat <- NULL
         meshorig <- mesh1
         stopit <- FALSE
-        if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
+        if (!is.null(lm1) && !is.null(lm2)) {## case: landmarks are provided
             bary <- vcgClost(lm1,mesh1,barycentric = T)
+            if (!is.null(Bayes)) {
+                ##register landmarks on model and constrain reference
+                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale)$yrot
+                mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }                
+            
             if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
                 cat("\n landmarks but no transform specified, performing rigid transrorm\n")
                 rigid <- list(iterations=0)
@@ -256,10 +267,9 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                                         #oo <- wire3d(tmp$mesh,col=count)
                 gc()
                 ## calculate error
-                if (!is.null(Bayes) && length(Bayes$sd) >= count) {
-                    x <- vert2points(tmp$mesh)
-                    x <- restrict(x,Bayes$model, sd=Bayes$sd[count],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar=Bayes$maxVar)
-                    tmp$mesh$vb[1:3,] <- t(x)
+                if (!is.null(Bayes) && length(Bayes$sdmax) >= count) {
+                    tmp$mesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
+                    
                     
                 }
                 if (smooth)

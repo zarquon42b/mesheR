@@ -228,7 +228,12 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
         
         ## do icp matching
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
-            bary <- vcgClost(lm1,mesh1,barycentric = T) 
+            bary <- vcgClost(lm1,mesh1,barycentric = T)
+            if (!is.null(Bayes)) {
+                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale)$yrot
+                mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }           
             if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
                 if (!is.null(rigid)) { ##perform rigid icp-matching
                     rigid$lm1 <- lm1
@@ -290,10 +295,8 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                 mesh1$vb[1:3,] <- t(tmp$addit)
 
 
-            if (!is.null(Bayes) && length(Bayes$sd) >= i) {
-                x <- vert2points(mesh1)
-                x <- restrict(x,Bayes$model, sd=Bayes$sd[i],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar = Bayes$maxVar)
-                mesh1$vb[1:3,] <- t(x)
+            if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
+                mesh1 <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
 
             }
             mesh1 <- updateNormals(mesh1)

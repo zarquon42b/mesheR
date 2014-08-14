@@ -65,7 +65,7 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 
 \item{silent}{logical: no verbosity}
 
-\item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution}
+\item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed.}
 
 \item{forceLM}{logical: if icp is requested landmark based deformation will be applied after icp-based transformation.}
 
