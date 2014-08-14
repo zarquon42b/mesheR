@@ -63,7 +63,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
           project3d <- closemeshKD
       }
       if (!is.null(lm1)){## perform initial rough registration
-          trafo <- computeTransform(lm2,lm1,type=type)
+          trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection)
           mesh1 <- applyTransform(mesh1,trafo)
       }
       ttype <- substr(type[1],1L,1L)
