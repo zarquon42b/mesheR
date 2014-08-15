@@ -295,7 +295,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                         cat("smoothing step\n")
                     mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
                     if (!silent)
-                        cat("smoothing finished\n")
+                        #cat("smoothing finished\n")
                 }
             }
             ## call the workhorse doing the displacement
@@ -305,7 +305,8 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                 tmpmesh <- mesh1
                 tmpmesh$vb[1:3,] <- t(tmp$addit)
                 tmpmesh <- updateNormals(mesh1)
-                mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i])$mesh
+                mytry <- try(mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i])$mesh,TRUE)
+               
             } else
                 mesh1$vb[1:3,] <- t(tmp$addit)
 
