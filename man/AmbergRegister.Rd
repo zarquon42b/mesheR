@@ -98,10 +98,10 @@ data(dummyhead)
 # only 10 iterations to keep example calculation time reasonable.
 params <- list(iterations=10)
 params <- append(params, list(
-   # first \\code{lambda} is set relatively high because first matching uses landmarks
+   # first lambda is set relatively high because first matching uses landmarks
    # then let it increase from 0.2 to 0.6
    lambda=c(0.7,seq(from = 0.2,to=0.6,length.out = params$iterations-1)),
-   # treat \\code{k} similar as \\code{lambda}
+   # treat k similar as lambda
    k=c(10,seq(from = 1,to=params$iterations-1,by=1)),
    useiter=FALSE # iteratively deform dummyhead onto humface
    ))

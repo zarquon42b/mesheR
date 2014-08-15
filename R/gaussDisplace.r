@@ -294,7 +294,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                     if (!silent)
                         cat("smoothing step\n")
                     mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
-                    if (!silent)
+                    #if (!silent)
                         #cat("smoothing finished\n")
                 }
             }
