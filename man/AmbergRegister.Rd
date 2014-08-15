@@ -8,7 +8,8 @@ AmbergRegister(mesh1, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
   useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
   similarity = NULL, affine = NULL, nn = 20, silent = FALSE,
-  Bayes = NULL, forceLM = FALSE, visualize = FALSE, folder = NULL)
+  Bayes = NULL, useConstrained = TRUE, forceLM = FALSE,
+  visualize = FALSE, folder = NULL)
 }
 \arguments{
 \item{mesh1}{reference mesh: triangular mesh of class "mesh3d". No loose
@@ -66,6 +67,8 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 \item{silent}{logical: no verbosity}
 
 \item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed.}
+
+\item{useConstrained}{logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.}
 
 \item{forceLM}{logical: if icp is requested landmark based deformation will be applied after icp-based transformation.}
 
