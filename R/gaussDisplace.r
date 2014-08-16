@@ -1,4 +1,5 @@
 ## @export gaussDisplace
+#' @importFrom Rvcg vcgUpdateNormals
 gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...)
 {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
@@ -6,13 +7,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     pro <- substring(pro[1],1L,1L)
     if (pro == "v") {
         project3d <- vcgClostKD
-     } else if (pro == "m") {
-         protmp <- function(x,y,sign=F) {
-             out <- closemeshKD(x,y,k=k0,sign=sign,method=prometh)
-             return(out)
-         }
-         project3d <- protmp
-     }
+    } else if (pro == "m") {
+        protmp <- function(x,y,sign=F) {
+            out <- closemeshKD(x,y,k=k0,sign=sign,method=prometh)
+            return(out)
+        }
+        project3d <- protmp
+    }
     rc <- 0
     out <- NULL
     t0 <- Sys.time()
@@ -88,7 +89,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     
     tol <- tol^2
 ### make multicore 
-        
+    
     out <- .Call("displaceGauss",W0,S0,M,D1,D2,sigma,gamma,clostIndW,clostIndP,tol=tol,rt0,rt1,rc,oneway,PACKAGE="mesheR")
     addit <- W0+out
     return(list(addit=addit))
@@ -128,7 +129,6 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param rigid named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param similarity named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).
 #'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
-#' @param reuseLM logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.
 #' @param nh Integer: neighbourhood (number vertices) for controlling
 #' displacement smoothing, default is 150/mesh resolution.
 #' @param toldist Integer: Exclude everything from the whole procedure with a
@@ -155,6 +155,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #'  @param AmbergLambda as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
 #' @param silent logical suppress messages
 #' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
+#' @param useConstrained logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -187,8 +188,17 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,reuseLM=FALSE, nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,...)
+gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,useConstrained=TRUE,...)
     {
+        if (!is.null(Bayes)) {
+            if (!require(RvtkStatismo))
+                stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
+            mesh1 <- DrawMean(Bayes$model)
+        }
+        if (!is.null(angtol)) {
+            mesh1 <- vcgUpdateNormals(mesh1)
+            mesh2 <- vcgUpdateNormals(mesh2)
+        }
         Amberg <- FALSE
         ##setup variables
         if (!is.null(AmbergK) && !is.null(AmbergLambda)) {
@@ -204,8 +214,8 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                 stop("AmbergLambda must be vector of length 'iterations'")
             Amberg <- TRUE
         }
-       
-            
+        
+        
         ## clean input mesh
         if(length(unrefVertex(mesh1)) > 0 )
             mesh1 <- rmUnrefVertex(mesh1)
@@ -229,31 +239,40 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
         
         ## do icp matching
         if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
-            bary <- vcgClost(lm1,mesh1,barycentric = T) 
-            if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
-                if (!is.null(rigid)) { ##perform rigid icp-matching
-                    rigid$lm1 <- lm1
-                    rigid$lm2 <- lm2
-                    mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-                }
-                if (!is.null(similarity)) {##similarity matching
-                   if (is.null(rigid) || reuseLM) {
-                        similarity$lm1 <- lm1
-                        similarity$lm2 <- lm2
-                    }
-                    mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-               }
-                if (!is.null(affine)) {##similarity matching
-                      if ((is.null(rigid) && is.null(similarity)) || reuseLM) {
-                         affine$lm1 <- lm1
-                         affine$lm2 <- lm2
-                     }
-                     mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
-                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-                  }
+            bary <- vcgClost(lm1,mesh1,barycentric = T)
+            if (!is.null(Bayes)) {
+                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
+                constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
+                if (useConstrained)
+                    Bayes$model <- constMod
+                mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }           
+            if (is.null(rigid) && is.null(affine) && is.null(similarity))
+                rigid <- list(iterations=0)
+            if (!is.null(rigid)) { ##perform rigid icp-matching
+                rigid$lm1 <- lm1
+                rigid$lm2 <- lm2
+                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
+            if (!is.null(similarity)) {##similarity matching
+                if (is.null(rigid)) {
+                    similarity$lm1 <- lm1
+                    similarity$lm2 <- lm2
+                }
+                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            if (!is.null(affine)) {##similarity matching
+                if (is.null(rigid) && is.null(similarity)) {
+                    affine$lm1 <- lm1
+                    affine$lm2 <- lm2
+                }
+                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            
         } else {
             if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
                 if (!is.null(rigid)) ##perform rigid icp-matching
@@ -275,8 +294,8 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                     if (!silent)
                         cat("smoothing step\n")
                     mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
-                    if (!silent)
-                        cat("smoothing finished\n")
+                    #if (!silent)
+                        #cat("smoothing finished\n")
                 }
             }
             ## call the workhorse doing the displacement
@@ -286,15 +305,14 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                 tmpmesh <- mesh1
                 tmpmesh$vb[1:3,] <- t(tmp$addit)
                 tmpmesh <- updateNormals(mesh1)
-                mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i])$mesh
+                mytry <- try(mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i])$mesh,TRUE)
+               
             } else
                 mesh1$vb[1:3,] <- t(tmp$addit)
 
 
-            if (!is.null(Bayes) && length(Bayes$sd) >= i) {
-                x <- vert2points(mesh1)
-                x <- restrict(x,Bayes$model, sd=Bayes$sd[i],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar = Bayes$maxVar)
-                mesh1$vb[1:3,] <- t(x)
+            if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
+                mesh1 <- PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=TRUE)
 
             }
             mesh1 <- updateNormals(mesh1)

@@ -6,10 +6,11 @@
 gaussMatch(mesh1, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, rigid = NULL,
-  similarity = NULL, affine = NULL, reuseLM = FALSE, nh = NULL,
-  toldist = 0, pro = c("vcg", "morpho"), k0 = 50, prometh = 1,
-  angtol = NULL, border = FALSE, horiz.disp = NULL, AmbergK = NULL,
-  AmbergLambda = NULL, silent = FALSE, Bayes = NULL, ...)
+  similarity = NULL, affine = NULL, nh = NULL, toldist = 0,
+  pro = c("vcg", "morpho"), k0 = 50, prometh = 1, angtol = NULL,
+  border = FALSE, horiz.disp = NULL, AmbergK = NULL,
+  AmbergLambda = NULL, silent = FALSE, Bayes = NULL,
+  useConstrained = TRUE, ...)
 }
 \arguments{
 \item{mesh1}{An object of class mesh3d used as atlas mesh to be deformed
@@ -50,8 +51,6 @@ initial rotation of mesh1 onto mesh2.}
 
 \item{affine}{named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)}
 
-\item{reuseLM}{logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.}
-
 \item{nh}{Integer: neighbourhood (number vertices) for controlling
 displacement smoothing, default is 150/mesh resolution.}
 
@@ -88,6 +87,8 @@ discarded. Reduces distortion especially at mesh borders.}
 \item{silent}{logical suppress messages}
 
 \item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution}
+
+\item{useConstrained}{logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }

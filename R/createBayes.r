@@ -1,21 +1,19 @@
-#' create an object of class BayesDeform to be used in gaussMatch
+#' create an object of class BayesDeform to be used in gaussMatch and AmbergRegister
 #'
-#' create an object of class BayesDeform to be used in gaussMatch
+#' create an object of class BayesDeform to be used in gaussMatch and AmbergRegister
 #'
-#' @param model list containing mshape, PCs, sd of a model distribution (can be result of \code{procSym}
-#' @param sd numeric or vector of numerics (length must be of value =< \code{iterations} as to be specified in gaussMatch or AmbergRegister. If \code{length(sd) =n < iterations}, then the first n iterations will be restricted to the according standard deviations
-#' @param nPC number of PCs used in restricting (overrides maxVar)
-#' @param scale logical: if FALSE, configuration will be restricted within a probablistic hypercube, otherwise Chi-Square distribution will be used.
-#' @param maxVar percentage to be explained by the PCs used for the restriction. E.g. if you want to include PCs explaining 95\% of the variance, set maxVar=95.
+#' @param model a model of class pPCA created with package RvtkStatismo
+#' @param sdmax numeric or vector of numerics (length must be of value =< \code{iterations} as to be specified in gaussMatch or AmbergRegister. If \code{length(sd) =n < iterations}, then the first n iterations will be restricted to the according standard deviations
+#' @param mahalanobis parameter according to mahaprob in function PredictSample from RvtkStatismo
+#' @param ptValueNoise parameter according to ptValueNoise in function statismoConstrainModel from RvtkStatismo
 #' @return returns a list of class "BayesDeform"
 #' @export 
-createBayes <- function(model, sd=3,nPC=NULL, scale=FALSE, maxVar=95) {
+createBayes <- function(model, sdmax=numeric(0),mahalanobis="chisq",ptValueNoise=2) {
     Bayes <- list(); class(Bayes) <- "BayesDeform"
     Bayes$model <- model
-    Bayes$sd <- sd
-    Bayes$nPC <- nPC
-    Bayes$scale <- scale
-    Bayes$maxVar <- maxVar
+    Bayes$sdmax <- sdmax
+    Bayes$mahaprob <- mahalanobis
+    Bayes$ptValueNoise <- ptValueNoise
 
     return(Bayes)
 }

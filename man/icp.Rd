@@ -6,7 +6,8 @@
 icp(mesh1, mesh2, iterations = 3, lm1 = NULL, lm2 = NULL, uprange = 0.9,
   maxdist = NULL, minclost = 50, distinc = 0.5, rhotol = pi, k = 50,
   reflection = FALSE, pro = c("vcg", "morpho"), silent = FALSE,
-  subsample = NULL, type = c("rigid", "similarity", "affine"))
+  subsample = NULL, type = c("rigid", "similarity", "affine"),
+  getTransform = FALSE)
 }
 \arguments{
 \item{mesh1}{object of class "mesh3d".}
@@ -47,9 +48,14 @@ If the tow meshes have only little or no overlap, "vcg" can be really slow. Othe
 \item{subsample}{integer use a subsample (using kmeans clustering) to find closest points for  - subsample specifies the size of this subsample.}
 
 \item{type}{set type of affine transformation: options are "affine", "rigid" and "similarity" (rigid + scale)}
+
+\item{getTransform}{logical: if TRUE, a list containing the transformed mesh and the 4x4 transformation matrix.}
 }
 \value{
-Returns the rotated mesh1.
+if \code{getTransform=FALSE}, the tranformed mesh1 is returned and otherwise a list containing
+
+\item{mesh}{tranformed mesh1}
+\item{transform}{4x4 transformation matrix}
 }
 \description{
 performs rigid body transformations (and scaling if requested) to map a

@@ -35,9 +35,9 @@
 #'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param silent logical: no verbosity
-#' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
+#' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed.
+#' @param useConstrained logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
-#' @param reuseLM logical: if TRUE and multiple initial transforms (e.g affine and rigid) are selected, each transform will be initialized by updated landmarks from the previous transform.
 #' @param visualize logical request visualization of deformation process.
 #' @param folder logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.
 #' @return 
@@ -60,10 +60,10 @@
 #' # only 10 iterations to keep example calculation time reasonable.
 #' params <- list(iterations=10) 
 #' params <- append(params, list(
-#'    # first \code{lambda} is set relatively high because first matching uses landmarks
+#'    # first lambda is set relatively high because first matching uses landmarks
 #'    # then let it increase from 0.2 to 0.6
 #'    lambda=c(0.7,seq(from = 0.2,to=0.6,length.out = params$iterations-1)),
-#'    # treat \code{k} similar as \code{lambda}
+#'    # treat k similar as lambda
 #'    k=c(10,seq(from = 1,to=params$iterations-1,by=1)),
 #'    useiter=FALSE # iteratively deform dummyhead onto humface
 #'    ))
@@ -87,8 +87,13 @@
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
 #' @importFrom Morpho meshcube applyTransform computeTransform
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,forceLM=FALSE,reuseLM=FALSE,visualize=FALSE, folder=NULL)
+AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL)
     {
+        if (!is.null(Bayes)) {
+            if (!require(RvtkStatismo))
+                stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
+            mesh1 <- DrawMean(Bayes$model)
+        }
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         meshbord <- vcgBorder(mesh2)
         count <- 0
@@ -107,8 +112,18 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         affinemat <- NULL
         meshorig <- mesh1
         stopit <- FALSE
-        if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
+        if (!is.null(lm1) && !is.null(lm2)) {## case: landmarks are provided
             bary <- vcgClost(lm1,mesh1,barycentric = T)
+            if (!is.null(Bayes)) {
+                ##register landmarks on model and constrain reference
+                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
+                constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
+                if (useConstrained)
+                    Bayes$model <- constMod
+                mesh1 <- DrawMean(constMod)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }                
+            
             if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
                 cat("\n landmarks but no transform specified, performing rigid transrorm\n")
                 rigid <- list(iterations=0)
@@ -120,7 +135,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(similarity)) {##similarity matching
-                if (is.null(rigid) || reuseLM) {
+                if (is.null(rigid)) {
                     similarity$lm1 <- lm1
                     similarity$lm2 <- lm2
                 }
@@ -128,7 +143,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(affine)) {##similarity matching
-                if ((is.null(rigid) && is.null(similarity)) || reuseLM) {
+                if (is.null(rigid) && is.null(similarity)) {
                     affine$lm1 <- lm1
                     affine$lm2 <- lm2
                 }
@@ -251,16 +266,16 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                     tmp$S <- NULL
 
                 tmpold <- tmp
-                chk <- try(tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[count],lambda=lambda[count],S=tmp$S))
-                if (inherits(chk,"try-error"))
+                chk <- try(tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[count],lambda=lambda[count],S=tmp$S),silent = TRUE)
+                if (inherits(chk,"try-error")) {
                     tmp <- tmpold
-                                        #oo <- wire3d(tmp$mesh,col=count)
+                    cat("iteration failed: previous iteration used")
+                }
                 gc()
                 ## calculate error
-                if (!is.null(Bayes) && length(Bayes$sd) >= count) {
-                    x <- vert2points(tmp$mesh)
-                    x <- restrict(x,Bayes$model, sd=Bayes$sd[count],scale=Bayes$scale,nPC=Bayes$nPC,probab=FALSE,maxVar=Bayes$maxVar)
-                    tmp$mesh$vb[1:3,] <- t(x)
+                if (!is.null(Bayes) && length(Bayes$sdmax) >= count) {
+                    tmp$mesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
+                    
                     
                 }
                 if (smooth)
