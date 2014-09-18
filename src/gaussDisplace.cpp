@@ -110,10 +110,8 @@ RcppExport SEXP displaceGauss(SEXP iomat_, SEXP Wvb_, SEXP Pvb_, SEXP D1_, SEXP 
   return wrap(out);
  }  catch (std::exception& e) {
     ::Rf_error( e.what());
-    return wrap(1);
   } catch (...) {
     ::Rf_error("unknown exception");
-    return wrap(1);
   }
 }
     
