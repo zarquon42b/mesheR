@@ -8,12 +8,13 @@
 #' @param ptValueNoise parameter according to ptValueNoise in function statismoConstrainModel from RvtkStatismo
 #' @return returns a list of class "BayesDeform"
 #' @export 
-createBayes <- function(model, sdmax=numeric(0),mahalanobis="chisq",ptValueNoise=2) {
+createBayes <- function(model, sdmax=numeric(0),mahalanobis="chisq",ptValueNoise=2,wt=NULL,align=TRUE) {
     Bayes <- list(); class(Bayes) <- "BayesDeform"
     Bayes$model <- model
     Bayes$sdmax <- sdmax
     Bayes$mahaprob <- mahalanobis
     Bayes$ptValueNoise <- ptValueNoise
-
+    Bayes$wt <- wt
+    Bayes$align <- align
     return(Bayes)
 }

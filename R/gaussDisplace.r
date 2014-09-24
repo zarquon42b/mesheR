@@ -304,7 +304,7 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
             if (Amberg) {#smooth deformation
                 tmpmesh <- mesh1
                 tmpmesh$vb[1:3,] <- t(tmp$addit)
-                tmpmesh <- updateNormals(mesh1)
+                tmpmesh <- vcgUpdateNormals(mesh1)
                 mytry <- try(mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i])$mesh,TRUE)
                
             } else
@@ -312,10 +312,18 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
 
 
             if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
-                mesh1 <- PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=TRUE)
+                if (!is.null(Bayes$wt)) {
+                    wt <- Bayes$wt
+                    wts <- c(1,wt)
+                    wts <- wts/sum(wts)
+                    tmpmesh <- PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=TRUE)
+                    mesh1$vb[1:3,] <- wts[1]*mesh1$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,]
+                    
+                } else
+                    mesh1 <- PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align)
 
             }
-            mesh1 <- updateNormals(mesh1)
+            mesh1 <- vcgUpdateNormals(mesh1)
             
             
             time1 <- Sys.time()
