@@ -4,7 +4,7 @@
 \title{create an object of class BayesDeform to be used in gaussMatch and AmbergRegister}
 \usage{
 createBayes(model, sdmax = numeric(0), mahalanobis = "chisq",
-  ptValueNoise = 2)
+  ptValueNoise = 2, wt = NULL, align = TRUE)
 }
 \arguments{
 \item{model}{a model of class pPCA created with package RvtkStatismo}
@@ -14,6 +14,10 @@ createBayes(model, sdmax = numeric(0), mahalanobis = "chisq",
 \item{mahalanobis}{parameter according to mahaprob in function PredictSample from RvtkStatismo}
 
 \item{ptValueNoise}{parameter according to ptValueNoise in function statismoConstrainModel from RvtkStatismo}
+
+\item{wt}{weight put on the closest model configuration. E.g. if wt = 2 the deformation will be 0.33*closestPoints + 0.66*most probable model shape.}
+
+\item{align}{logical: if the target mesh is already aligned to the model, align can be set to FALSE.}
 }
 \value{
 returns a list of class "BayesDeform"

@@ -95,6 +95,8 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
             mesh1 <- DrawMean(Bayes$model)
         }
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
+        mesh1 <- vcgUpdateNormals(mesh1)
+        mesh2 <- vcgUpdateNormals(mesh2)
         meshbord <- vcgBorder(mesh2)
         count <- 0
         if (iterations < 1)
@@ -125,7 +127,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
             }                
             
             if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
-                cat("\n landmarks but no transform specified, performing rigid transrorm\n")
+                cat("\n landmarks but no transform specified, performing rigid transform\n")
                 rigid <- list(iterations=0)
             }
             if (!is.null(rigid)) { ##perform rigid icp-matching
@@ -272,14 +274,22 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                     cat("iteration failed: previous iteration used")
                 }
                 gc()
-                ## calculate error
-                if (!is.null(Bayes) && length(Bayes$sdmax) >= count) {
-                    tmp$mesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
-                    
-                    
-                }
                 if (smooth)
                     tmp$mesh <- vcgSmooth(tmp$mesh,iteration = smoothit,type=smoothtype)
+                ## calculate error
+                if (!is.null(Bayes) && length(Bayes$sdmax) >= count) {
+                    if (!is.null(Bayes$wt)) {
+                        wt <- Bayes$wt
+                        wts <- c(1,wt)
+                        wts <- wts/sum(wts)
+                        tmpmesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
+                        tmp$mesh$vb[1:3,] <- wts[1]*tmp$mesh$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,]
+                    } else {
+                        tmp$mesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
+                    }
+                    
+                }
+                tmp$mesh <- vcgUpdateNormals(tmp$mesh)
                 if (visualize) {
                     
                     if (!is.null(rglid))
