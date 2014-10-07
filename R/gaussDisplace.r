@@ -105,8 +105,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' al. and Bryan et al.. Additional mechanisms for controlling and restricting
 #' the displacement smoothing are implemented
 #' 
-#' @param mesh1 An object of class mesh3d used as atlas mesh to be deformed
-#' onto the target mesh. Mesh resolution should be ~1.5.
+#' @param mesh1 x reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. Mesh resolution should be ~1.5.
 #' @param mesh2 An object of class mesh3d used as target mesh. Mesh resolution
 #' should be ~1.5.
 #' @param iterations Iterations of displacement. Default is 10.
@@ -188,8 +187,15 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,useConstrained=TRUE,...)
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,useConstrained=TRUE,visualize=FALSE,folder=NULL,...)
     {
+        if (inherits(x, "mesh3d")) {
+            mesh1 <- x
+            Bayes <- NULL
+        } else if (inherits(x, "BayesDeform"))
+            Bayes <- x
+        else
+            stop("x must be an object of class mesh3d or BayesDeform")
         if (!is.null(Bayes)) {
             if (!require(RvtkStatismo))
                 stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
@@ -283,7 +289,33 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
                     mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
             }
         }
-        
+        if (visualize) {
+             rglid <- NULL
+            open3d()
+            points3d(meshcube(mesh1),col="white",alpha=0)
+            shade3d(mesh2,col=2,specular=1)
+            if (!is.null(rglid))
+                rgl.pop(id=rglid)
+            rglid <- wire3d(mesh1,col="white")
+           
+            if (!is.null(folder)) {
+                if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") 
+                    folder <- paste(folder,"/",sep="")
+                dir.create(folder,showWarnings=F)
+                movie <- paste(folder,"deformation",sep="")
+                
+                npics <- nchar(iterations+1)
+                ndec <- paste0("%s%0",npics,"d.png")
+            }
+            readline("please select viewpoint\n")
+            
+            
+            if (!is.null(folder)) {
+                filename <- sprintf("%s%04d.png", movie, 1)
+                rgl.snapshot(filename,fmt="png")
+                movcount <- 2
+            }
+         }
         ## elastic matching starts
         if (!silent)
             cat("starting elastic matching\n****************\n")
@@ -324,6 +356,17 @@ gaussMatch <- function(mesh1,mesh2,iterations=10,smooth=NULL,smoothit=10,smootht
 
             }
             mesh1 <- vcgUpdateNormals(mesh1)
+            if (visualize) {
+                    
+                    if (!is.null(rglid))
+                        rgl.pop(id=rglid)
+                    rglid <- wire3d(mesh1,col="white")
+                    if (!is.null(folder)) {
+                        filename <- sprintf("%s%04d.png", movie, movcount)
+                        movcount <- movcount+1
+                        rgl.snapshot(filename,fmt="png")
+                    }
+                }
             
             
             time1 <- Sys.time()
