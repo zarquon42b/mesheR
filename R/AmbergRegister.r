@@ -3,8 +3,7 @@
 #' Perform registration of two triangular meshes, minimizing per-face
 #' distortions. 
 #' 
-#' @param mesh1 reference mesh: triangular mesh of class "mesh3d". No loose
-#' vertices, edges and degenerated faces are allowed. 
+#' @param x reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed.No loose vertices, edges and degenerated faces are allowed. 
 #' @param mesh2 target mesh: triangular mesh of class "mesh3d". 
 #' @param lm1 m x 3 matrix containing correspondences on "mesh1". 
 #' @param lm2 m x 3 matrix containing target correspondences on "mesh2".
@@ -33,9 +32,9 @@
 #' @param rigid named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param similarity named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).
 #'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
+#' @param pcAlign if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param silent logical: no verbosity
-#' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed.
 #' @param useConstrained logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
 #' @param visualize logical request visualization of deformation process.
@@ -85,10 +84,18 @@
 #'                       k=params$k, lambda=params$lambda, useiter=params$useiter,rigid=rigid,
 #'                       similarity=similarity,affine=affine,forceLM = TRUE)
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
-#' @importFrom Morpho meshcube applyTransform computeTransform
+#' @importFrom Morpho meshcube applyTransform computeTransform pcAlign
 #' @export AmbergRegister
-AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,nn=20, silent=FALSE, Bayes=NULL,useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL)
+AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL, pcAlign=TRUE,nn=20, silent=FALSE, useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL)
     {
+        if (inherits(x, "mesh3d")) {
+            mesh1 <- x
+            Bayes <- NULL
+        } else if (inherits(x, "BayesDeform"))
+            Bayes <- x
+        else
+            stop("x must be an object of class mesh3d or BayesDeform")
+        
         if (!is.null(Bayes)) {
             if (!require(RvtkStatismo))
                 stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
@@ -114,9 +121,14 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
         affinemat <- NULL
         meshorig <- mesh1
         stopit <- FALSE
-        if (!is.null(lm1) && !is.null(lm2)) {## case: landmarks are provided
-            bary <- vcgClost(lm1,mesh1,barycentric = T)
-            if (!is.null(Bayes)) {
+        hasLM <- FALSE
+        if (!is.null(lm1) && !is.null(lm2))
+            hasLM <- TRUE
+        if (hasLM || pcAlign) {## case: landmarks are provided
+            if (hasLM)
+                bary <- vcgClost(lm1,mesh1,barycentric = T)
+
+            if (!is.null(Bayes) && hasLM) {
                 ##register landmarks on model and constrain reference
                 lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
                 constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
@@ -126,15 +138,21 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }                
             
-            if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
+            if (is.null(rigid) && is.null(affine) && is.null(similarity) && !pcAlign) {
                 cat("\n landmarks but no transform specified, performing rigid transform\n")
                 rigid <- list(iterations=0)
+            }
+            if (pcAlign) {
+                mesh1 <- pcAlign(mesh1,mesh2)
+                if (hasLM)
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(rigid)) { ##perform rigid icp-matching
                 rigid$lm1 <- lm1
                 rigid$lm2 <- lm2
                 mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                if (hasLM)
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(similarity)) {##similarity matching
                 if (is.null(rigid)) {
@@ -142,7 +160,8 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                     similarity$lm2 <- lm2
                 }
                 mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                if (hasLM)
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(affine)) {##similarity matching
                 if (is.null(rigid) && is.null(similarity)) {
@@ -150,7 +169,8 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                     affine$lm2 <- lm2
                 }
                 mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                if (hasLM)
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             
             affinemat <- computeTransform(vert2points(mesh1),vert2points(meshorig))
@@ -159,7 +179,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
             if (!useiter && !forceLM)
                 tmp$S <- createS(mesh1)
             
-            if (forceLM) {
+            if (forceLM && hasLM) {
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
                 tmp <- AmbergDeformSpam(mesh1,lm1,lm2,k0=k[1],lambda=lambda[1])
                 count <- count+1
@@ -219,7 +239,7 @@ AmbergRegister <- function(mesh1, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iter
                 rgl.snapshot(filename,fmt="png")
                 movcount <- 2
             }
-                }
+         }
         
         if (!stopit) {
             ## set error and counter appropriately
