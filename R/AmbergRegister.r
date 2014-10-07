@@ -124,9 +124,8 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
         hasLM <- FALSE
         if (!is.null(lm1) && !is.null(lm2))
             hasLM <- TRUE
-        if (hasLM || pcAlign) {## case: landmarks are provided
-            if (hasLM)
-                bary <- vcgClost(lm1,mesh1,barycentric = T)
+        if (hasLM) {## case: landmarks are provided
+            bary <- vcgClost(lm1,mesh1,barycentric = T)
 
             if (!is.null(Bayes) && hasLM) {
                 ##register landmarks on model and constrain reference
@@ -144,12 +143,13 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             }
             if (pcAlign) {
                 mesh1 <- pcAlign(mesh1,mesh2)
-                if (hasLM)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(rigid)) { ##perform rigid icp-matching
-                rigid$lm1 <- lm1
-                rigid$lm2 <- lm2
+                if (!pcAlign) {
+                    rigid$lm1 <- lm1
+                    rigid$lm2 <- lm2
+                }
                 mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
                 if (hasLM)
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
@@ -160,8 +160,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     similarity$lm2 <- lm2
                 }
                 mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
-                if (hasLM)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(affine)) {##similarity matching
                 if (is.null(rigid) && is.null(similarity)) {
@@ -169,8 +168,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     affine$lm2 <- lm2
                 }
                 mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
-                if (hasLM)
-                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             
             affinemat <- computeTransform(vert2points(mesh1),vert2points(meshorig))
@@ -189,7 +187,10 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             verts0 <- vert2points(mesh1)
             
             
-        } else if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
+        } else if (pcAlign || !is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
+            if (pcAlign) {
+                mesh1 <- pcAlign(mesh1,mesh2)
+            }
             if (!is.null(rigid)){ ##perform rigid icp-matching
                 mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
             }
