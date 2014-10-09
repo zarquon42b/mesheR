@@ -4,7 +4,7 @@
 \title{Deform triangular mesh based on correspondences}
 \usage{
 AmbergDeformSpam(mesh, lm1, lm2, k0 = 1, lambda = 1, S = NULL,
-  clean = FALSE)
+  Hchol = NULL, clean = FALSE)
 }
 \arguments{
 \item{mesh}{triangular mesh of class "mesh3d". No loose vertices, edges and
@@ -19,6 +19,8 @@ degenerated faces are allowed.}
 \item{lambda}{numeric: parameter regularizing faces's distortion.}
 
 \item{S}{optional: object from function createS from previous calculation.}
+
+\item{Hchol}{Cholesky decomposition of Hessian (obtained by a previous run of AmbergDeformSpam), speeds up things significantly.}
 
 \item{clean}{logical: if TRUE, \code{vcgClean} from package Rvcg is run to remove duplicated and unreferenced vertices from the mesh and preventing segfaults.}
 }

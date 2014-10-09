@@ -192,7 +192,7 @@ createJc <- function(lm1,ncol,mesh)
 #' @param k0 integer: parameter regularizing face normal distortion.
 #' @param lambda numeric: parameter regularizing faces's distortion.  
 #' @param S optional: object from function createS from previous calculation.
-#' @param Hchol choldesky decomposition of Hessian (obtained by a previous run of AmbergDeformSpam), speeds up things significantly.
+#' @param Hchol Cholesky decomposition of Hessian (obtained by a previous run of AmbergDeformSpam), speeds up things significantly.
 #' @param clean logical: if TRUE, \code{vcgClean} from package Rvcg is run to remove duplicated and unreferenced vertices from the mesh and preventing segfaults. 
 #' @return
 #' \item{mesh}{deformed mesh}
