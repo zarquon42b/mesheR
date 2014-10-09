@@ -1,7 +1,6 @@
 ## @export gaussDisplace
 #' @importFrom Rvcg vcgUpdateNormals
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...)
-{
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...) {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
     ## set projection function according to input request
     pro <- substring(pro[1],1L,1L)
@@ -187,195 +186,209 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,useConstrained=TRUE,visualize=FALSE,folder=NULL,...)
-    {
-        if (inherits(x, "mesh3d")) {
-            mesh1 <- x
-            Bayes <- NULL
-        } else if (inherits(x, "BayesDeform"))
-            Bayes <- x
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,useConstrained=TRUE,visualize=FALSE,folder=NULL,...) {
+    if (inherits(x, "mesh3d")) {
+        mesh1 <- x
+        Bayes <- NULL
+    } else if (inherits(x, "BayesDeform"))
+          Bayes <- x
+      else
+          stop("x must be an object of class mesh3d or BayesDeform")
+    if (!is.null(Bayes)) {
+        if (!require(RvtkStatismo))
+            stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
+        mesh1 <- DrawMean(Bayes$model)
+    }
+    if (!is.null(angtol)) {
+        mesh1 <- vcgUpdateNormals(mesh1)
+        mesh2 <- vcgUpdateNormals(mesh2)
+    }
+    Amberg <- FALSE
+    ##setup variables
+    if (!is.null(AmbergK) && !is.null(AmbergLambda)) {
+        AmbergK <- round(AmbergK)# make sure k is integer - otherwise RAM overkill
+        ambergsingle <- FALSE
+        if (length(AmbergK) == 1) {
+            AmbergK <- rep(AmbergK,iterations)
+            ambergsingle <- TRUE
+        } else if (length(AmbergK) != iterations)
+              stop("AmbergK must be vector of length 'iterations'")
+        
+        if (length(AmbergLambda) == 1)
+            AmbergLambda <- rep(AmbergLambda,iterations)
+        else if (length(AmbergLambda) != iterations)
+            stop("AmbergLambda must be vector of length 'iterations'")
         else
-            stop("x must be an object of class mesh3d or BayesDeform")
+            ambergsingle <- FALSE
+        Amberg <- TRUE
+        Hchol <- NULL
+    }
+    
+    ## clean input mesh
+    if(length(unrefVertex(mesh1)) > 0 )
+        mesh1 <- rmUnrefVertex(mesh1)
+    
+    if (is.null(nh)) {
+        nh=ceiling(150/meshres(mesh1))
+        if (!silent)
+            cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
+    }
+    ## set projection function according to input request
+    pro <- substring(pro[1],1L,1L)
+    if (pro == "v") {
+        project3d <- vcgClostKD
+    } else if (pro == "m") {
+        protmp <- function(x,y,sign=F) {
+            out <- closemeshKD(x,y,k=k0,sign=sign)
+            return(out)
+        }
+        project3d <- protmp
+    }
+    
+    ## do icp matching
+    if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
+        bary <- vcgClost(lm1,mesh1,barycentric = T)
         if (!is.null(Bayes)) {
-            if (!require(RvtkStatismo))
-                stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
-            mesh1 <- DrawMean(Bayes$model)
+            lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
+            constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
+            if (useConstrained)
+                Bayes$model <- constMod
+            mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
+            lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+        }           
+        if (is.null(rigid) && is.null(affine) && is.null(similarity))
+            rigid <- list(iterations=0)
+        if (!is.null(rigid)) { ##perform rigid icp-matching
+            rigid$lm1 <- lm1
+            rigid$lm2 <- lm2
+            mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+            lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
-        if (!is.null(angtol)) {
-            mesh1 <- vcgUpdateNormals(mesh1)
-            mesh2 <- vcgUpdateNormals(mesh2)
-        }
-        Amberg <- FALSE
-        ##setup variables
-        if (!is.null(AmbergK) && !is.null(AmbergLambda)) {
-            AmbergK <- round(AmbergK)# make sure k is integer - otherwise RAM overkill
-            if (length(AmbergK) == 1)
-                AmbergK <- rep(AmbergK,iterations)
-            else if (length(AmbergK) != iterations)
-                stop("AmbergK must be vector of length 'iterations'")
-            
-            if (length(AmbergLambda) == 1)
-                AmbergLambda <- rep(AmbergLambda,iterations)
-            else if (length(AmbergLambda) != iterations)
-                stop("AmbergLambda must be vector of length 'iterations'")
-            Amberg <- TRUE
-        }
-        
-        
-        ## clean input mesh
-        if(length(unrefVertex(mesh1)) > 0 )
-            mesh1 <- rmUnrefVertex(mesh1)
-        
-        if (is.null(nh)) {
-            nh=ceiling(150/meshres(mesh1))
-            if (!silent)
-                cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
-        }
-        ## set projection function according to input request
-        pro <- substring(pro[1],1L,1L)
-        if (pro == "v") {
-            project3d <- vcgClostKD
-        } else if (pro == "m") {
-            protmp <- function(x,y,sign=F) {
-                out <- closemeshKD(x,y,k=k0,sign=sign)
-                return(out)
+        if (!is.null(similarity)) {##similarity matching
+            if (is.null(rigid)) {
+                similarity$lm1 <- lm1
+                similarity$lm2 <- lm2
             }
-            project3d <- protmp
+            mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+            lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+        }
+        if (!is.null(affine)) {##similarity matching
+            if (is.null(rigid) && is.null(similarity)) {
+                affine$lm1 <- lm1
+                affine$lm2 <- lm2
+            }
+            mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+            lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
         
-        ## do icp matching
-        if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
-            bary <- vcgClost(lm1,mesh1,barycentric = T)
-            if (!is.null(Bayes)) {
-                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
-                constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
-                if (useConstrained)
-                    Bayes$model <- constMod
-                mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-            }           
-            if (is.null(rigid) && is.null(affine) && is.null(similarity))
-                rigid <- list(iterations=0)
-            if (!is.null(rigid)) { ##perform rigid icp-matching
-                rigid$lm1 <- lm1
-                rigid$lm2 <- lm2
+    } else {
+        if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
+            if (!is.null(rigid)) ##perform rigid icp-matching
                 mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-            }
-            if (!is.null(similarity)) {##similarity matching
-                if (is.null(rigid)) {
-                    similarity$lm1 <- lm1
-                    similarity$lm2 <- lm2
-                }
+            if (!is.null(similarity))##similarity matching
                 mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-            }
-            if (!is.null(affine)) {##similarity matching
-                if (is.null(rigid) && is.null(similarity)) {
-                    affine$lm1 <- lm1
-                    affine$lm2 <- lm2
-                }
+            if (!is.null(affine))##similarity matching
                 mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-            }
+        }
+    }
+    if (visualize) {
+        rglid <- NULL
+        open3d()
+        points3d(meshcube(mesh1),col="white",alpha=0)
+        shade3d(mesh2,col=2,specular=1)
+        if (!is.null(rglid))
+            rgl.pop(id=rglid)
+        rglid <- wire3d(mesh1,col="white")
+        
+        if (!is.null(folder)) {
+            if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") 
+                folder <- paste(folder,"/",sep="")
+            dir.create(folder,showWarnings=F)
+            movie <- paste(folder,"deformation",sep="")
             
-        } else {
-            if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
-                if (!is.null(rigid)) ##perform rigid icp-matching
-                    mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
-                if (!is.null(similarity))##similarity matching
-                    mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
-                if (!is.null(affine))##similarity matching
-                    mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+            npics <- nchar(iterations+1)
+            ndec <- paste0("%s%0",npics,"d.png")
+        }
+        readline("please select viewpoint\n")
+        
+        
+        if (!is.null(folder)) {
+            filename <- sprintf("%s%04d.png", movie, 1)
+            rgl.snapshot(filename,fmt="png")
+            movcount <- 2
+        }
+    }
+    if (Amberg) {
+        S <- createS(mesh1)
+        meshorig <- mesh1
+    }
+    ## elastic matching starts
+    if (!silent)
+        cat("starting elastic matching\n****************\n")
+    for (i in 1:iterations) {
+        time0 <- Sys.time()
+        if (!is.null(smooth) && i > 1) {
+            if (i %% smooth == 0) {
+                if (!silent)
+                    cat("smoothing step\n")
+                mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
+                                        #if (!silent)
+                                        #cat("smoothing finished\n")
             }
         }
+        ## call the workhorse doing the displacement
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
+        
+        
+        if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
+            if (!is.null(Bayes$wt)) {
+                mesh0 <- mesh1
+                mesh0$vb[1:3,] <- t(tmp$addit)
+                mesh0 <- vcgUpdateNormals(mesh0)
+                wt <- Bayes$wt
+                wts <- c(1,wt)
+                wts <- wts/sum(wts)
+                tmpmesh <- PredictSample(Bayes$model,mesh0,TRUE, sdmax=Bayes$sdmax[i],align=TRUE)
+                                        #mesh1$vb[1:3,] <- wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,]
+                tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
+                
+            } else
+                tmp$addit <- vert2points(PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align))
+            
+        }
+        
+        if (Amberg) {
+            mytry <- try(ambtry <- AmbergDeformSpam(meshorig,vert2points(meshorig),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i],S=S,Hchol=Hchol),FALSE)
+            if (!inherits(mytry,"try-error")) {
+                if (ambergsingle) 
+                    Hchol <- ambtry$Hchol
+                mesh1 <- ambtry$mesh
+            }
+        } else {
+            mesh1$vb[1:3,] <- t(tmp$addit)
+        }
+        
+        mesh1 <- vcgUpdateNormals(mesh1)
         if (visualize) {
-             rglid <- NULL
-            open3d()
-            points3d(meshcube(mesh1),col="white",alpha=0)
-            shade3d(mesh2,col=2,specular=1)
+            
             if (!is.null(rglid))
                 rgl.pop(id=rglid)
             rglid <- wire3d(mesh1,col="white")
-           
             if (!is.null(folder)) {
-                if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") 
-                    folder <- paste(folder,"/",sep="")
-                dir.create(folder,showWarnings=F)
-                movie <- paste(folder,"deformation",sep="")
-                
-                npics <- nchar(iterations+1)
-                ndec <- paste0("%s%0",npics,"d.png")
-            }
-            readline("please select viewpoint\n")
-            
-            
-            if (!is.null(folder)) {
-                filename <- sprintf("%s%04d.png", movie, 1)
+                filename <- sprintf("%s%04d.png", movie, movcount)
+                movcount <- movcount+1
                 rgl.snapshot(filename,fmt="png")
-                movcount <- 2
-            }
-         }
-        ## elastic matching starts
-        if (!silent)
-            cat("starting elastic matching\n****************\n")
-        for (i in 1:iterations) {
-            time0 <- Sys.time()
-            if (!is.null(smooth) && i > 1) {
-                if (i %% smooth == 0) {
-                    if (!silent)
-                        cat("smoothing step\n")
-                    mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
-                    #if (!silent)
-                        #cat("smoothing finished\n")
-                }
-            }
-            ## call the workhorse doing the displacement
-            tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
-            
-            if (Amberg) {#smooth deformation
-                tmpmesh <- mesh1
-                tmpmesh$vb[1:3,] <- t(tmp$addit)
-                tmpmesh <- vcgUpdateNormals(mesh1)
-                mytry <- try(mesh1 <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i])$mesh,TRUE)
-               
-            } else
-                mesh1$vb[1:3,] <- t(tmp$addit)
-
-
-            if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
-                if (!is.null(Bayes$wt)) {
-                    wt <- Bayes$wt
-                    wts <- c(1,wt)
-                    wts <- wts/sum(wts)
-                    tmpmesh <- PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=TRUE)
-                    mesh1$vb[1:3,] <- wts[1]*mesh1$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,]
-                    
-                } else
-                    mesh1 <- PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align)
-
-            }
-            mesh1 <- vcgUpdateNormals(mesh1)
-            if (visualize) {
-                    
-                    if (!is.null(rglid))
-                        rgl.pop(id=rglid)
-                    rglid <- wire3d(mesh1,col="white")
-                    if (!is.null(folder)) {
-                        filename <- sprintf("%s%04d.png", movie, movcount)
-                        movcount <- movcount+1
-                        rgl.snapshot(filename,fmt="png")
-                    }
-                }
-            
-            
-            time1 <- Sys.time()
-            if (!silent) {
-                cat(paste("completed iteration",i, "in", round(time1-time0,2), "seconds\n"))
-                cat("****************\n")
             }
         }
-        invisible(mesh1)
+        
+        
+        time1 <- Sys.time()
+        if (!silent) {
+            cat(paste("completed iteration",i, "in", round(time1-time0,2), "seconds\n"))
+            cat("****************\n")
+        }
     }
+    invisible(mesh1)
+}
 
 
