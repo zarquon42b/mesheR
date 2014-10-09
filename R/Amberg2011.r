@@ -192,6 +192,7 @@ createJc <- function(lm1,ncol,mesh)
 #' @param k0 integer: parameter regularizing face normal distortion.
 #' @param lambda numeric: parameter regularizing faces's distortion.  
 #' @param S optional: object from function createS from previous calculation.
+#' @param Hchol choldesky decomposition of Hessian (obtained by a previous run of AmbergDeformSpam), speeds up things significantly.
 #' @param clean logical: if TRUE, \code{vcgClean} from package Rvcg is run to remove duplicated and unreferenced vertices from the mesh and preventing segfaults. 
 #' @return
 #' \item{mesh}{deformed mesh}
@@ -206,7 +207,7 @@ createJc <- function(lm1,ncol,mesh)
 #' @keywords ~kwd1 ~kwd2
 #' @importFrom Rvcg vcgClean
 #' @export AmbergDeformSpam
-AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=FALSE)
+AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=FALSE)
     {
         if (clean) {
             mesh <- vcgClean(mesh,sel=c(0:1),silent=T)
@@ -234,18 +235,23 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,clean=FALSE)
                                      
         ## append Jn to Jacobian J
         J <- rbind.spam(J,Jn)
-        ## calculate Hessian H
-        H <- t(J)%*%J
-        Hchk <- as.logical(length(which(!diff(H@rowpointers) > 0)))
-        if (Hchk)
-            diag(H) <- diag(H)
         Jtc <- t(Jc)%*%lm2
-        ## Cholesky decomposition of Hessian H
-        chk <- try(Hchol <- chol(H),silent = T)
-        if (inherits(chk,"try-error")) {
-            diag(H) <- diag(H)+1e-12
-            Hchol <- chol(H)
-            warning("singularity avoided by adding 1e-12 to diagonal, please check result")
+        ## calculate Hessian H
+        if (is.null(Hchol)) {
+            H <- t(J)%*%J
+            Hchk <- as.logical(length(which(!diff(H@rowpointers) > 0)))
+            if (Hchk)
+                diag(H) <- diag(H)
+           
+            ## Cholesky decomposition of Hessian H
+            chk <- try(Hchol <- chol(H),silent = T)
+            if (inherits(chk,"try-error")) {
+                diag(H) <- diag(H)+1e-12
+                Hchol <- chol(H)
+                warning("singularity avoided by adding 1e-12 to diagonal, please check result")
+            }
+        } else {
+            H <- NULL
         }
         k <- solve.spam(Hchol,lambda*Jtc)
         v <- S$sel$allcoo
