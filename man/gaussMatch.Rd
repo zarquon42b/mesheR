@@ -8,7 +8,7 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, rigid = NULL,
   similarity = NULL, affine = NULL, nh = NULL, toldist = 0,
   pro = c("vcg", "morpho"), k0 = 50, prometh = 1, angtol = NULL,
-  border = FALSE, horiz.disp = NULL, AmbergK = NULL,
+  border = FALSE, horiz.disp = NULL, useiter = TRUE, AmbergK = NULL,
   AmbergLambda = NULL, silent = FALSE, Bayes = NULL,
   useConstrained = TRUE, visualize = FALSE, folder = NULL, ...)
 }

@@ -186,7 +186,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,useConstrained=TRUE,visualize=FALSE,folder=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=TRUE,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,useConstrained=TRUE,visualize=FALSE,folder=NULL,...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
@@ -319,7 +319,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         }
     }
     if (Amberg) {
-        S <- createS(mesh1)
+        if (!useiter)
+            S <- createS(mesh1)
+        else
+            S <- NULL
         meshorig <- mesh1
     }
     ## elastic matching starts
@@ -358,9 +361,13 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         }
         
         if (Amberg) {
+            if (!useiter) 
             mytry <- try(ambtry <- AmbergDeformSpam(meshorig,vert2points(meshorig),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i],S=S,Hchol=Hchol),FALSE)
+            else
+                mytry <- try(ambtry <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i],S=S,Hchol=Hchol),FALSE)
+
             if (!inherits(mytry,"try-error")) {
-                if (ambergsingle) 
+                if (ambergsingle && !useiter) 
                     Hchol <- ambtry$Hchol
                 mesh1 <- ambtry$mesh
             }
