@@ -4,7 +4,7 @@
 \title{create an object of class BayesDeform to be used in gaussMatch and AmbergRegister}
 \usage{
 createBayes(model, sdmax = numeric(0), mahalanobis = "chisq",
-  ptValueNoise = 2, wt = NULL, align = TRUE)
+  ptValueNoise = 2, wt = NULL, align = TRUE, shrinkfun = NULL)
 }
 \arguments{
 \item{model}{a model of class pPCA created with package RvtkStatismo}
@@ -15,14 +15,23 @@ createBayes(model, sdmax = numeric(0), mahalanobis = "chisq",
 
 \item{ptValueNoise}{parameter according to ptValueNoise in function statismoConstrainModel from RvtkStatismo}
 
-\item{wt}{weight put on the closest model configuration. E.g. if wt = 2 the deformation will be 0.33*closestPoints + 0.66*most probable model shape.}
+\item{wt}{numeric: a weight put on the closest model configuration. E.g. if wt = 2 the deformation will be 0.33*closestPoints + 0.66*most probable model shape. This can either be a constant scalar (that might be modified in each iteration by a shrinkage function - see below) or a vector of length sdmax.}
 
 \item{align}{logical: if the target mesh is already aligned to the model, align can be set to FALSE.}
+
+\item{shrinkfun}{a two-valued function for the generation of the weight in the i-th iteration. See examples below.}
 }
 \value{
 returns a list of class "BayesDeform"
 }
 \description{
 create an object of class BayesDeform to be used in gaussMatch and AmbergRegister
+}
+\examples{
+\dontrun{
+shrinkfun <- function(x,i){x <- x*0.9^i; return(x)}
+# for wt=0.5 this will produce
+#
+}
 }
 
