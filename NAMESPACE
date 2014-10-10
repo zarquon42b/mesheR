@@ -2,6 +2,7 @@
 
 S3method(restrict,matrix)
 S3method(restrict,mesh3d)
+S3method(wiremesh3d,mesh3d)
 export(AijklWeights)
 export(AmbergDeformSpam)
 export(AmbergRegister)
