@@ -347,8 +347,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             if (!is.null(Bayes$wt)) {
                 mesh0 <- mesh1
                 mesh0$vb[1:3,] <- t(tmp$addit)
-                mesh0 <- vcgUpdateNormals(mesh0)
-                wt <- Bayes$wt
+                #mesh0 <- vcgUpdateNormals(mesh0)
+                wt <- Bayes$wt[i]
                 wts <- c(1,wt)
                 wts <- wts/sum(wts)
                 tmpmesh <- PredictSample(Bayes$model,mesh0,TRUE, sdmax=Bayes$sdmax[i],align=TRUE)

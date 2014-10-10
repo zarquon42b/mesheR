@@ -300,7 +300,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                 ## calculate error
                 if (!is.null(Bayes) && length(Bayes$sdmax) >= count) {
                     if (!is.null(Bayes$wt)) {
-                        wt <- Bayes$wt
+                        wt <- Bayes$wt[count]
                         wts <- c(1,wt)
                         wts <- wts/sum(wts)
                         tmpmesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
