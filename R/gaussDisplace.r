@@ -258,13 +258,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             
             constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
             if (useConstrained) {
-                lmModel <- lm2tmp
                 Bayes$model <- constMod
-            } else {
-                lmModel <- lm1
+                mesh1 <- vcgUpdateNormals(DrawMean(Bayes$model))
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
-            mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
-            lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }           
         if (is.null(rigid) && is.null(affine) && is.null(similarity))
             rigid <- list(iterations=0)
@@ -290,8 +287,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
-        if (!is.null(Bayes)) 
-            mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align))
+        #if (!is.null(Bayes)) 
+            #mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align))
     
         #mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,lmDataset=lm1,lmModel=lmModel,align=TRUE))
         

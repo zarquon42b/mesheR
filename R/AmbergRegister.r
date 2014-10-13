@@ -131,10 +131,11 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                 ##register landmarks on model and constrain reference
                 lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
                 constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
-                if (useConstrained)
+                if (useConstrained) {
                     Bayes$model <- constMod
-                mesh1 <- DrawMean(constMod)
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                    mesh1 <- vcgUpdateNormals(DrawMean(Bayes$model))
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                }
             }                
             
             if (is.null(rigid) && is.null(affine) && is.null(similarity) && !pcAlign) {
