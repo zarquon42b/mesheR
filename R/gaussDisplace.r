@@ -367,11 +367,11 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 wt <- Bayes$wt[i]
                 wts <- c(1,wt)
                 wts <- wts/sum(wts)
-                tmpmesh <- PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,mesh0,TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align)
+                tmpmesh <- PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,mesh0,TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob)
                 tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
                 
             } else
-                tmp$addit <- PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],align=Bayes$align)
+                tmp$addit <- PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
             
         }
         

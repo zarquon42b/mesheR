@@ -303,10 +303,10 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                         wt <- Bayes$wt[count]
                         wts <- c(1,wt)
                         wts <- wts/sum(wts)
-                        tmpmesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
+                        tmpmesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE,mahaprob=Bayes$mahaprob)
                         tmp$mesh$vb[1:3,] <- wts[1]*tmp$mesh$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,]
                     } else {
-                        tmp$mesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE)
+                        tmp$mesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=TRUE,mahaprob=Bayes$mahaprob)
                     }
                     
                 }
