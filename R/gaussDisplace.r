@@ -104,7 +104,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' al. and Bryan et al.. Additional mechanisms for controlling and restricting
 #' the displacement smoothing are implemented
 #' 
-#' @param mesh1 x reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. Mesh resolution should be ~1.5.
+#' @param x reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.
 #' @param mesh2 An object of class mesh3d used as target mesh. Mesh resolution
 #' should be ~1.5.
 #' @param iterations Iterations of displacement. Default is 10.
@@ -186,7 +186,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=TRUE,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, Bayes=NULL,useConstrained=TRUE,visualize=FALSE,folder=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, useConstrained=TRUE,visualize=FALSE,folder=NULL,...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
@@ -203,7 +203,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         mesh1 <- vcgUpdateNormals(mesh1)
         mesh2 <- vcgUpdateNormals(mesh2)
     }
-    Amberg <- FALSE
+    Amberg <- ambergsingle <- FALSE
     ##setup variables
     if (!is.null(AmbergK) && !is.null(AmbergLambda)) {
         AmbergK <- round(AmbergK)# make sure k is integer - otherwise RAM overkill
@@ -223,7 +223,6 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         Amberg <- TRUE
         Hchol <- NULL
     }
-    
     ## clean input mesh
     if(length(unrefVertex(mesh1)) > 0 )
         mesh1 <- rmUnrefVertex(mesh1)
@@ -244,15 +243,26 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         }
         project3d <- protmp
     }
-    
+    hasLM <- FALSE
+    if (!is.null(lm1) && !is.null(lm2))
+        hasLM <- TRUE
     ## do icp matching
-    if (!is.null(lm1) && !is.null(lm2)) {   ## case: landmarks are provided
+    lmModel <- NULL
+    if (hasLM) {   ## case: landmarks are provided
         bary <- vcgClost(lm1,mesh1,barycentric = T)
         if (!is.null(Bayes)) {
-            lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
+            if (Bayes$align)
+                lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
+            else
+                lm2tmp <- lm2
+            
             constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
-            if (useConstrained)
+            if (useConstrained) {
+                lmModel <- lm2tmp
                 Bayes$model <- constMod
+            } else {
+                lmModel <- lm1
+            }
             mesh1 <- DrawMean(statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise))
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }           
@@ -280,6 +290,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
+        if (!is.null(Bayes)) 
+            mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align))
+    
+        #mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,lmDataset=lm1,lmModel=lmModel,align=TRUE))
         
     } else {
         if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
@@ -294,8 +308,11 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
     if (visualize) {
         rglid <- NULL
         open3d()
-        points3d(meshcube(mesh1),col="white",alpha=0)
-        shade3d(mesh2,col=2,specular=1)
+        bb <- meshcube(mesh1)
+        bmean <- apply(bb,2,mean)
+        bb <- t(((t(bb)-bmean)*2)+bmean)
+        points3d(bb,col="white",alpha=0)
+        shade3d(mesh2,col=2,specular=1,alpha=0.7)
         if (!is.null(rglid))
             rgl.pop(id=rglid)
         rglid <- wire3d(mesh1,col="white")
@@ -347,16 +364,14 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             if (!is.null(Bayes$wt)) {
                 mesh0 <- mesh1
                 mesh0$vb[1:3,] <- t(tmp$addit)
-                #mesh0 <- vcgUpdateNormals(mesh0)
                 wt <- Bayes$wt[i]
                 wts <- c(1,wt)
                 wts <- wts/sum(wts)
-                tmpmesh <- PredictSample(Bayes$model,mesh0,TRUE, sdmax=Bayes$sdmax[i],align=TRUE)
-                                        #mesh1$vb[1:3,] <- wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,]
+                tmpmesh <- PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,mesh0,TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align)
                 tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
                 
             } else
-                tmp$addit <- vert2points(PredictSample(Bayes$model,mesh1,TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align))
+                tmp$addit <- PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],align=Bayes$align)
             
         }
         
@@ -369,6 +384,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             if (!inherits(mytry,"try-error")) {
                 if (ambergsingle && !useiter) 
                     Hchol <- ambtry$Hchol
+                
                 mesh1 <- ambtry$mesh
             }
         } else {

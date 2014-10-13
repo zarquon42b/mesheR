@@ -8,11 +8,13 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, rigid = NULL,
   similarity = NULL, affine = NULL, nh = NULL, toldist = 0,
   pro = c("vcg", "morpho"), k0 = 50, prometh = 1, angtol = NULL,
-  border = FALSE, horiz.disp = NULL, useiter = TRUE, AmbergK = NULL,
-  AmbergLambda = NULL, silent = FALSE, Bayes = NULL,
-  useConstrained = TRUE, visualize = FALSE, folder = NULL, ...)
+  border = FALSE, horiz.disp = NULL, useiter = FALSE, AmbergK = NULL,
+  AmbergLambda = NULL, silent = FALSE, useConstrained = TRUE,
+  visualize = FALSE, folder = NULL, ...)
 }
 \arguments{
+\item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.}
+
 \item{mesh2}{An object of class mesh3d used as target mesh. Mesh resolution
 should be ~1.5.}
 
@@ -83,11 +85,9 @@ discarded. Reduces distortion especially at mesh borders.}
 
 \item{silent}{logical suppress messages}
 
-\item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution}
-
 \item{useConstrained}{logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.}
 
-\item{mesh1}{x reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. Mesh resolution should be ~1.5.}
+\item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }
