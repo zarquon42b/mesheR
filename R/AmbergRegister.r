@@ -86,7 +86,7 @@
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
 #' @importFrom Morpho meshcube applyTransform computeTransform pcAlign
 #' @export AmbergRegister
-AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL, pcAlign=TRUE,nn=20, silent=FALSE, useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL)
+AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL, pcAlign=FALSE,nn=20, silent=FALSE, useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL)
     {
         if (inherits(x, "mesh3d")) {
             mesh1 <- x
@@ -124,6 +124,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
         hasLM <- FALSE
         if (!is.null(lm1) && !is.null(lm2))
             hasLM <- TRUE
+        print(hasLM)
         if (hasLM) {## case: landmarks are provided
             bary <- vcgClost(lm1,mesh1,barycentric = T)
 
