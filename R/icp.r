@@ -124,7 +124,9 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
           cat("\n")
       if (getTransform) {
           trafo <- computeTransform(vert2points(mesh1),vert2points(meshorig))
-          return(list(mesh=mesh1,transform=trafo))
+          if (!is.null(lm1))
+              lm1 <- applyTransform(lm1,trafo)
+          return(list(mesh=mesh1,transform=trafo,landmarks=lm1))
       } else {
           return(mesh1)
       }
