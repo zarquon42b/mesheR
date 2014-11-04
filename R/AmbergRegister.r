@@ -140,8 +140,13 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             }                
             
             if (is.null(rigid) && is.null(affine) && is.null(similarity) && !pcAlign) {
-                cat("\n landmarks but no transform specified, performing rigid transform\n")
-                rigid <- list(iterations=0)
+                if (is.null(Bayes)) {                
+                    rigid <- list(iterations=0)
+                    cat("\n landmarks but no transform specified, performing rigid transform\n")
+                } else if (Bayes$align) {
+                    rigid <- list(iterations=0)
+                    cat("\n landmarks but no transform specified, performing rigid transform\n")
+            }
             }
             if (pcAlign) {
                 mesh1 <- pcAlign(mesh1,mesh2)

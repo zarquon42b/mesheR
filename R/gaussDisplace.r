@@ -8,7 +8,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
         project3d <- vcgClostKD
     } else if (pro == "m") {
         protmp <- function(x,y,sign=F) {
-            out <- closemeshKD(x,y,k=k0,sign=sign,method=prometh)
+            out <- closemeshKD(x,y,k=k0,sign=sign,method=prometh,...)
             return(out)
         }
         project3d <- protmp
@@ -49,11 +49,11 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
         if (is.null(rhotol))
             rc <- horiz.disp
         tmp <- list();tmp$normals <- mesh1$vb[1:3,]-Spro$vb[1:3,]
-        hordev0 <- normcheck(mesh1,tmp,circle=FALSE)
+        hordev0 <- normcheck(mesh1,tmp)
         rt0[which(hordev0 > horiz.disp)] <- 4
         if (!oneway) {
             tmp <- list();tmp$normals <- mesh2$vb[1:3,]-Mpro$vb[1:3,]
-            hordev1 <- normcheck(mesh2,tmp,circle=FALSE)
+            hordev1 <- normcheck(mesh2,tmp)
             rt1[which(hordev1 > horiz.disp)] <- 4
         }
     }
@@ -238,7 +238,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         project3d <- vcgClostKD
     } else if (pro == "m") {
         protmp <- function(x,y,sign=F) {
-            out <- closemeshKD(x,y,k=k0,sign=sign)
+            out <- closemeshKD(x,y,k=k0,sign=sign,...)
             return(out)
         }
         project3d <- protmp
@@ -263,8 +263,12 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
         }           
-        if (is.null(rigid) && is.null(affine) && is.null(similarity))
-            rigid <- list(iterations=0)
+        if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
+            if (is.null(Bayes))                
+                rigid <- list(iterations=0)
+            else if (Bayes$align)
+                rigid <- list(iterations=0)
+        }
         if (!is.null(rigid)) { ##perform rigid icp-matching
             rigid$lm1 <- lm1
             rigid$lm2 <- lm2
@@ -304,7 +308,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
     }
     if (visualize) {
         rglid <- NULL
-        open3d()
+        if (!length(rgl.ids()$id)) 
+            open3d()
+        else
+            rgl.clear()
         bb <- meshcube(mesh1)
         bmean <- apply(bb,2,mean)
         bb <- t(((t(bb)-bmean)*2)+bmean)
@@ -359,7 +366,6 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         
         if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
             if (!is.null(Bayes$wt)) {
-                print(2)
                 mesh0 <- mesh1
                 mesh0$vb[1:3,] <- t(tmp$addit)
                 wt <- Bayes$wt[i]
@@ -406,6 +412,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         
         
         time1 <- Sys.time()
+        gc()
         if (!silent) {
             cat(paste("completed iteration",i, "in", round(time1-time0,2), "seconds\n"))
             cat("****************\n")
