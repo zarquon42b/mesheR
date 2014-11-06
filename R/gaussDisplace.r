@@ -310,8 +310,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         rglid <- NULL
         if (!length(rgl.ids()$id)) 
             open3d()
-        else
+        else {
+            rgl.bringtotop()
             rgl.clear()
+        }
         bb <- meshcube(mesh1)
         bmean <- apply(bb,2,mean)
         bb <- t(((t(bb)-bmean)*2)+bmean)

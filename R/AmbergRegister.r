@@ -124,7 +124,6 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
         hasLM <- FALSE
         if (!is.null(lm1) && !is.null(lm2))
             hasLM <- TRUE
-        print(hasLM)
         if (hasLM) {## case: landmarks are provided
             bary <- vcgClost(lm1,mesh1,barycentric = T)
 
