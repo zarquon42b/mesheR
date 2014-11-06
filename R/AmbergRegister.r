@@ -92,9 +92,9 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             mesh1 <- x
             Bayes <- NULL
         } else if (inherits(x, "BayesDeform"))
-            Bayes <- x
-        else
-            stop("x must be an object of class mesh3d or BayesDeform")
+              Bayes <- x
+          else
+              stop("x must be an object of class mesh3d or BayesDeform")
         
         if (!is.null(Bayes)) {
             if (!require(RvtkStatismo))
@@ -141,11 +141,13 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             if (is.null(rigid) && is.null(affine) && is.null(similarity) && !pcAlign) {
                 if (is.null(Bayes)) {                
                     rigid <- list(iterations=0)
-                    cat("\n landmarks but no transform specified, performing rigid transform\n")
+                    if (!silent)
+                        cat("\n landmarks but no transform specified, performing rigid transform\n")
                 } else if (Bayes$align) {
                     rigid <- list(iterations=0)
-                    cat("\n landmarks but no transform specified, performing rigid transform\n")
-            }
+                    if (!silent)
+                        cat("\n landmarks but no transform specified, performing rigid transform\n")
+                }
             }
             if (pcAlign) {
                 mesh1 <- pcAlign(mesh1,mesh2)
@@ -221,14 +223,14 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             verts0 <- vert2points(mesh1)
         }
         if (visualize) {
-             rglid <- NULL
+            rglid <- NULL
             open3d()
             points3d(meshcube(tmp$mesh),col="white",alpha=0)
             shade3d(mesh2,col=2,specular=1)
             if (!is.null(rglid))
                 rgl.pop(id=rglid)
             rglid <- wire3d(tmp$mesh,col="white")
-           
+            
             if (!is.null(folder)) {
                 if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") 
                     folder <- paste(folder,"/",sep="")
@@ -246,7 +248,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                 rgl.snapshot(filename,fmt="png")
                 movcount <- 2
             }
-         }
+        }
         
         if (!stopit) {
             ## set error and counter appropriately
