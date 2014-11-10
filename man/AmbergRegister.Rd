@@ -7,7 +7,7 @@ AmbergRegister(x, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   iterations = 15, rho = pi/2, dist = 2, border = FALSE,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
   useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
-  similarity = NULL, affine = NULL, pcAlign = TRUE, nn = 20,
+  similarity = NULL, affine = NULL, pcAlign = FALSE, nn = 20,
   silent = FALSE, useConstrained = TRUE, forceLM = FALSE,
   visualize = FALSE, folder = NULL)
 }
