@@ -23,7 +23,6 @@
 #' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgRaySearch vcgNonBorderEdge vcgSmooth vcgClostKD
 #' @importFrom parallel detectCores mclapply
 #' @importFrom Rcpp evalCpp
-#' @import rhdf5
 #' 
 
 NULL
