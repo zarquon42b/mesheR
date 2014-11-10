@@ -13,6 +13,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
         }
         project3d <- protmp
     }
+    angdev <- ifelse(is.null(rhotol),0,rhotol)
     rc <- 0
     out <- NULL
     t0 <- Sys.time()
@@ -20,13 +21,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     M0 <- t(mesh2$vb[1:3,])
     S0 <- t(mesh1$vb[1:3,])
     sigma <- (sigma0*f^(-k))^2
-    Spro <- project3d(mesh1,mesh2,sign=F)
+    Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0)
     S <- vert2points(Spro)
     ## get symmetric distances and displacement field between meshes
     if (oneway) {
         M <- vert2points(mesh2)
     } else {
-        Mpro <- project3d(mesh2,mesh1,sign=F)
+        Mpro <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0)
         M <- vert2points(Mpro)
     }
     ## get neighbourhood for each point to minimize calculation time
@@ -186,7 +187,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, useConstrained=TRUE,visualize=FALSE,folder=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=1e5,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, useConstrained=TRUE,visualize=FALSE,folder=NULL,...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
