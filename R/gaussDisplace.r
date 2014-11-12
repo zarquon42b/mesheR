@@ -33,7 +33,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     if (!oneway)
         sel <- 1:2
     
-    getClost <- mclapply(sel,twoway,mc.cores=2)
+    getClost <- lapply(sel,twoway)
     Spro <-getClost[[1]]
     S <- vert2points(Spro)
     ## get symmetric distances and displacement field between meshes
