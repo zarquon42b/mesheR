@@ -1,5 +1,6 @@
 ## @export gaussDisplace
 #' @importFrom Rvcg vcgUpdateNormals
+#' @importFrom parallel mclapply
 gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...) {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
     ## set projection function according to input request
@@ -20,13 +21,26 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     M0 <- t(mesh2$vb[1:3,])
     S0 <- t(mesh1$vb[1:3,])
     sigma <- (sigma0*f^(-k))^2
-    Spro <- project3d(mesh1,mesh2,sign=F)
+    twoway <- function(kk) {
+        if (kk == 1) {
+            out <- project3d(mesh1,mesh2,sign=F,angdev=rhotol,k=k0)
+        } else {
+            out <- project3d(mesh2,mesh1,sign=F,angdev=rhotol,k=k0)
+        }
+        return(out)
+    }
+    sel <- 1
+    if (!oneway)
+        sel <- 1:2
+    
+    getClost <- mclapply(sel,twoway,mc.cores=2)
+    Spro <-getClost[[1]]
     S <- vert2points(Spro)
     ## get symmetric distances and displacement field between meshes
     if (oneway) {
         M <- vert2points(mesh2)
     } else {
-        Mpro <- project3d(mesh2,mesh1,sign=F)
+        Mpro <- getClost[[2]]
         M <- vert2points(Mpro)
     }
     ## get neighbourhood for each point to minimize calculation time
@@ -186,7 +200,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, useConstrained=TRUE,visualize=FALSE,folder=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, useConstrained=TRUE,visualize=FALSE,folder=NULL,tol=1e-5,...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
@@ -243,6 +257,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         }
         project3d <- protmp
     }
+    t.dist <- 1e12
     hasLM <- FALSE
     if (!is.null(lm1) && !is.null(lm2))
         hasLM <- TRUE
@@ -351,7 +366,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
     ## elastic matching starts
     if (!silent)
         cat("starting elastic matching\n****************\n")
-    for (i in 1:iterations) {
+    i <- 1
+    while (i <= iterations && t.dist > tol ) {
         time0 <- Sys.time()
         if (!is.null(smooth) && i > 1) {
             if (i %% smooth == 0) {
@@ -362,6 +378,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                                         #cat("smoothing finished\n")
             }
         }
+        vb0 <- vert2points(mesh1)
         ## call the workhorse doing the displacement
         tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
         
@@ -377,7 +394,6 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
                 
             } else {
-                print(1)
                 tmp$addit <- PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
             }
             
@@ -412,13 +428,16 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             }
         }
         
-        
+        t.dist <- mean(sqrt(rowSums((vert2points(mesh1)-vb0)^2)))
         time1 <- Sys.time()
         gc()
         if (!silent) {
             cat(paste("completed iteration",i, "in", round(time1-time0,2), "seconds\n"))
+            cat(paste0("average vertex displacement to last iteration = ",t.dist,"\n"))
             cat("****************\n")
         }
+        i <- i+1
+        
     }
     invisible(mesh1)
 }
