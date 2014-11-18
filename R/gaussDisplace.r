@@ -14,6 +14,10 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
         }
         project3d <- protmp
     }
+    if (is.null(rhotol))
+        angdev <- 0
+    else
+        angdev <- rhotol
     rc <- 0
     out <- NULL
     t0 <- Sys.time()
@@ -23,9 +27,9 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     sigma <- (sigma0*f^(-k))^2
     twoway <- function(kk) {
         if (kk == 1) {
-            out <- project3d(mesh1,mesh2,sign=F,angdev=rhotol,k=k0)
+            out <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0)
         } else {
-            out <- project3d(mesh2,mesh1,sign=F,angdev=rhotol,k=k0)
+            out <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0)
         }
         return(out)
     }
