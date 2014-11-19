@@ -1,6 +1,5 @@
 ## @export gaussDisplace
 #' @importFrom Rvcg vcgUpdateNormals
-#' @importFrom parallel mclapply
 gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,...) {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
     ## set projection function according to input request
@@ -14,10 +13,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
         }
         project3d <- protmp
     }
-    if (is.null(rhotol))
-        angdev <- 0
-    else
-        angdev <- rhotol
+    angdev <- ifelse(is.null(rhotol),0,rhotol)
     rc <- 0
     out <- NULL
     t0 <- Sys.time()
@@ -25,26 +21,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     M0 <- t(mesh2$vb[1:3,])
     S0 <- t(mesh1$vb[1:3,])
     sigma <- (sigma0*f^(-k))^2
-    twoway <- function(kk) {
-        if (kk == 1) {
-            out <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0)
-        } else {
-            out <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0)
-        }
-        return(out)
-    }
-    sel <- 1
-    if (!oneway)
-        sel <- 1:2
-    
-    getClost <- lapply(sel,twoway)
-    Spro <-getClost[[1]]
+    Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0)
     S <- vert2points(Spro)
     ## get symmetric distances and displacement field between meshes
     if (oneway) {
         M <- vert2points(mesh2)
     } else {
-        Mpro <- getClost[[2]]
+        Mpro <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0)
         M <- vert2points(Mpro)
     }
     ## get neighbourhood for each point to minimize calculation time
@@ -169,9 +152,9 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' discarded. Reduces distortion especially at mesh borders.
 #' @param AmbergK a single integer or an integer vector vector containing the \code{k0}-value (normal slackness) for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
 #'  @param AmbergLambda as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
-#' @param silent logical suppress messages
-#' @param Bayes optional: object of class BayesDeform created by createBayes to restrict based on a known distribution
+#' @param tol convergence threshold: if RMSE between iterations is below tol, the function stops.
 #' @param useConstrained logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.
+#' @param silent logical suppress messages
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -204,7 +187,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,silent=FALSE, useConstrained=TRUE,visualize=FALSE,folder=NULL,tol=1e-5,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
@@ -337,10 +320,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         bmean <- apply(bb,2,mean)
         bb <- t(((t(bb)-bmean)*2)+bmean)
         points3d(bb,col="white",alpha=0)
-        shade3d(mesh2,col=2,specular=1,alpha=0.7)
+        shade3d(mesh2,col=col1,specular=1,alpha=alpha)
         if (!is.null(rglid))
             rgl.pop(id=rglid)
-        rglid <- wire3d(mesh1,col="white")
+        rglid <- wire3d(mesh1,col=col2)
         
         if (!is.null(folder)) {
             if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") 
@@ -424,7 +407,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             
             if (!is.null(rglid))
                 rgl.pop(id=rglid)
-            rglid <- wire3d(mesh1,col="white")
+            rglid <- wire3d(mesh1,col=col2)
             if (!is.null(folder)) {
                 filename <- sprintf("%s%04d.png", movie, movcount)
                 movcount <- movcount+1

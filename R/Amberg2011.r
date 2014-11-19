@@ -212,7 +212,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=
         if (clean) {
             mesh <- vcgClean(mesh,sel=c(0:1),silent=T)
         }
-        spamnosym <- spam.options(cholsymmetrycheck=FALSE,safmode=c(T,T,T))
+        spamnosym <- spam.options(cholsymmetrycheck=FALSE)
         assign(".Spam",spamnosym,envir=asNamespace("spam")) #disable symmetry check
         t0 <- Sys.time()
         out <- list()
@@ -245,10 +245,10 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=
                 diag(H) <- diag(H)
            
             ## Cholesky decomposition of Hessian H
-            chk <- try(Hchol <- chol(H),silent = T)
+            chk <- try(suppressWarnings(Hchol <- chol(H)),silent = T)
             if (inherits(chk,"try-error")) {
                 diag(H) <- diag(H)+1e-12
-                Hchol <- chol(H)
+                Hchol <- suppressWarnings(chol(H))
                 warning("singularity avoided by adding 1e-12 to diagonal, please check result")
             }
         } else {
