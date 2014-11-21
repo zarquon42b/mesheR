@@ -9,8 +9,9 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   similarity = NULL, affine = NULL, nh = NULL, toldist = 0,
   pro = c("vcg", "morpho"), k0 = 50, prometh = 1, angtol = NULL,
   border = FALSE, horiz.disp = NULL, useiter = FALSE, AmbergK = NULL,
-  AmbergLambda = NULL, silent = FALSE, useConstrained = TRUE,
-  visualize = FALSE, folder = NULL, tol = 1e-05, ...)
+  AmbergLambda = NULL, tol = 1e-05, useConstrained = TRUE,
+  silent = FALSE, visualize = FALSE, folder = NULL, alpha = 0.7,
+  col1 = "red", col2 = "white", ...)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.}
@@ -83,11 +84,11 @@ discarded. Reduces distortion especially at mesh borders.}
 
 \item{AmbergLambda}{as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.}
 
-\item{silent}{logical suppress messages}
+\item{tol}{convergence threshold: if RMSE between iterations is below tol, the function stops.}
 
 \item{useConstrained}{logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.}
 
-\item{Bayes}{optional: object of class BayesDeform created by createBayes to restrict based on a known distribution}
+\item{silent}{logical suppress messages}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }
