@@ -49,7 +49,7 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
         
 ### rotate initial circle and create opposing circle ###    
         dirs <- dirs/sqrt(sum(dirs^2))
-        yz <- tanplan(dirs)
+        yz <- tangentPlane(dirs)
         rmat <- cbind(yz$z,yz$y,dirs)
         data <- t(rmat%*%t(data))
         data2 <- t(apply(data,1,function(x){x <- x+length*dirs;return(x)}))
@@ -65,7 +65,7 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
         class(cyl) <- "mesh3d"
         cyl$vb <- cylvb
         cyl$it <- t(it)
-        cyl <- conv2backf(cyl)
+        cyl <- invertFaces(cyl)
         cyl$normals <- NULL
         cyl <- translate3d(cyl,x[1],x[2],x[3])
         if (adNormals)

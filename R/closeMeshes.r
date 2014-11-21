@@ -5,12 +5,12 @@
 #' @param mesh1 triangular mesh in first state
 #' @param mesh2 triangular mesh in second state
 #' @param invert logical: if TRUE the orientation of mesh1 will be flipped
-#' @importFrom Morpho mergeMeshes conv2backf
+#' @importFrom Morpho mergeMeshes invertFaces
 #' @importFrom Rvcg vcgGetEdge vcgClean
 #' @export
 closeMeshes <- function(mesh1,mesh2,invert=TRUE) {
     if (invert)
-        mesh1 <- conv2backf(mesh1)
+        mesh1 <- invertFaces(mesh1)
     nvb <- ncol(mesh1$vb)
     merge <- mergeMeshes(mesh1,mesh2)
     gE <- vcgGetEdge(mesh1)

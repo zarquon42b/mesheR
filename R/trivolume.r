@@ -11,7 +11,7 @@ trivolume <- function(mesh1,mesh2)
       if (missing(mesh2)) {
           mesh2 <- mesh1
       }
-    #mesh2 <- conv2backf(mesh2)
+    #mesh2 <- invertFaces(mesh2)
     vb1 <- mesh1$vb
     vb2 <- mesh2$vb
     it <- mesh1$it-1; storage.mode(it) <- "integer"
