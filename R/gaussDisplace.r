@@ -1,18 +1,20 @@
 ## @export gaussDisplace
 #' @importFrom Rvcg vcgUpdateNormals
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,angclost=angclost,...) {
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg","kd"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,angclost=FALSE,bbox=NULL,...) {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
     ## set projection function according to input request
     pro <- substring(pro[1],1L,1L)
-    if (pro == "v") {
+    if (pro == "k") {
         project3d <- vcgClostKD
+        print(1)
     } else if (pro == "m") {
-        protmp <- function(x,y,sign=F) {
-            out <- closemeshKD(x,y,k=k0,sign=sign,method=prometh,...)
+        protmp <- function(x,y,sign=F,...) {
+            out <- closemeshKD(x,y,sign=sign,method=prometh,...)
             return(out)
         }
         project3d <- protmp
-    }
+    } else if (pro =="v")
+          project3d <- vcgClost
     
     angdev <- ifelse((is.null(rhotol) || !angclost),0,rhotol)
     rc <- 0
@@ -22,13 +24,14 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     M0 <- t(mesh2$vb[1:3,])
     S0 <- t(mesh1$vb[1:3,])
     sigma <- (sigma0*f^(-k))^2
-    Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0)
+    Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0,tol=tol)
+    
     S <- vert2points(Spro)
     ## get symmetric distances and displacement field between meshes
     if (oneway) {
         M <- vert2points(mesh2)
     } else {
-        Mpro <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0)
+        Mpro <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0,tol=tol)
         M <- vert2points(Mpro)
     }
     ## get neighbourhood for each point to minimize calculation time
@@ -48,6 +51,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
             rt1 <- normcheck(mesh2,Mpro)
     }
     if (!is.null(horiz.disp)) {
+        print(1)
         if (is.null(rhotol))
             rc <- horiz.disp
         tmp <- list();tmp$normals <- mesh1$vb[1:3,]-Spro$vb[1:3,]
@@ -59,23 +63,27 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
             rt1[which(hordev1 > horiz.disp)] <- 4
         }
     }
+    if (!is.null(bbox)) {
+        badrange <- outsideBBox(mesh1,bbox)
+        
+        rt0[badrange] <- 4
+        
+        if (!oneway) {
+            badrange <- outsideBBox(Mpro,bbox)
+            rt1[badrange] <- 4
+        }
+    }
     t3 <- Sys.time()
     D1 <- S-S0
     D2 <- M-M0
     if (!border) {
         if (is.null(rhotol))
             rc <- pi
-        if (pro=="v") {
-            rt0[as.logical(Spro$border)] <- 4
-            if (!oneway)
-                rt1[as.logical(Mpro$border)] <- 4
-        } else {
-            bordtmp <- vcgBorder(mesh2)
-            rt0[which(Spro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
-            if (!oneway) {
-                bordtmp <- vcgBorder(mesh1)
-                rt1[which(Mpro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
-            }
+        bordtmp <- vcgBorder(mesh2)
+        rt0[which(Spro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
+        if (!oneway) {
+            bordtmp <- vcgBorder(mesh1)
+            rt1[which(Mpro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
         }
     }
     storage.mode(rt0) <- "double"
@@ -189,7 +197,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
@@ -206,6 +214,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         mesh1 <- vcgUpdateNormals(mesh1)
         mesh2 <- vcgUpdateNormals(mesh2)
     }
+    if (!is.null(bbox))
+        bbox <- getMeshBox(mesh2,extend=bbox)
     Amberg <- ambergsingle <- FALSE
     ##setup variables
     if (!is.null(AmbergK) && !is.null(AmbergLambda)) {
@@ -295,8 +305,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
-        #if (!is.null(Bayes)) 
-        mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align,sdmax=Bayes$sdmax[1],mahaprob=Bayes$mahaprob))
+        if (!is.null(Bayes)) 
+            mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align,sdmax=Bayes$sdmax[1],mahaprob=Bayes$mahaprob))
     
         #mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,lmDataset=lm1,lmModel=lmModel,align=TRUE))
         
@@ -369,7 +379,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         }
         vb0 <- vert2points(mesh1)
         ## call the workhorse doing the displacement
-        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,...)
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,bbox=bbox,angclost=angclost,...)
         
         
         if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
