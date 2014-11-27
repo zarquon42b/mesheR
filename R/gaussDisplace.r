@@ -24,14 +24,14 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     M0 <- t(mesh2$vb[1:3,])
     S0 <- t(mesh1$vb[1:3,])
     sigma <- (sigma0*f^(-k))^2
-    Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0,tol=tol)
+    Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0,tol=tol,borderchk=!border)
     
     S <- vert2points(Spro)
     ## get symmetric distances and displacement field between meshes
     if (oneway) {
         M <- vert2points(mesh2)
     } else {
-        Mpro <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0,tol=tol)
+        Mpro <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0,tol=tol,borderchk=!border)
         M <- vert2points(Mpro)
     }
     ## get neighbourhood for each point to minimize calculation time
@@ -79,11 +79,17 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     if (!border) {
         if (is.null(rhotol))
             rc <- pi
-        bordtmp <- vcgBorder(mesh2)
-        rt0[which(Spro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
-        if (!oneway) {
-            bordtmp <- vcgBorder(mesh1)
-            rt1[which(Mpro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
+        if (pro %in% c("v","k")) {
+            rt0[as.logical(Spro$border)] <- 4
+            if (!oneway)
+                rt1[as.logical(Mpro$border)] <- 4
+        } else {
+            bordtmp <- vcgBorder(mesh2)
+            rt0[which(Spro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
+            if (!oneway) {
+                bordtmp <- vcgBorder(mesh1)
+                rt1[which(Mpro$faceptr %in% which(as.logical(bordtmp$borderit)))] <- 4
+            }
         }
     }
     storage.mode(rt0) <- "double"
