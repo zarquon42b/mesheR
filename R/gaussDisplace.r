@@ -6,7 +6,6 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     pro <- substring(pro[1],1L,1L)
     if (pro == "k") {
         project3d <- vcgClostKD
-        print(1)
     } else if (pro == "m") {
         protmp <- function(x,y,sign=F,...) {
             out <- closemeshKD(x,y,sign=sign,method=prometh,...)
@@ -51,7 +50,6 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
             rt1 <- normcheck(mesh2,Mpro)
     }
     if (!is.null(horiz.disp)) {
-        print(1)
         if (is.null(rhotol))
             rc <- horiz.disp
         tmp <- list();tmp$normals <- mesh1$vb[1:3,]-Spro$vb[1:3,]
