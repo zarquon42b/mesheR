@@ -90,19 +90,10 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
             }
         }
     }
-    storage.mode(rt0) <- "double"
-    storage.mode(rt1) <- "double"
-    storage.mode(clostIndW) <- "integer"
-    storage.mode(clostIndP) <- "integer"
-    storage.mode(S0) <- "double"
-    storage.mode(M) <- "double"
-    storage.mode(D1) <- "double"
-    storage.mode(D2) <- "double"
-    storage.mode(nh) <- "integer"
-    
     tol <- tol^2
 ### make multicore 
-    
+    if (nh < 1)
+        stop ("neighbourhood must be at least 1")
     out <- .Call("displaceGauss",W0,S0,M,D1,D2,sigma,gamma,clostIndW,clostIndP,tol=tol,rt0,rt1,rc,oneway,PACKAGE="mesheR")
     addit <- W0+out
     return(list(addit=addit))
