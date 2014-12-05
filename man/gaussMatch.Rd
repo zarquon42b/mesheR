@@ -7,11 +7,11 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, rigid = NULL,
   similarity = NULL, affine = NULL, nh = NULL, toldist = 0,
-  pro = c("vcg", "morpho"), k0 = 50, prometh = 1, angtol = NULL,
+  pro = c("kd", "vcg", "morpho"), k0 = 50, prometh = 1, angtol = NULL,
   border = FALSE, horiz.disp = NULL, useiter = FALSE, AmbergK = NULL,
   AmbergLambda = NULL, tol = 1e-05, useConstrained = TRUE,
-  silent = FALSE, visualize = FALSE, folder = NULL, alpha = 0.7,
-  col1 = "red", col2 = "white", ...)
+  angclost = TRUE, silent = FALSE, visualize = FALSE, folder = NULL,
+  alpha = 0.7, col1 = "red", col2 = "white", bbox = NULL, ...)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.}
@@ -87,6 +87,8 @@ discarded. Reduces distortion especially at mesh borders.}
 \item{tol}{convergence threshold: if RMSE between iterations is below tol, the function stops.}
 
 \item{useConstrained}{logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.}
+
+\item{angclost}{if TRUE, the closest k faces will be evaluated and the closest with the appropriate normal angle will be selected.}
 
 \item{silent}{logical suppress messages}
 

@@ -158,8 +158,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #'  @param AmbergLambda as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
 #' @param tol convergence threshold: if RMSE between iterations is below tol, the function stops.
 #' @param useConstrained logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.
+#' @param angclost if TRUE, the closest k faces will be evaluated and the closest with the appropriate normal angle will be selected.
 #' @param silent logical suppress messages
-#' @p only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -189,6 +189,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' affine <- list(iterations=200,subsample=100,rhotol=pi/2,uprange=0.9)
 #'  match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
 #' @importFrom Rvcg vcgClostKD vcgKDtree
+#' @importFrom rgl rgl.ids
 #' @export
 #'
 #' @useDynLib mesheR
