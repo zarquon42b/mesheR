@@ -86,7 +86,7 @@ warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=
         for (i in 0:n) {
             mesh <- x
             mesh$vb[1:3,]<-(i/n)*y$vb[1:3,]+(1-(i/n))*x$vb[1:3,]
-            mesh <- updateNormals(mesh)
+            mesh <- vcgUpdateNormals(mesh)
             if (mixcolor && is.null(whichcolor)) {
                 if (is.null(mesh$material$color)) 
                     mesh$material$color <- matrix("#FFFFFF",mesh$it[1],mesh$it[2])
@@ -116,7 +116,7 @@ warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=
         for (i in 1:(n-1)) {
             mesh<-x
             mesh$vb[1:3,]<-(i/n)*x$vb[1:3,]+(1-(i/n))*y$vb[1:3,]
-            mesh <- updateNormals(mesh)
+            mesh <- vcgUpdateNormals(mesh)
             a <- shade3d(mesh,col=col, shadeopts)
             filename <- sprintf("%s%04d.png", movie, countbegin+i+n)
             rgl.snapshot(filename,fmt="png")

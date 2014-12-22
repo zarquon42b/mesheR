@@ -264,7 +264,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=
         vert_new <- as.matrix(t((v+deltav)[1:ncol(mesh$vb),]))
         mesh_new <- mesh
         mesh_new$vb[1:3,] <- (vert_new)
-        meshout <- updateNormals(mesh_new)
+        meshout <- vcgUpdateNormals(mesh_new)
         return(list(mesh=meshout,Jn=Jn,Jc=Jc,J=J,H=H,Hchol=Hchol,S=S))
     }
 

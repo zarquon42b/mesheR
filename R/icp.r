@@ -52,8 +52,8 @@
 #' @export icp
 icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,type=c("rigid","similarity","affine"),getTransform=FALSE)
   {
-      meshorig <- mesh1 <- updateNormals(mesh1)
-      mesh2 <- updateNormals(mesh2)
+      meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
+      mesh2 <- vcgUpdateNormals(mesh2)
       if (!is.null(subsample))
           subs0 <- duplicated(kmeans(vert2points(mesh1),center=subsample,iter.max =100)$cluster)
       pro <- substring(pro[1],1L,1L)

@@ -12,7 +12,7 @@
 #' @return
 #' restricted landmarks/mesh
 #'
-#' @importFrom Morpho rotonto rotreverse vert2points updateNormals cSize
+#' @importFrom Morpho rotonto rotreverse vert2points cSize
 #' @export
 restrict <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=FALSE,reference=NULL) UseMethod("restrict")
 
@@ -23,7 +23,7 @@ restrict.mesh3d <- function(x,model,sd=3,maxVar=95,scale=FALSE,nPC=NULL,probab=F
     x <- vert2points(mesh)
     out <- restrict(x,model=model,sd=sd,maxVar=maxVar,scale=scale,nPC=nPC,probab=FALSE,reference=NULL)
     mesh$vb[1:3,] <- t(out)
-    mesh <- updateNormals(mesh)
+    mesh <- vcgUpdateNormals(mesh)
     return(mesh)
 }
 #' @rdname restrict
