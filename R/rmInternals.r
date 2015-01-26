@@ -37,7 +37,9 @@ rmInternals <- function(mesh,mindist=NULL,explode=FALSE,center=NULL)
     else
       intern <- which(((check$quality) * (check$distance > mindist))==1)
 
-    out <- rmVertex(mesh,intern)
+    if (length(intern))
+        out <- rmVertex(mesh,intern)
+    else out <- mesh
     cat(paste("removed",length(intern),"vertices\n"))
     invisible(out)
   }
