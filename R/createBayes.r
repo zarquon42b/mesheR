@@ -23,17 +23,20 @@ createBayes <- function(model, sdmax=numeric(0),mahalanobis="chisq",ptValueNoise
     Bayes$sdmax <- sdmax
     Bayes$mahaprob <- mahalanobis
     Bayes$ptValueNoise <- ptValueNoise
-    if (length(wt) == 1) {
-        Bayes$wt <- rep(wt,length(sdmax))
-        if (!is.null(shrinkfun)) {
-            for (i in 2:length(sdmax))
-                Bayes$wt[i] <- shrinkfun(Bayes$wt[i],i)
-        }
-    } else if ( length(wt) != length(sdmax)) {
-        stop("wt must be of same length as sdmax, or single value")
+    if (!is.null(wt)) {
+        if (length(wt) == 1) {
+            Bayes$wt <- rep(wt,length(sdmax))
+            if (!is.null(shrinkfun)) {
+                for (i in 2:length(sdmax))
+                    Bayes$wt[i] <- shrinkfun(Bayes$wt[i],i)
+            }
+        } else if ( length(wt) != length(sdmax)) {
+            stop("wt must be of same length as sdmax, or single value")
+        } else
+            Bayes$wt <- wt
     } else
         Bayes$wt <- wt
-            
-    Bayes$align <- align
-    return(Bayes)
-}
+        
+        Bayes$align <- align
+        return(Bayes)
+    }
