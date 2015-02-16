@@ -224,7 +224,12 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
         }
         if (visualize) {
             rglid <- NULL
-            open3d()
+            if (!length(rgl.ids()$id)) 
+                open3d()
+            else {
+                rgl.bringtotop()
+                rgl.clear()
+            }
             points3d(meshcube(tmp$mesh),col="white",alpha=0)
             shade3d(mesh2,col=2,specular=1)
             if (!is.null(rglid))
