@@ -257,6 +257,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
         
         if (!stopit) {
             ## set error and counter appropriately
+            distance <- 1e12
             error <- 1e12
             count <- count+1
             while (count <= iterations && error > tol) {
@@ -323,6 +324,14 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     }
                     
                 }
+                distance_old <- distance
+                distance <- mean(vcgClostKD(mesh2,tmp$mesh,k0=10,sign=F)$quality)
+                if (distance > distance_old && !is.null(Bayes)) {
+                    cat("\n=========================================\n")
+                    message(paste(" Info: Distance is increasing, matching stopped after ",count,"iterations\n"))
+                    count <- 1e10
+                    tmp <- tmpold
+                }
                 tmp$mesh <- vcgUpdateNormals(tmp$mesh)
                 if (visualize) {
                     
@@ -336,10 +345,12 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     }
                 }
                 error <- sum((vert2points(tmp$mesh)-vert_old)^2)/nrow(vert_old)
+               
                 time1 <- Sys.time()
-                if (!silent) {
+                if (!silent && count < 1e10) {
                     cat(paste("-> finished iteration",count,"in",round(time1-time0,2), "seconds\n"))
                     cat(paste(" Info: MSE between iterations:",error,"\n"))
+                    cat(paste(" Info: Average distance to target:",distance,"\n"))
                     if (error < tol)
                         cat(paste("***\n==> Convergence threshold reached after",count,"iterations\n"))
                 }

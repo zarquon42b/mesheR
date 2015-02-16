@@ -362,6 +362,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
     if (!silent)
         cat("starting elastic matching\n****************\n")
     i <- 1
+    distance <- 1e10
     while (i <= iterations && t.dist > tol ) {
         time0 <- Sys.time()
         if (!is.null(smooth) && i > 1) {
@@ -377,7 +378,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         ## call the workhorse doing the displacement
         tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,bbox=bbox,angclost=angclost,...)
         
-        
+        tmpold <- mesh1
         if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
             if (!is.null(Bayes$wt)) {
                 mesh0 <- mesh1
@@ -389,7 +390,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
                 
             } else {
-          	    tmp$addit <- PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
+                tmp$addit <- PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
             }
             
         }
@@ -409,7 +410,15 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         } else {
             mesh1$vb[1:3,] <- t(tmp$addit)
         }
-        
+        ## check if distance increases
+        distance_old <- distance
+        distance <- mean(vcgClostKD(mesh2,mesh1,k0=10,sign=F)$quality)
+        if (distance > distance_old && !is.null(Bayes)) {
+            cat("\n=========================================\n")
+            message(paste(" Info: Distance is increasing, matching stopped after ",count,"iterations\n"))
+            i <- 1e10
+            mesh1 <- tmpold
+        }
         mesh1 <- vcgUpdateNormals(mesh1)
         if (visualize) {
             
@@ -426,8 +435,9 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         t.dist <- mean(sqrt(rowSums((vert2points(mesh1)-vb0)^2)))
         time1 <- Sys.time()
         gc()
-        if (!silent) {
+        if (!silent && i < 1e10) {
             cat(paste("completed iteration",i, "in", round(time1-time0,2), "seconds\n"))
+            cat(paste(" Info: Average distance to target:",distance,"\n"))
             cat(paste0("average vertex displacement to last iteration = ",t.dist,"\n"))
             cat("****************\n")
         }
