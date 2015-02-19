@@ -33,3 +33,48 @@ bary2point <- function(bary,faceptr, mesh)
      out <- as.matrix(C%*%t(mesh$vb[1:3,]))
      return(out)
  }
+
+#' transfer points between two registered meshes
+#'
+#' transfer points between two registered meshes
+#' @param x a matrix with 3D-coordinates (or a mesh), positioned on \code{mesh1}
+#' @param mesh1 a mesh on which \code{x} is placed
+#' @param mesh2 a mesh with vertices and faces corresponding to  \code{mesh1} (e.g. registered using \code{\link{gaussMatch}}).
+#' @param tolwarn numeric: if at least one coordinate of \code{x} is further away from \code{mesh1} than \code{tolwarn}, a warning will be issued.
+#' @details the function gets the barycentric coordinates of  \code{x} on \code{mesh1} and uses them to find the corresponding positions on \code{mesh2}
+#' @return returns a matrix containing \code{x} tranfered to \code{mesh2}.
+#' @examples
+#' require(rgl)
+#' require(Rvcg)
+#' data(humface)
+#' #extract 300 random points from humface 
+#' coords <- vcgSample(humface,200,"pd")
+#' 
+#' #move original mesh
+#' transface <- translate3d(humface, 10, 10 ,10)
+#' ##extract coordinates
+#' newcoord <- transferPoints(coords, humface, transface)
+#' wire3d(transface, col=3)
+#' spheres3d(newcoord)
+#' @export
+transferPoints <- function(x, mesh1, mesh2, tolwarn= 0.01) {
+    
+    chkv <- ncol(mesh1$vb) == ncol(mesh2$vb)
+    chknf <- ncol(mesh1$it) == ncol(mesh2$it)
+    if (!chkv)
+        stop("amount of vertices does not correspond between meshes")
+    if (!chknf)
+        stop("amount of faces does not correspond between meshes")
+    
+    chkf <- which(mesh1$it != mesh2$it)
+    if (length(chkf))
+        stop("faces do not correspond between meshes")
+    bary <- vcgClostKD(x,mesh1,k=10,barycentric=TRUE,sign=F)
+    if (max(bary$quality) > tolwarn)
+        warning(paste0("there are points that are farther away than ",tolwarn," mm"))
+    out <- bary2point(bary$barycoord,bary$faceptr,mesh2)
+    return(out)
+}
+        
+     
+    
