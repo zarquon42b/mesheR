@@ -188,7 +188,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' ## we start with an affine transformation initiated by landmarks
 #' affine <- list(iterations=200,subsample=100,rhotol=pi/2,uprange=0.9)
 #'  match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
-#' @importFrom Rvcg vcgClostKD vcgKDtree
+#' @importFrom Rvcg vcgClostKD vcgKDtree vcgMeshres
 #' @importFrom rgl rgl.ids
 #' @export
 #'
@@ -237,7 +237,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         mesh1 <- rmUnrefVertex(mesh1)
     
     if (is.null(nh)) {
-        nh=ceiling(150/meshres(mesh1))
+        nh=ceiling(150/vcgMeshres(mesh1))
         if (!silent)
             cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
     }
