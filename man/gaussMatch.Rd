@@ -11,9 +11,9 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   pro = c("kd", "vcg", "morpho"), k0 = 50, prometh = 1, angtol = NULL,
   border = FALSE, horiz.disp = NULL, useiter = FALSE, AmbergK = NULL,
   AmbergLambda = NULL, tol = 1e-05, useConstrained = TRUE,
-  angclost = TRUE, silent = FALSE, visualize = FALSE, folder = NULL,
-  alpha = 0.7, col1 = "red", col2 = "white", bbox = NULL,
-  noinc = FALSE, ...)
+  angclost = TRUE, noinc = FALSE, silent = FALSE, visualize = FALSE,
+  folder = NULL, alpha = 0.7, col1 = "red", col2 = "white",
+  bbox = NULL, ...)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.}
@@ -92,7 +92,19 @@ discarded. Reduces distortion especially at mesh borders.}
 
 \item{angclost}{if TRUE, the closest k faces will be evaluated and the closest with the appropriate normal angle will be selected.}
 
+\item{noinc}{after each iteration the RMSE between target and moving image is calculated and if this value increases compared to a previous value, the matching stops. Can be useful when matching a statistical model to a partial shape.}
+
 \item{silent}{logical suppress messages}
+
+\item{visualize}{logical: if TRUE the matching process is visualized}
+
+\item{folder}{character: if specified, each a screenshot of each deformation step will be saved as a png file in this folder.}
+
+\item{col1}{color of fix mesh (if visualize = TRUE)}
+
+\item{col2}{color of moving mesh (if visualize = TRUE)}
+
+\item{bbox}{a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \link{\code{getMeshBox}}. Everything outside this box will be ignored.}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }

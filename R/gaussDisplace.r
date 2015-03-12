@@ -159,7 +159,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param tol convergence threshold: if RMSE between iterations is below tol, the function stops.
 #' @param useConstrained logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.
 #' @param angclost if TRUE, the closest k faces will be evaluated and the closest with the appropriate normal angle will be selected.
+#' @param noinc after each iteration the RMSE between target and moving image is calculated and if this value increases compared to a previous value, the matching stops. Can be useful when matching a statistical model to a partial shape.
 #' @param silent logical suppress messages
+#' @param visualize logical: if TRUE the matching process is visualized
+#' @param folder character: if specified, each a screenshot of each deformation step will be saved as a png file in this folder.
+#' @param col1 color of fix mesh (if visualize = TRUE)
+#' @param col2 color of moving mesh (if visualize = TRUE)
+#' @param bbox a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \link{\code{getMeshBox}}. Everything outside this box will be ignored.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -193,7 +199,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,noinc=FALSE,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
