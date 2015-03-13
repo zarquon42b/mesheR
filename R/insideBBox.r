@@ -16,9 +16,9 @@
 #' spheres3d(bbox)
 #' outside <- outsideBBox(humface,bbox)
 #' humshrink <- rmVertex(humface,outside)
-#' wire3d(humshrink,col=3)
-#' wire3d(humface,col=2)
-#' shade3d(bboxmesh,alpha=0.2)
+#' wire3d(humshrink,col=3)#inside
+#' wire3d(humface,col=2)#outside
+#' shade3d(bboxmesh,alpha=0.4)
 #' 
 #' @export
 outsideBBox <- function(x, corners, outside=TRUE) {
@@ -35,7 +35,7 @@ outsideBBox <- function(x, corners, outside=TRUE) {
 #' create a bounding box as mesh
 #'
 #' create a bounding box as mesh
-#' @param corners a 8 x 3 matrix defining the corners of a bounding box.
+#' @param corners a 8 x 3 matrix defining the corners of a bounding box. With first 4 rows containing the corners of one square and 5:8 their opposing counterparts.
 #' @export
 makeBox <- function(corners) {
     bbox4 <- list(vb = rbind(t(corners),1))
@@ -60,7 +60,7 @@ makeBox <- function(corners) {
 #' bbox <- getMeshBox(humface)
 #' spheres3d(bbox)
 #' bbmesh <- getMeshBox(humface,tri=TRUE)
-#' wire3d(bbmesh)
+#' shade3d(bbmesh,alpha=0.4)
 #' wire3d(humface)
 #' @export
 getMeshBox <- function(mesh,tri=FALSE,extend=0) {

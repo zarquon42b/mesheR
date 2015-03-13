@@ -165,7 +165,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param folder character: if specified, each a screenshot of each deformation step will be saved as a png file in this folder.
 #' @param col1 color of fix mesh (if visualize = TRUE)
 #' @param col2 color of moving mesh (if visualize = TRUE)
-#' @param bbox a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \link{\code{getMeshBox}}. Everything outside this box will be ignored.
+#' @param bbox a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \link{\code{getMeshBox}}, or complying with the specification of \code{corners} in \code{\link{makeBox}}. Everything outside this box will be ignored.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -196,6 +196,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #'  match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
 #' @importFrom Rvcg vcgClostKD vcgKDtree vcgMeshres
 #' @importFrom rgl rgl.ids
+#' @seealso \code{\link{outsideBBox},\link{getMeshBox} }
 #' @export
 #'
 #' @useDynLib mesheR
