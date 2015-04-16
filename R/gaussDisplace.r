@@ -244,7 +244,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         mesh1 <- rmUnrefVertex(mesh1)
     
     if (is.null(nh)) {
-        nh=ceiling(150/vcgMeshres(mesh1))
+        nh=ceiling(150/vcgMeshres(mesh1)$res)
         if (!silent)
             cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
     }
