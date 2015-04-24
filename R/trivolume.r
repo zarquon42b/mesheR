@@ -4,7 +4,7 @@
 #'
 #' @param mesh1 triangular mesh in first state
 #' @param mesh2 triangular mesh in second state
-#' @return Volume
+#' @return Volume (\code{NA_real_} on failure)
 #' @export trivolume
 trivolume <- function(mesh1,mesh2)
   {
