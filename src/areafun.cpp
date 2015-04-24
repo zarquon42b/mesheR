@@ -1,4 +1,8 @@
 #include "RcppArmadillo.h"
+#include <Rconfig.h>
+#ifdef SUPPORT_OPENMP
+#include <omp.h>
+#endif
 
 #include "angcheck.h"
 using namespace Rcpp;

@@ -2,6 +2,10 @@
 #define ARMA_DONT_PRINT_ERRORS 
 #endif
 #include "RcppArmadillo.h"
+#include <Rconfig.h>
+#ifdef SUPPORT_OPENMP
+#include <omp.h>
+#endif
 
 using namespace Rcpp;
 using namespace arma;
