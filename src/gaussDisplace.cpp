@@ -1,5 +1,10 @@
 #include "RcppArmadillo.h"
+
+#include <Rconfig.h>
+#ifdef SUPPORT_OPENMP
 #include <omp.h>
+#endif
+
 using namespace Rcpp;
 using namespace arma;
 
