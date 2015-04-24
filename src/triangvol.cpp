@@ -6,6 +6,8 @@ using namespace arma;
 typedef unsigned int uint;
 
 RcppExport SEXP trianvol(SEXP vb1_, SEXP vb2_, SEXP it_) {
+  double V = 0.0;
+  
   try {
   NumericMatrix vb1(vb1_);
   NumericMatrix vb2(vb2_);
@@ -25,7 +27,6 @@ RcppExport SEXP trianvol(SEXP vb1_, SEXP vb2_, SEXP it_) {
   uvec tmp02; tmp02 << 0 << 1 << 2 << endr;
   uvec tmp453; tmp453 << 4 << 5 << 3 << endr;
   int dimit = it.ncol();
-  double V = 0.0;
   for (unsigned int i = 0; i < dimit; i++) {
     double Vtmp = 0.0;
     uvec slice0 = uIT.col(i);
@@ -39,6 +40,10 @@ RcppExport SEXP trianvol(SEXP vb1_, SEXP vb2_, SEXP it_) {
     }
     V += Vtmp/6;
   }
+  } catch (...)
+  {
+  V=NA_REAL;
+  }
+  
   return wrap(V);
-  } catch (...) {}
 }
