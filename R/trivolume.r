@@ -14,7 +14,6 @@ trivolume <- function(mesh1,mesh2)
     #mesh2 <- invertFaces(mesh2)
     vb1 <- mesh1$vb
     vb2 <- mesh2$vb
-    V <- 0; storage.mode(V) <- "double"
     it <- mesh1$it-1L; storage.mode(it) <- "integer"
     out <- .Call("trianvol",vb1,vb2,it)
     return(out)
