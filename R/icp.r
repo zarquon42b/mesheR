@@ -31,6 +31,7 @@
 #' @param subsample integer use a subsample (using kmeans clustering) to find closest points for  - subsample specifies the size of this subsample.
 #' @param type set type of affine transformation: options are "affine", "rigid" and "similarity" (rigid + scale)
 #' @param getTransform logical: if TRUE, a list containing the transformed mesh and the 4x4 transformation matrix.
+#' @param pcAlign if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.
 #' @return if \code{getTransform=FALSE}, the tranformed mesh1 is returned and otherwise a list containing
 #'
 #' \item{mesh}{tranformed mesh1}
@@ -45,15 +46,21 @@
 #' require(rgl)
 #' require(Morpho)
 #' data(nose)
-#' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
+#' warpnose.long <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm)
 #' rotnose <- icp(warpnose.long,shortnose.mesh,lm1=longnose.lm,lm2=shortnose.lm,rhotol=0.7,uprange=0.9)
 #' shade3d(rotnose,col=2,alpha=0.7)
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,type=c("rigid","similarity","affine"),getTransform=FALSE)
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE)
   {
       meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
       mesh2 <- vcgUpdateNormals(mesh2)
+       if (pcAlign) {
+                mesh1 <- pcAlign(mesh1,mesh2,optim=FALSE)
+                if (!is.null(lm1))
+                    lm1 <- applyTransform(lm1,computeTransform(mesh2,mesh1))
+            }
+      
       if (!is.null(subsample))
           subs0 <- duplicated(kmeans(vert2points(mesh1),center=subsample,iter.max =100)$cluster)
       pro <- substring(pro[1],1L,1L)
@@ -62,7 +69,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
       } else if (pro == "m") {
           project3d <- closemeshKD
       }
-      if (!is.null(lm1)){## perform initial rough registration
+      if (!is.null(lm1) && !pcAlign){## perform initial rough registration
           trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection)
           mesh1 <- applyTransform(mesh1,trafo)
       }

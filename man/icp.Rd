@@ -8,7 +8,7 @@ icp(mesh1, mesh2, iterations = 3, lm1 = NULL, lm2 = NULL, uprange = 0.9,
   maxdist = NULL, minclost = 50, distinc = 0.5, rhotol = pi, k = 50,
   reflection = FALSE, pro = c("vcg", "morpho"), silent = FALSE,
   subsample = NULL, type = c("rigid", "similarity", "affine"),
-  getTransform = FALSE)
+  getTransform = FALSE, pcAlign = FALSE)
 }
 \arguments{
 \item{mesh1}{object of class "mesh3d".}
@@ -51,6 +51,8 @@ If the tow meshes have only little or no overlap, "vcg" can be really slow. Othe
 \item{type}{set type of affine transformation: options are "affine", "rigid" and "similarity" (rigid + scale)}
 
 \item{getTransform}{logical: if TRUE, a list containing the transformed mesh and the 4x4 transformation matrix.}
+
+\item{pcAlign}{if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.}
 }
 \value{
 if \code{getTransform=FALSE}, the tranformed mesh1 is returned and otherwise a list containing
@@ -71,7 +73,7 @@ registration)
 require(rgl)
 require(Morpho)
 data(nose)
-warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
+warpnose.long <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm)
 rotnose <- icp(warpnose.long,shortnose.mesh,lm1=longnose.lm,lm2=shortnose.lm,rhotol=0.7,uprange=0.9)
 shade3d(rotnose,col=2,alpha=0.7)
 shade3d(shortnose.mesh,col=3,alpha=0.7)
