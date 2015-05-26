@@ -69,16 +69,14 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
       } else if (pro == "m") {
           project3d <- closemeshKD
       }
+      type <- match.arg(type,c("rigid","similarity","affine"))
       if (!is.null(lm1) && !pcAlign){## perform initial rough registration
           trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection)
           mesh1 <- applyTransform(mesh1,trafo)
       }
-      ttype <- substr(type[1],1L,1L)
-      mytrafo <- c("rigid","similarity","affine")
-      mytrafoshort <- substr(mytrafo,1,1)
-      mytrafo <- mytrafo[grep(ttype,mytrafoshort)]
+      
       if (!silent) 
-          cat(paste0("\n performing ",mytrafo," registration\n\n") )
+          cat(paste0("\n performing ",type," registration\n\n") )
       count <- 0
       while (count < iterations) {
           if (!silent)
