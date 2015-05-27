@@ -80,6 +80,7 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
     refind <- ((1:(length(mv)/3)) -1 )*3
     refind <- cbind(refind+1,refind+2,refind+3)
     symmetric <- symmetric[1]
+    tarmesh <- vcgUpdateNormals(tarmesh)
     if (! symmetric %in% c(0:2))
         stop("symmetric must be 0,1 or 2")
     for ( i in 1:iterations) {
