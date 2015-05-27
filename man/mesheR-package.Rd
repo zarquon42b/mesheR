@@ -12,8 +12,8 @@ A toolbox for meshing operations: elastic mesh mapping, Iteratively closest poin
 \tabular{ll}{
 Package: \tab mesheR\cr
 Type: \tab Package\cr
-Version: \tab 0.4.150512\cr
-Date: \tab 2015-05-12\cr
+Version: \tab 0.4.150527\cr
+Date: \tab 2015-05-27\cr
 License: \tab GPL\cr
 LazyLoad: \tab yes\cr }
 }
