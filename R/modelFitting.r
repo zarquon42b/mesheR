@@ -46,7 +46,7 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' tar.lm <- as.matrix(read.csv("VSD002-lm.csv",row.names=1))
 #' mymod <- statismoModelFromRepresenter(ref,kernel=list(c(50,50)),ncomp = 100,isoScale = 0.1)
 #' mymodC <- statismoConstrainModel(mymod,tar.lm,ref.lm,2)
-#' fit <- modelFitting(mymodC,tarmesh,iterations = 15)
+#' fit <- modelFitting(mymodC,tar,iterations = 15)
 #' @details this function fits a statistical model to a target mesh using a l-bfgs optimizer to minimize the symmetric mean squared distance between meshes.
 #' @note needs RvtkStatismo installed
 #' @importFrom lbfgs lbfgs

@@ -46,6 +46,6 @@ ref.lm <- as.matrix(read.csv("VSD001-lm.csv",row.names=1))
 tar.lm <- as.matrix(read.csv("VSD002-lm.csv",row.names=1))
 mymod <- statismoModelFromRepresenter(ref,kernel=list(c(50,50)),ncomp = 100,isoScale = 0.1)
 mymodC <- statismoConstrainModel(mymod,tar.lm,ref.lm,2)
-fit <- modelFitting(mymodC,tarmesh,iterations = 15)
+fit <- modelFitting(mymodC,tar,iterations = 15)
 }
 
