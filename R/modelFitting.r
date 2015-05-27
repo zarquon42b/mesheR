@@ -120,7 +120,7 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
         
         if (!silent) {
             cat(paste("iteration", i,"\n"))
-            cat(paste("MSE:",objectiveMSQ(vars,clost,A,B,tarclost),"\n"))
+            cat(paste("MSE between correspondences:",objectiveMSQ(vars,clost,A,B,tarclost),"\n"))
         }
     }
     estim <- DrawSample(model,vars)
