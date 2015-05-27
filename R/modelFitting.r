@@ -1,6 +1,9 @@
 objectiveMSQ <- function(x,clost,A,B,tarclost) {
-    Ax <- A%*%x
-    out <- sum((Ax-clost)^2)/(nrow(Ax)/3)
+    out <- 0
+    if (!is.null(A)){
+        Ax <- A%*%x
+        out <- sum((Ax-clost)^2)/(nrow(Ax)/3)
+    }
     if (!is.null(B)) {
         Bx <- B%*%x
         out <- out+sum((Bx-tarclost)^2)/(nrow(Bx)/3)
@@ -10,9 +13,12 @@ objectiveMSQ <- function(x,clost,A,B,tarclost) {
 
 
 objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
-    Ax <- A%*%x
-    Axb <- Ax-clost
-    grad <- (2*t(A)%*%Axb)/(nrow(Ax)/3)
+    grad <- x*0
+    if  (!is.null(A)){
+        Ax <- A%*%x
+        Axb <- Ax-clost
+        grad <- (2*t(A)%*%Axb)/(nrow(Ax)/3)
+    }
     if (!is.null(B)) {
         Bx <- B%*%x
         Bxb <- Bx-tarclost
@@ -27,8 +33,12 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @param model statistical model of class pPCA
 #' @param tarmesh a target mesh already aligned to the model
 #' @param iterations numbers of iterations to run
+#' @param lbfgs.iter integer:
+#' @param refdist maximal distance from model to reference to be considered
 #' @param tardist maximal distance from target to model to be considered
-#' @param symmetric logical: if TRUE, the symmetric distance will be minimized.
+#' @param rho numeric: allowed normal deviation of a point to be considered as corresponding.
+#' @param symmetric integer: specify which MSE to minimize. 0=search both ways, 1=model to target, 2=target to model.
+#' @param sdmax constrain parameters (normalized PC-scores) to be within +- sdmax
 #' @param silent logical: if TRUE output will be suppressed.
 #' @return
 #' \item{par}{the model's parameters}
@@ -47,41 +57,99 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' mymod <- statismoModelFromRepresenter(ref,kernel=list(c(50,50)),ncomp = 100,isoScale = 0.1)
 #' mymodC <- statismoConstrainModel(mymod,tar.lm,ref.lm,2)
 #' fit <- modelFitting(mymodC,tar,iterations = 15)
+#' #or without landmarks but instead with some icp steps
+#' taricp <- icp(tar,ref,iterations = 50,type="s",getTransform = T)
+#' taricpAff <- icp(taricp$mesh,ref,iterations = 50,type="a",getTransform = T)
+#' ##get affine transform
+#' combotrafo <- taricpAff$transform%*%taricp$transform
+#' fit2 <- modelFitting(mymod,taricpAff$mesh,iterations = 15)
+#' ## revert affine transforms
+#' fit2aff <- applyTransform(fit2$mesh,combotrafo,inverse=T)
 #' @details this function fits a statistical model to a target mesh using a l-bfgs optimizer to minimize the symmetric mean squared distance between meshes.
 #' @note needs RvtkStatismo installed
 #' @importFrom lbfgs lbfgs
 #' @export
-modelFitting <- function(model, tarmesh, iterations=5,symmetric=TRUE,tardist=1e5,silent=FALSE) {
+modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,silent=FALSE) {
     if (!require(RvtkStatismo))
         stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
     vars <- rep(0,length(GetPCAVarianceVector(model)))
-    A <- GetPCABasisMatrix(model)
+    Aorig <- GetPCABasisMatrix(model)
+    A <- clost <- NULL
     B <- tarclost <- NULL
     mv <- GetMeanVector(model)
+    refind <- ((1:(length(mv)/3)) -1 )*3
+    refind <- cbind(refind+1,refind+2,refind+3)
+    symmetric <- symmetric[1]
+    if (! symmetric %in% c(0:2))
+        stop("symmetric must be 0,1 or 2")
     for ( i in 1:iterations) {
         ## to target
-        mm <- DrawSample(model,vars)
-        cc <- vcgClostKD(mm,tarmesh,sign = FALSE)
-        clost <- as.vector(cc$vb[1:3,])-mv
-        ## from target
-        if (symmetric) {
+        mm <- vcgUpdateNormals(DrawSample(model,vars))
+        if (symmetric %in% c(0,1)) {
+            cc <- vcgClostKD(mm,tarmesh,sign = FALSE)
+            ncref <- as.logical(normcheck(cc,mm) < rho)
+            distgoodref <- as.logical(abs(cc$quality) <= refdist)
+            goodref <- sort(which(as.logical(distgoodref*ncref)))
+            refindtmp <- as.vector(t(refind[goodref,]))
+            clost <- as.vector(cc$vb[1:3,goodref])-mv[refindtmp]
+            A <- Aorig[refindtmp,]
+        }
+            ## from target
+        if (symmetric %in% c(0,2)) {
             tarGet <- vcgKDtree(mm,tarmesh,k=1)
-            good <- which(tarGet$distance < tardist)
+            dummynorms <- list(normals=mm$normals[,tarGet$index])
+            nctar <- as.logical(normcheck(dummynorms,tarmesh) < rho)
+            distgoodtar <- as.logical(abs(tarGet$distance) <= tardist)
+            goodtar <- sort(which(as.logical(distgoodtar*nctar)))
+            good <- sort(which(as.logical(distgoodtar*nctar)))
+            ##good <- which(tarGet$distance < tardist)
             tarclostind <- tarGet$index[good]
             inds <- (tarclostind-1)*3
             inds <- cbind(inds+1,inds+2,inds+3)
             inds <- as.vector(t(inds))
-            B <- A[inds,]
+            B <- Aorig[inds,]
             tarclost <- as.vector(tarmesh$vb[1:3,good])-mv[inds]
         }
         ##run optimization
-        out <- lbfgs(objectiveMSQ,objectiveMSQ.grad,vars=vars,A=A,clost=clost,B=B,tarclost=tarclost,max_iterations = 5,invisible=1)
+        out <- lbfgs(objectiveMSQ,objectiveMSQ.grad,vars=vars,A=A,clost=clost,B=B,tarclost=tarclost,max_iterations = lbfgs.iter,invisible=1)
         vars <- out$par
+        if (!is.null(sdmax)) {
+            vars <-  constrainParams(vars,sdmax=sdmax)
+        }
+        
+        
         if (!silent) {
             cat(paste("iteration", i,"\n"))
-            cat(paste("MSQ:",objectiveMSQ(vars,clost,A,B,tarclost),"\n"))
+            cat(paste("MSE:",objectiveMSQ(vars,clost,A,B,tarclost),"\n"))
         }
     }
     estim <- DrawSample(model,vars)
     return(list(mesh=estim,par=vars))
+}
+
+constrainParams <- function(alpha,sdmax=3,mahaprob=c("none","chisq","dist")) {
+    
+    mahaprob <- match.arg(mahaprob,c("none","chisq","dist"))
+    if (mahaprob != "none") {
+        sdl <- length(alpha)
+        probs <- sum(alpha^2)
+        if (mahaprob == "chisq") {
+            Mt <- qchisq(1-2*pnorm(sdmax,lower.tail=F),df=sdl)
+            probs <- sum(alpha^2)
+        } else if (mahaprob == "dist") {
+            Mt <- sdmax
+            probs <- sqrt(probs)
+        }
+        if (probs > Mt ) {
+            sca <- Mt/probs
+            alpha <- alpha*sca
+        }
+    } else { 
+        signalpha <- sign(alpha)
+        alpha <- abs(alpha)
+        outlier <- which(alpha > sdmax)
+        alpha[outlier] <- sdmax
+        alpha <- alpha*signalpha
+    }
+    return(alpha)
 }

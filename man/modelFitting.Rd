@@ -4,8 +4,9 @@
 \alias{modelFitting}
 \title{fit a model minimizing the (symmetric) mean squared  distance}
 \usage{
-modelFitting(model, tarmesh, iterations = 5, symmetric = TRUE,
-  tardist = 1e+05, silent = FALSE)
+modelFitting(model, tarmesh, iterations = 5, lbfgs.iter = 5,
+  symmetric = c(0, 1, 2), refdist = 1e+05, tardist = 1e+05, rho = pi/2,
+  sdmax = NULL, silent = FALSE)
 }
 \arguments{
 \item{model}{statistical model of class pPCA}
@@ -14,9 +15,17 @@ modelFitting(model, tarmesh, iterations = 5, symmetric = TRUE,
 
 \item{iterations}{numbers of iterations to run}
 
-\item{symmetric}{logical: if TRUE, the symmetric distance will be minimized.}
+\item{lbfgs.iter}{integer:}
+
+\item{symmetric}{integer: specify which MSE to minimize. 0=search both ways, 1=model to target, 2=target to model.}
+
+\item{refdist}{maximal distance from model to reference to be considered}
 
 \item{tardist}{maximal distance from target to model to be considered}
+
+\item{rho}{numeric: allowed normal deviation of a point to be considered as corresponding.}
+
+\item{sdmax}{constrain parameters (normalized PC-scores) to be within +- sdmax}
 
 \item{silent}{logical: if TRUE output will be suppressed.}
 }
@@ -47,5 +56,13 @@ tar.lm <- as.matrix(read.csv("VSD002-lm.csv",row.names=1))
 mymod <- statismoModelFromRepresenter(ref,kernel=list(c(50,50)),ncomp = 100,isoScale = 0.1)
 mymodC <- statismoConstrainModel(mymod,tar.lm,ref.lm,2)
 fit <- modelFitting(mymodC,tar,iterations = 15)
+#or without landmarks but instead with some icp steps
+taricp <- icp(tar,ref,iterations = 50,type="s",getTransform = T)
+taricpAff <- icp(taricp$mesh,ref,iterations = 50,type="a",getTransform = T)
+##get affine transform
+combotrafo <- taricpAff$transform\%*\%taricp$transform
+fit2 <- modelFitting(mymod,taricpAff$mesh,iterations = 15)
+## revert affine transforms
+fit2aff <- applyTransform(fit2$mesh,combotrafo,inverse=T)
 }
 
