@@ -153,3 +153,47 @@ constrainParams <- function(alpha,sdmax=3,mahaprob=c("none","chisq","dist")) {
     }
     return(alpha)
 }
+
+
+#' minimize mean squared distance between model and a point-cloud with correspondences
+#'
+#' minimize mean squared distance between model and a point-cloud with correspondences
+#' @param clost matrix or mesh3d
+#' @param model statismo model of class pPCA
+#' @param iterations integer: max number of iterations passed to lbfgs
+#' @param initpar initial estimate of the model parameters
+#' @param use integer vector: which points to use
+#' @param sdmax constrain parameters (normalized PC-scores) to be within +- sdmax
+#' @param mahaprob character: if != "none", use mahalanobis-distance to determine overall probability (of the shape projected into the model space."chisq" uses the Chi-Square distribution of the squared Mahalanobisdistance, while "dist" restricts the values to be within a multi-dimensional sphere of radius \code{sdmax}. If FALSE the probability will be determined per PC separately.
+#' @param ... additional parameters to be passed to \code{\link{lbfgs}}.
+#' @return
+#' \item{par}{the model's parameters}
+#' \item{mesh}{the fitted mesh}
+#' @export
+miniSQmodel <- function(clost,model,iterations=10,initpar=NULL,use=NULL,sdmax=NULL,mahaprob=c("none","chisq","dist"),...) {
+     if (!require(RvtkStatismo))
+         stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
+    if (is.null(initpar))   
+        vars <- rep(0,length(GetPCAVarianceVector(model)))
+    else
+        vars <- initpar
+     Aorig <- GetPCABasisMatrix(model)
+     mv <- GetMeanVector(model)
+     if (inherits(clost,"mesh3d"))
+         clost <- vert2points(clost)
+     A <- B <- tarclost <- NULL
+     if (is.null(use))
+         use <- 1:nrow(clost)
+     refind <- ((1:(length(mv)/3)) -1 )*3
+     refind <- cbind(refind+1,refind+2,refind+3)
+     refindtmp <- as.vector(t(refind[use,]))
+     clost <- as.vector(t(clost[use,]))-mv[refindtmp]
+     A <- Aorig[refindtmp,]
+     out <- lbfgs(objectiveMSQ,objectiveMSQ.grad,vars=vars,A=A,clost=clost,B=B,tarclost=tarclost,max_iterations = iterations,invisible=1,...)
+     vars <- out$par
+     if (!is.null(sdmax))
+         vars <-  constrainParams(vars,sdmax=sdmax,mahaprob = mahaprob)
+         
+     estim <- DrawSample(model,vars)
+     return(list(mesh=estim,par=vars))
+ }
