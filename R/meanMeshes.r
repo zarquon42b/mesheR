@@ -5,12 +5,15 @@
 #' @return a mesh with averaged vertices
 #' @export
 meanMeshes <- function(...) UseMethod("meanMeshes")
+
+#' @export
 meanMeshes.default <- function(...) {
     args <- list(...)
     ref <- meanMeshes(args)
     return(ref)
 }
-    
+
+#' @export
 meanMeshes.list <- function(...) {
     x <-  (...)
     mmmvert <- meshlist2array(x)
@@ -20,6 +23,7 @@ meanMeshes.list <- function(...) {
     ref <- Rvcg::vcgUpdateNormals(ref)
     return(ref)
 }
+
 
 meshlist2array <- function (meshlist) {
     n <- length(meshlist)
