@@ -4,15 +4,23 @@
 #' @param ... meshes of class mesh3d
 #' @return a mesh with averaged vertices
 #' @export
-meanMeshes <- function(...) {
+meanMeshes <- function(...) UseMethod("meanMeshes")
+meanMeshes.default <- function(...) {
     args <- list(...)
-    mmmvert <- RvtkStatismo::meshlist2array(args)
+    ref <- meanMeshes(args)
+    return(ref)
+}
+    
+meanMeshes.list <- function(...) {
+    x <-  (...)
+    mmmvert <- meshlist2array(x)
     mmmvertmean <- Morpho::arrMean3(mmmvert)
-    ref <- args[[1]]
+    ref <- x[[1]]
     ref$vb[1:3,] <- t(mmmvertmean)
     ref <- Rvcg::vcgUpdateNormals(ref)
     return(ref)
 }
+
 meshlist2array <- function (meshlist) {
     n <- length(meshlist)
     k <- ncol(meshlist[[1]]$vb)
