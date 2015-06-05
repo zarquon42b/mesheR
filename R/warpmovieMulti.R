@@ -26,13 +26,19 @@
 #' bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
 #' warpmovieMulti(bluemesh, redmesh, n=15)
 #' @importFrom rgl open3d points3d shade3d rgl.snapshot rgl.pop rgl.close
-#' @export warpmovieMulti
-warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE, shade=c("s","w","b"))
-{	
-    args <- list(...)
-    if (length(args) == 1 && !inherits(args[[1]],"mesh3d"))
-        args <- unlist(args, recursive = FALSE)
+#' @export
+warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE, shade=c("s","w","b")) UseMethod("warpmovieMulti")
 
+#' @export
+warpmovieMulti.default <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE, shade=c("s","w","b")) {
+    args <- list(...)
+    warpmovieMulti(args,n=n, col=col, folder=folder, movie=movie,add=add, close=close, countbegin=countbegin, ask=ask, whichcolor=whichcolor, align=align, scale=scale, mixcolor=mixcolor, shade=shade)
+}
+
+#' @export    
+warpmovieMulti.list <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE, shade=c("s","w","b"))
+{	
+    args <- (...)
     argc <- length(args)
     if (argc < 2)
             stop("at least two arguments needed")
