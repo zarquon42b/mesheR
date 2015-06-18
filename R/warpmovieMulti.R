@@ -24,7 +24,9 @@
 #' redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
 #' bluemesh <- shortnose.mesh
 #' bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
+#' \dontrun{
 #' warpmovieMulti(bluemesh, redmesh, n=15)
+#' }
 #' @importFrom rgl open3d points3d shade3d rgl.snapshot rgl.pop rgl.close
 #' @export
 warpmovieMulti <- function(..., n, col=NULL, folder=NULL, movie="warpmovie",add=FALSE, close=TRUE, countbegin=0, ask=TRUE, whichcolor=NULL, align=TRUE, scale=FALSE, mixcolor=TRUE, shade=c("s","w","b")) UseMethod("warpmovieMulti")

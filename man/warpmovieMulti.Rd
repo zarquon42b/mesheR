@@ -48,6 +48,8 @@ redmesh <- shortnose.mesh
 redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
 bluemesh <- shortnose.mesh
 bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
+\dontrun{
 warpmovieMulti(bluemesh, redmesh, n=15)
+}
 }
 
