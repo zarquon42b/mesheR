@@ -25,7 +25,9 @@
 #'                 76.0469 , 3.7734 , 12.8234 , 81.3138 , 63.4207 ,
 #'                 47.5009 , 44.6468), 4, 3)
 #' #place markers of 5mm length
+#' \dontrun{
 #' placeDowels(lms, humface, rep(5, 4))
+#' }
 #' @seealso \code{\link{cylinder}}
 #' @importFrom rgl shade3d
 #' @export placeDowels
