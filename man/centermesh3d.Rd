@@ -18,12 +18,17 @@ returns the translated mesh
 move the centroid of a mesh to a given coordinate
 }
 \examples{
-require(rgl)
 require(Rvcg)
 data(humface)
+\dontrun{
+require(rgl)
 wire3d(humface, col=3)
+}
 humcenter <- centermesh3d(humface)
 #view translated mesh
+\dontrun{
+require(rgl)
 wire3d(humcenter, col=2)
+}
 }
 

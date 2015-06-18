@@ -9,12 +9,15 @@
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2
 #' @examples
-#' require(rgl)
+#' 
 #' require(Morpho)
 #' data(nose)
 #' offset <- meshOffset(shortnose.mesh,3)
+#' \dontrun{
+#' require(rgl)
 #' shade3d(shortnose.mesh,col=3)
 #' wire3d(offset)
+#' }
 #' @export meshOffset 
 meshOffset <- function(mesh,offset)
 {

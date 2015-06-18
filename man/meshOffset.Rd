@@ -18,12 +18,14 @@ returns modified mesh.
 translate vertices of a triangular mesh along its normals
 }
 \examples{
-require(rgl)
 require(Morpho)
 data(nose)
 offset <- meshOffset(shortnose.mesh,3)
+\dontrun{
+require(rgl)
 shade3d(shortnose.mesh,col=3)
 wire3d(offset)
+}
 }
 \author{
 Stefan Schlager

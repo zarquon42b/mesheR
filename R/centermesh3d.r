@@ -6,13 +6,19 @@
 #'
 #' @return returns the translated mesh
 #' @examples
-#' require(rgl)
+#' 
 #' require(Rvcg)
 #' data(humface)
+#' \dontrun{
+#' require(rgl)
 #' wire3d(humface, col=3)
+#' }
 #' humcenter <- centermesh3d(humface)
 #' #view translated mesh
+#' \dontrun{
+#' require(rgl)
 #' wire3d(humcenter, col=2)
+#' }
 #' @export centermesh3d
 centermesh3d <- function(x,center=NULL)
   {

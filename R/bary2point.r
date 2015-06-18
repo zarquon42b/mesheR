@@ -7,7 +7,7 @@
 #'
 #' @return a nx3 matrix containing 3D-coordinates
 #' @examples
-#' require(rgl)
+#' 
 #' require(Rvcg)
 #' data(humface)
 #' #extract 300 random points from humface 
@@ -17,9 +17,11 @@
 #' #move original mesh
 #' transface <- translate3d(humface, 10, 10 ,10)
 #' newcoord <- bary2point(proj$barycoords, proj$faceptr, transface)
+#' \dontrun{
+#' require(rgl)
 #' wire3d(transface, col=3)
 #' spheres3d(newcoord,radius=0.5)
-#' 
+#' }
 #' @export bary2point
 bary2point <- function(bary,faceptr, mesh)
  {
@@ -44,7 +46,7 @@ bary2point <- function(bary,faceptr, mesh)
 #' @details the function gets the barycentric coordinates of  \code{x} on \code{mesh1} and uses them to find the corresponding positions on \code{mesh2}
 #' @return returns a matrix containing \code{x} tranfered to \code{mesh2}.
 #' @examples
-#' require(rgl)
+#' 
 #' require(Rvcg)
 #' data(humface)
 #' #extract 300 random points from humface 
@@ -54,8 +56,11 @@ bary2point <- function(bary,faceptr, mesh)
 #' transface <- translate3d(humface, 10, 10 ,10)
 #' ##extract coordinates
 #' newcoord <- transferPoints(coords, humface, transface)
+#' \dontrun{
+#' require(rgl)
 #' wire3d(transface, col=3)
 #' spheres3d(newcoord)
+#' }
 #' @export
 transferPoints <- function(x, mesh1, mesh2, tolwarn= 0.01) {
     

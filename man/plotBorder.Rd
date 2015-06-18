@@ -17,11 +17,13 @@ plotBorder(mesh, col = 2, lwd = 2)
 plot all border edges of a triangular mesh
 }
 \examples{
+\dontrun{
 require(rgl)
 require(Morpho)
 data(nose)
 plotBorder(shortnose.mesh)
 wire3d(shortnose.mesh,col=3)
+}
 }
 \author{
 Stefan Schlager

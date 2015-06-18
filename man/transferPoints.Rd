@@ -25,7 +25,6 @@ transfer points between two registered meshes
 the function gets the barycentric coordinates of  \code{x} on \code{mesh1} and uses them to find the corresponding positions on \code{mesh2}
 }
 \examples{
-require(rgl)
 require(Rvcg)
 data(humface)
 #extract 300 random points from humface
@@ -35,7 +34,10 @@ coords <- vcgSample(humface,200,"pd")
 transface <- translate3d(humface, 10, 10 ,10)
 ##extract coordinates
 newcoord <- transferPoints(coords, humface, transface)
+\dontrun{
+require(rgl)
 wire3d(transface, col=3)
 spheres3d(newcoord)
+}
 }
 

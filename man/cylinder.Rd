@@ -26,7 +26,10 @@ a triangular mesh of class 'mesh3d'
 create a mesh representation of a cylinder
 }
 \examples{
+cyl <- cylinder(1:3,1:3,4,adNormals = TRUE)
+\dontrun{
 require(rgl)
-wire3d(cylinder(1:3,1:3,4,adNormals = TRUE))
+wire3d(cyl)
+}
 }
 

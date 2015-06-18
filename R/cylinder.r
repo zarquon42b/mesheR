@@ -11,8 +11,11 @@
 #' @return
 #' a triangular mesh of class 'mesh3d'
 #' @examples
+#' cyl <- cylinder(1:3,1:3,4,adNormals = TRUE)
+#' \dontrun{
 #' require(rgl)
-#' wire3d(cylinder(1:3,1:3,4,adNormals = TRUE))
+#' wire3d(cyl)
+#' }
 #' @importFrom rgl translate3d
 #' @export cylinder
 cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)

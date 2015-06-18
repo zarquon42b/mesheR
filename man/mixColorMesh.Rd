@@ -21,7 +21,6 @@ mixColorMesh mixes the vertex colors of two
 registered meshes (identical faces and corresponding vertices).
 }
 \examples{
-require(rgl)
 require(Morpho)
 data(nose)
 redmesh <- shortnose.mesh
@@ -29,7 +28,10 @@ redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
 bluemesh <- shortnose.mesh
 bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
 mixmesh <- mixColorMesh(bluemesh,redmesh)
+\dontrun{
+require(rgl)
 shade3d(mixmesh)
+}
 }
 \author{
 Stefan Schlager

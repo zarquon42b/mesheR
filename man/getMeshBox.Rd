@@ -21,12 +21,16 @@ compute the bounding box of a triangular mesh
 }
 \examples{
 require(Rvcg)
-require(rgl)
 data(humface)
 bbox <- getMeshBox(humface)
+\dontrun{
+require(rgl)
 spheres3d(bbox)
+}
 bbmesh <- getMeshBox(humface,tri=TRUE)
+\dontrun{
 shade3d(bbmesh,alpha=0.4)
 wire3d(humface)
+}
 }
 

@@ -11,7 +11,7 @@
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2
 #' @examples
-#' require(rgl)
+#' 
 #' require(Morpho)
 #' data(nose)
 #' redmesh <- shortnose.mesh
@@ -20,7 +20,10 @@
 #' # mesh without colors
 #' nocolmesh <- shortnose.mesh
 #' mixmesh <- colorTrans(nocolmesh, redmesh)
+#' \dontrun{
+#' require(rgl)
 #' shade3d(mixmesh)
+#' }
 #' @importClassesFrom colorspace LAB RGB color
 #' @importFrom colorspace RGB hex hex2RGB
 #' @export colorTrans 

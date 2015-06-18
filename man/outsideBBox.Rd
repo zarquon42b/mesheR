@@ -22,15 +22,20 @@ get vertex indices of vertices outside a bounding box
 \examples{
 require(Rvcg)
 require(Morpho)
-require(rgl)
+
 data(humface)
 bbox <- getMeshBox(humface,extend=-0.2)
 bboxmesh <-  getMeshBox(humface,extend=-0.2,tri=TRUE)
+\dontrun{
+require(rgl)
 spheres3d(bbox)
+}
 outside <- outsideBBox(humface,bbox)
 humshrink <- rmVertex(humface,outside)
+\dontrun{
 wire3d(humshrink,col=3)#inside
 wire3d(humface,col=2)#outside
 shade3d(bboxmesh,alpha=0.4)
+}
 }
 

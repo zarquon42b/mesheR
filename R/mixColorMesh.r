@@ -10,7 +10,7 @@
 #' @author Stefan Schlager
 #' @keywords ~kwd1 ~kwd2
 #' @examples
-#' require(rgl)
+#' 
 #' require(Morpho)
 #' data(nose)
 #' redmesh <- shortnose.mesh
@@ -18,7 +18,10 @@
 #' bluemesh <- shortnose.mesh
 #' bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
 #' mixmesh <- mixColorMesh(bluemesh,redmesh)
+#' \dontrun{
+#' require(rgl)
 #' shade3d(mixmesh)
+#' }
 #' @importFrom colorspace mixcolor
 #' @export mixColorMesh
 mixColorMesh <- function(mesh1,mesh2,alpha=0.5)

@@ -20,7 +20,6 @@ a nx3 matrix containing 3D-coordinates
 transform barycentric coordinates into 3D-coordinates
 }
 \examples{
-require(rgl)
 require(Rvcg)
 data(humface)
 #extract 300 random points from humface
@@ -30,7 +29,10 @@ proj <- vcgClost(coords, humface, barycentric=TRUE)
 #move original mesh
 transface <- translate3d(humface, 10, 10 ,10)
 newcoord <- bary2point(proj$barycoords, proj$faceptr, transface)
+\dontrun{
+require(rgl)
 wire3d(transface, col=3)
 spheres3d(newcoord,radius=0.5)
+}
 }
 

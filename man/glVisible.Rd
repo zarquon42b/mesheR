@@ -21,12 +21,14 @@ Determine which vertices of a rendered mesh are visible from the current
 viewpoint
 }
 \examples{
+\dontrun{
 require(rgl)
 require(Morpho)
 data(nose)
 shade3d(shortnose.mesh,col=3)
 visi <- glVisible(shortnose.mesh)
 points3d(vert2points(shortnose.mesh)[which(visi),])
+}
 }
 \author{
 Stefan Schlager
