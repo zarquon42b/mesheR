@@ -31,7 +31,7 @@ data(humface)
 coords <- vcgSample(humface,200,"pd")
 
 #move original mesh
-transface <- translate3d(humface, 10, 10 ,10)
+transface <- rgl::translate3d(humface, 10, 10 ,10)
 ##extract coordinates
 newcoord <- transferPoints(coords, humface, transface)
 \dontrun{
