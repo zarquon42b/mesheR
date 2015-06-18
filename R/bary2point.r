@@ -15,7 +15,7 @@
 #' #get barycentric coordinates
 #' proj <- vcgClost(coords, humface, barycentric=TRUE)
 #' #move original mesh
-#' transface <- translate3d(humface, 10, 10 ,10)
+#' transface <- rgl::translate3d(humface, 10, 10 ,10)
 #' newcoord <- bary2point(proj$barycoords, proj$faceptr, transface)
 #' \dontrun{
 #' require(rgl)
