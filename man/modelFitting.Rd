@@ -48,26 +48,32 @@ this function fits a statistical model to a target mesh using a l-bfgs optimizer
 needs RvtkStatismo installed
 }
 \examples{
+\dontrun{
 require(RvtkStatismo)
-download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD001_femur.vtk","./VSD001_femur.vtk",method = "w")
-download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD002_femur.vtk","./VSD002_femur.vtk",method = "w")
-download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD001-lm.csv","./VSD001-lm.csv",method = "w")
-download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD002-lm.csv","./VSD002-lm.csv",method = "w")
+download.file(url="https://github.com/marcelluethi/
+statismo-shaperegistration/raw/master/data/VSD001_femur.vtk","./VSD001_femur.vtk",method = "w")
+download.file(url="https://github.com/marcelluethi/
+statismo-shaperegistration/raw/master/data/VSD002_femur.vtk","./VSD002_femur.vtk",method = "w")
+download.file(url="https://github.com/marcelluethi/
+statismo-shaperegistration/raw/master/data/VSD001-lm.csv","./VSD001-lm.csv",method = "w")
+download.file(url="https://github.com/marcelluethi/
+statismo-shaperegistration/raw/master/data/VSD002-lm.csv","./VSD002-lm.csv",method = "w")
 
 ref <- read.vtk("VSD001_femur.vtk")
 tar <- read.vtk("VSD002_femur.vtk")
 ref.lm <- as.matrix(read.csv("VSD001-lm.csv",row.names=1))
 tar.lm <- as.matrix(read.csv("VSD002-lm.csv",row.names=1))
 mymod <- statismoModelFromRepresenter(ref,kernel=list(c(50,50)),ncomp = 100,isoScale = 0.1)
-mymodC <- statismoConstrainModel(mymod,tar.lm,ref.lm,2)
+mymodC <- RvtkStatismo::statismoConstrainModel(mymod,tar.lm,ref.lm,2)
 fit <- modelFitting(mymodC,tar,iterations = 15)
 #or without landmarks but instead with some icp steps
-taricp <- icp(tar,ref,iterations = 50,type="s",getTransform = T)
-taricpAff <- icp(taricp$mesh,ref,iterations = 50,type="a",getTransform = T)
+taricp <- icp(tar,ref,iterations = 50,type="s",getTransform = TRUE)
+taricpAff <- icp(taricp$mesh,ref,iterations = 50,type="a",getTransform = TRUE)
 ##get affine transform
 combotrafo <- taricpAff$transform\%*\%taricp$transform
 fit2 <- modelFitting(mymod,taricpAff$mesh,iterations = 15)
 ## revert affine transforms
-fit2aff <- applyTransform(fit2$mesh,combotrafo,inverse=T)
+fit2aff <- applyTransform(fit2$mesh,combotrafo,inverse=TRUE)
+}
 }
 

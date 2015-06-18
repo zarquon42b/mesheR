@@ -10,8 +10,6 @@ normcheck(mesh1, mesh2)
 \item{mesh1}{triangular mesh}
 
 \item{mesh2}{triangular mesh}
-
-\item{colwise}{logical: if TRUE, the columns will be compared.}
 }
 \value{
 numeric vector containing angles between corresponding normals

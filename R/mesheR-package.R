@@ -19,7 +19,7 @@
 #' @references To be announced
 #' @keywords package
 #' @useDynLib mesheR
-#' @importFrom Morpho angle.calc closemeshKD invertFaces facenormals file2mesh mcNNindex meshcube meshDist meshres projRead rmUnrefVertex rmVertex rotmesh.onto rotonmat rotonto tangentPlane tps3d unrefVertex vert2points warp.mesh
+#' @importFrom Morpho angle.calc closemeshKD invertFaces facenormals file2mesh mcNNindex meshcube meshDist meshres projRead rmUnrefVertex rmVertex rotmesh.onto rotonmat rotonto tangentPlane tps3d unrefVertex vert2points tps3d
 #' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgRaySearch vcgNonBorderEdge vcgSmooth vcgClostKD
 #' @importFrom parallel detectCores mclapply
 #' @importFrom Rcpp evalCpp

@@ -12,9 +12,9 @@ createBayes(model, sdmax = numeric(0), mahalanobis = "chisq",
 
 \item{sdmax}{numeric or vector of numerics (length must be of value =< \code{iterations} as to be specified in gaussMatch or AmbergRegister. If \code{length(sd) =n < iterations}, then the first n iterations will be restricted to the according standard deviations}
 
-\item{mahalanobis}{parameter according to mahaprob in function PredictSample from RvtkStatismo}
+\item{mahalanobis}{parameter according to mahaprob in function RvtkStatismo::PredictSample from RvtkStatismo}
 
-\item{ptValueNoise}{parameter according to ptValueNoise in function statismoConstrainModel from RvtkStatismo}
+\item{ptValueNoise}{parameter according to ptValueNoise in function RvtkStatismo::statismoConstrainModel from RvtkStatismo}
 
 \item{wt}{numeric: a weight put on the closest model configuration. E.g. if wt = 2 the deformation will be 0.33*closestPoints + 0.66*most probable model shape. This can either be a constant scalar (that might be modified in each iteration by a shrinkage function - see below) or a vector of length sdmax.}
 

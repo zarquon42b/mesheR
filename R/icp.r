@@ -62,7 +62,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
             }
       
       if (!is.null(subsample))
-          subs0 <- duplicated(kmeans(vert2points(mesh1),center=subsample,iter.max =100)$cluster)
+          subs0 <- duplicated(kmeans(vert2points(mesh1),centers=subsample,iter.max =100)$cluster)
       pro <- substring(pro[1],1L,1L)
       if (pro == "v") {
           project3d <- vcgClostKD
@@ -141,7 +141,6 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
 #' compare normal directions between two states of a mesh
 #' @param mesh1 triangular mesh
 #' @param mesh2 triangular mesh
-#' @param colwise logical: if TRUE, the columns will be compared.
 #'
 #' @return numeric vector containing angles between corresponding normals
 #' @export normcheck

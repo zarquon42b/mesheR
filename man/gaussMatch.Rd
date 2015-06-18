@@ -28,7 +28,7 @@ should be ~1.5.}
 \item{smoothit}{integer: smoothing steps.}
 
 \item{smoothtype}{Type of smoothing: Taubin, Laplacian, or HClaplacian. For
-details see \code{\link{vcgSmooth}}}
+details see \code{vcgSmooth}.}
 
 \item{sigma}{starting parameter for smoothed displacement (see Moshfeghi
 1994). Sigma controls the importance of the neighbourhood by defining the standard-deviation for the gaussian smoothing}
@@ -82,6 +82,8 @@ are discarded.}
 and starting points exceeds this threshold, the displacement vector will be
 discarded. Reduces distortion especially at mesh borders.}
 
+\item{useiter}{logical: if AmbergK and AmbergLambda are set and useiter is TRUE, the minimization will be performed using the latest iteration (slower). The orginal reference otherwise.}
+
 \item{AmbergK}{a single integer or an integer vector vector containing the \code{k0}-value (normal slackness) for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.}
 
 \item{AmbergLambda}{as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.}
@@ -100,11 +102,13 @@ discarded. Reduces distortion especially at mesh borders.}
 
 \item{folder}{character: if specified, each a screenshot of each deformation step will be saved as a png file in this folder.}
 
+\item{alpha}{numeric between 0 and 1 controls opacity of target mesh if visualize=TRUE.}
+
 \item{col1}{color of fix mesh (if visualize = TRUE)}
 
 \item{col2}{color of moving mesh (if visualize = TRUE)}
 
-\item{bbox}{a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \link{\code{getMeshBox}}, or complying with the specification of \code{corners} in \code{\link{makeBox}}. Everything outside this box will be ignored.}
+\item{bbox}{a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \code{\link{getMeshBox}}, or complying with the specification of \code{corners} in \code{\link{makeBox}}. Everything outside this box will be ignored.}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }
@@ -126,11 +130,13 @@ the displacement smoothing are implemented
 require(Morpho)
 data(nose)##load data
 ##warp a mesh onto another landmark configuration:
-warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
+warpnose.long <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm)
 ### result won't be too good as the surfaces do stronly differ.
 ## we start with an affine transformation initiated by landmarks
 affine <- list(iterations=200,subsample=100,rhotol=pi/2,uprange=0.9)
- match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
+match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,
+                   lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",
+                   smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
 }
 \author{
 Stefan Schlager

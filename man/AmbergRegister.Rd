@@ -75,6 +75,8 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 \item{visualize}{logical request visualization of deformation process.}
 
 \item{folder}{logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.}
+
+\item{noinc}{logical: if TRUE and x is of class 'Bayes', the process stops if the distance from the target to the deformed reference increases compared to the previous iteration.}
 }
 \value{
 \item{mesh}{registered mesh}

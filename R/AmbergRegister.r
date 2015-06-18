@@ -39,6 +39,7 @@
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
 #' @param visualize logical request visualization of deformation process.
 #' @param folder logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.
+#' @param noinc logical: if TRUE and x is of class 'Bayes', the process stops if the distance from the target to the deformed reference increases compared to the previous iteration. 
 #' @return 
 #' \item{mesh}{registered mesh}
 #' \item{affine }{affine 4x4 transformation matrix mapping mesh1 onto mesh2}
@@ -97,9 +98,9 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
               stop("x must be an object of class mesh3d or BayesDeform")
         
         if (!is.null(Bayes)) {
-            if (!require(RvtkStatismo))
+            if (!requireNamespace("RvtkStatismo"))
                 stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
-            mesh1 <- DrawMean(Bayes$model)
+            mesh1 <- RvtkStatismo::DrawMean(Bayes$model)
         }
         mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
         mesh1 <- vcgUpdateNormals(mesh1)
@@ -130,10 +131,10 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             if (!is.null(Bayes) && hasLM) {
                 ##register landmarks on model and constrain reference
                 lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
-                constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
+                constMod <- RvtkStatismo::statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
                 if (useConstrained) {
                     Bayes$model <- constMod
-                    mesh1 <- vcgUpdateNormals(DrawMean(Bayes$model))
+                    mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawMean(Bayes$model))
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
                 }
             }                
@@ -317,10 +318,10 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                         wt <- Bayes$wt[count]
                         wts <- c(1,wt)
                         wts <- wts/sum(wts)
-                        tmpmesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=Bayes$align,mahaprob=Bayes$mahaprob)
+                        tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=Bayes$align,mahaprob=Bayes$mahaprob)
                         tmp$mesh$vb[1:3,] <- wts[1]*tmp$mesh$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,]
                     } else {
-                        tmp$mesh <- PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=Bayes$align,mahaprob=Bayes$mahaprob)
+                        tmp$mesh <- RvtkStatismo::PredictSample(Bayes$model,tmp$mesh,TRUE, sdmax=Bayes$sdmax[count],align=Bayes$align,mahaprob=Bayes$mahaprob)
                     }
                     
                 }

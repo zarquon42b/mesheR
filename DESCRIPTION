@@ -1,6 +1,6 @@
 Package: mesheR
 Type: Package
-Title: Meshing operations on triangular meshes.
+Title: Meshing Operations on Triangular Meshes
 Version: 0.4.150601
 Date: 2015-06-01
 Author: Stefan Schlager

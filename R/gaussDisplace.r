@@ -116,7 +116,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param smooth Integer: smoothing factor. Default is NULL, no smoothing.
 #' @param smoothit integer: smoothing steps.
 #' @param smoothtype Type of smoothing: Taubin, Laplacian, or HClaplacian. For
-#' details see \code{\link{vcgSmooth}}
+#' details see \code{vcgSmooth}.
 #' @param sigma starting parameter for smoothed displacement (see Moshfeghi
 #' 1994). Sigma controls the importance of the neighbourhood by defining the standard-deviation for the gaussian smoothing
 #' @param gamma stiffness factor controlling displacement strength. The smoothed displacement vector for each vertex is divided by \code{gamma}. The larger \code{gamma}, the slower the approximation.
@@ -146,14 +146,14 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' take the point which is orthogonal to the closest face see Moshfeghi 1994).
 #' @param angtol numeric: If the angle between hit points' normals and the
 #' starting points' normals exceeds this threshold the displacement vector will
-#' be discarded.
-#' 
+#' be discarded. 
 #' @param border Logical: if TRUE, displacement vectors hitting mesh borders
 #' are discarded.
 #' @param horiz.disp numeric: If the angle between hit points' normals
 #' (independent of its orientation) and the distance vector between hit point
 #' and starting points exceeds this threshold, the displacement vector will be
 #' discarded. Reduces distortion especially at mesh borders.
+#' @param useiter logical: if AmbergK and AmbergLambda are set and useiter is TRUE, the minimization will be performed using the latest iteration (slower). The orginal reference otherwise.
 #' @param AmbergK a single integer or an integer vector vector containing the \code{k0}-value (normal slackness) for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
 #'  @param AmbergLambda as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
 #' @param tol convergence threshold: if RMSE between iterations is below tol, the function stops.
@@ -163,9 +163,10 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param silent logical suppress messages
 #' @param visualize logical: if TRUE the matching process is visualized
 #' @param folder character: if specified, each a screenshot of each deformation step will be saved as a png file in this folder.
+#' @param alpha numeric between 0 and 1 controls opacity of target mesh if visualize=TRUE.
 #' @param col1 color of fix mesh (if visualize = TRUE)
 #' @param col2 color of moving mesh (if visualize = TRUE)
-#' @param bbox a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \link{\code{getMeshBox}}, or complying with the specification of \code{corners} in \code{\link{makeBox}}. Everything outside this box will be ignored.
+#' @param bbox a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \code{\link{getMeshBox}}, or complying with the specification of \code{corners} in \code{\link{makeBox}}. Everything outside this box will be ignored.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -189,11 +190,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' require(Morpho)
 #' data(nose)##load data
 #' ##warp a mesh onto another landmark configuration:
-#' warpnose.long <- warp.mesh(shortnose.mesh,shortnose.lm,longnose.lm)
+#' warpnose.long <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm)
 #' ### result won't be too good as the surfaces do stronly differ.
 #' ## we start with an affine transformation initiated by landmarks
 #' affine <- list(iterations=200,subsample=100,rhotol=pi/2,uprange=0.9)
-#'  match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
+#' match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,
+#'                    lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",
+#'                    smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
 #' @importFrom Rvcg vcgClostKD vcgKDtree vcgMeshres
 #' @importFrom rgl rgl.ids
 #' @seealso \code{\link{outsideBBox},\link{getMeshBox} }
@@ -209,9 +212,9 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
       else
           stop("x must be an object of class mesh3d or BayesDeform")
     if (!is.null(Bayes)) {
-        if (!require(RvtkStatismo))
+        if (!requireNamespace("RvtkStatismo"))
             stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
-        mesh1 <- DrawMean(Bayes$model)
+        mesh1 <- RvtkStatismo::DrawMean(Bayes$model)
     }
     if (!is.null(angtol)) {
         mesh1 <- vcgUpdateNormals(mesh1)
@@ -273,10 +276,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             else
                 lm2tmp <- lm2
             
-            constMod <- statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
+            constMod <- RvtkStatismo::statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
             if (useConstrained) {
                 Bayes$model <- constMod
-                mesh1 <- vcgUpdateNormals(DrawMean(Bayes$model))
+                mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawMean(Bayes$model))
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
         }           
@@ -309,9 +312,9 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
         if (!is.null(Bayes)) 
-            mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align,sdmax=Bayes$sdmax[1],mahaprob=Bayes$mahaprob))
+            mesh1 <- vcgUpdateNormals(RvtkStatismo::PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align,sdmax=Bayes$sdmax[1],mahaprob=Bayes$mahaprob))
     
-        #mesh1 <- vcgUpdateNormals(PredictSample(Bayes$model,mesh1,representer = T,lmDataset=lm1,lmModel=lmModel,align=TRUE))
+        #mesh1 <- vcgUpdateNormals(RvtkStatismo::PredictSample(Bayes$model,mesh1,representer = T,lmDataset=lm1,lmModel=lmModel,align=TRUE))
         
     } else {
         if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
@@ -393,11 +396,11 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 wt <- Bayes$wt[i]
                 wts <- c(1,wt)
                 wts <- wts/sum(wts)
-                tmpmesh <- PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,dataset=mesh0,representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob)
+                tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,dataset=mesh0,representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob)
                 tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
                 
             } else {
-                tmp$addit <- PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
+                tmp$addit <- RvtkStatismo::PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
             }
             
         }

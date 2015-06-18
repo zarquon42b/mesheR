@@ -46,39 +46,45 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' \item{par}{the model's parameters}
 #' \item{mesh}{the fitted mesh}
 #' @examples
+#' \dontrun{
 #' require(RvtkStatismo)
-#' download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD001_femur.vtk","./VSD001_femur.vtk",method = "w")
-#' download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD002_femur.vtk","./VSD002_femur.vtk",method = "w")
-#' download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD001-lm.csv","./VSD001-lm.csv",method = "w")
-#' download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD002-lm.csv","./VSD002-lm.csv",method = "w")
+#' download.file(url="https://github.com/marcelluethi/
+#' statismo-shaperegistration/raw/master/data/VSD001_femur.vtk","./VSD001_femur.vtk",method = "w")
+#' download.file(url="https://github.com/marcelluethi/
+#' statismo-shaperegistration/raw/master/data/VSD002_femur.vtk","./VSD002_femur.vtk",method = "w")
+#' download.file(url="https://github.com/marcelluethi/
+#' statismo-shaperegistration/raw/master/data/VSD001-lm.csv","./VSD001-lm.csv",method = "w")
+#' download.file(url="https://github.com/marcelluethi/
+#' statismo-shaperegistration/raw/master/data/VSD002-lm.csv","./VSD002-lm.csv",method = "w")
 #' 
 #' ref <- read.vtk("VSD001_femur.vtk")
 #' tar <- read.vtk("VSD002_femur.vtk")
 #' ref.lm <- as.matrix(read.csv("VSD001-lm.csv",row.names=1))
 #' tar.lm <- as.matrix(read.csv("VSD002-lm.csv",row.names=1))
 #' mymod <- statismoModelFromRepresenter(ref,kernel=list(c(50,50)),ncomp = 100,isoScale = 0.1)
-#' mymodC <- statismoConstrainModel(mymod,tar.lm,ref.lm,2)
+#' mymodC <- RvtkStatismo::statismoConstrainModel(mymod,tar.lm,ref.lm,2)
 #' fit <- modelFitting(mymodC,tar,iterations = 15)
 #' #or without landmarks but instead with some icp steps
-#' taricp <- icp(tar,ref,iterations = 50,type="s",getTransform = T)
-#' taricpAff <- icp(taricp$mesh,ref,iterations = 50,type="a",getTransform = T)
+#' taricp <- icp(tar,ref,iterations = 50,type="s",getTransform = TRUE)
+#' taricpAff <- icp(taricp$mesh,ref,iterations = 50,type="a",getTransform = TRUE)
 #' ##get affine transform
 #' combotrafo <- taricpAff$transform%*%taricp$transform
 #' fit2 <- modelFitting(mymod,taricpAff$mesh,iterations = 15)
 #' ## revert affine transforms
-#' fit2aff <- applyTransform(fit2$mesh,combotrafo,inverse=T)
+#' fit2aff <- applyTransform(fit2$mesh,combotrafo,inverse=TRUE)
+#' }
 #' @details this function fits a statistical model to a target mesh using a l-bfgs optimizer to minimize the symmetric mean squared distance between meshes.
 #' @note needs RvtkStatismo installed
 #' @importFrom lbfgs lbfgs
 #' @export
 modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),silent=FALSE,...) {
-    if (!require(RvtkStatismo))
+    if (!requireNamespace("RvtkStatismo"))
         stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
-    vars <- rep(0,length(GetPCAVarianceVector(model)))
-    Aorig <- GetPCABasisMatrix(model)
+    vars <- rep(0,length(RvtkStatismo::GetPCAVarianceVector(model)))
+    Aorig <- RvtkStatismo::GetPCABasisMatrix(model)
     A <- clost <- NULL
     B <- tarclost <- NULL
-    mv <- GetMeanVector(model)
+    mv <- RvtkStatismo::GetMeanVector(model)
     refind <- ((1:(length(mv)/3)) -1 )*3
     refind <- cbind(refind+1,refind+2,refind+3)
     symmetric <- symmetric[1]
@@ -87,7 +93,7 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
         stop("symmetric must be 0,1 or 2")
     for ( i in 1:iterations) {
         ## to target
-        mm <- vcgUpdateNormals(DrawSample(model,vars))
+        mm <- vcgUpdateNormals(RvtkStatismo::DrawSample(model,vars))
         if (symmetric %in% c(0,1)) {
             cc <- vcgClostKD(mm,tarmesh,sign = FALSE)
             ncref <- as.logical(normcheck(cc,mm) < rho)
@@ -126,7 +132,7 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
             cat(paste("MSE between correspondences:",objectiveMSQ(vars,clost,A,B,tarclost),"\n"))
         }
     }
-    estim <- DrawSample(model,vars)
+    estim <- RvtkStatismo::DrawSample(model,vars)
     return(list(mesh=estim,par=vars))
 }
 
@@ -174,14 +180,14 @@ constrainParams <- function(alpha,sdmax=3,mahaprob=c("none","chisq","dist")) {
 #' \item{mesh}{the fitted mesh}
 #' @export
 miniSQmodel <- function(clost,model,iterations=10,initpar=NULL,use=NULL,sdmax=NULL,mahaprob=c("none","chisq","dist"),...) {
-     if (!require(RvtkStatismo))
+     if (!requireNamespace("RvtkStatismo"))
          stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
     if (is.null(initpar))   
-        vars <- rep(0,length(GetPCAVarianceVector(model)))
+        vars <- rep(0,length(RvtkStatismo::GetPCAVarianceVector(model)))
     else
         vars <- initpar
-     Aorig <- GetPCABasisMatrix(model)
-     mv <- GetMeanVector(model)
+     Aorig <- RvtkStatismo::GetPCABasisMatrix(model)
+     mv <- RvtkStatismo::GetMeanVector(model)
      if (inherits(clost,"mesh3d"))
          clost <- vert2points(clost)
      A <- B <- tarclost <- NULL
@@ -197,6 +203,6 @@ miniSQmodel <- function(clost,model,iterations=10,initpar=NULL,use=NULL,sdmax=NU
      if (!is.null(sdmax))
          vars <-  constrainParams(vars,sdmax=sdmax,mahaprob = mahaprob)
          
-     estim <- DrawSample(model,vars)
+     estim <- RvtkStatismo::DrawSample(model,vars)
      return(list(mesh=estim,par=vars))
  }
