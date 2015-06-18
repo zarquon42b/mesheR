@@ -1,6 +1,6 @@
 mesheR [![Travis Build Status](https://travis-ci.org/zarquon42b/mesheR.png?branch=master)](https://travis-ci.org/zarquon42b/mesheR)
-
 ====
+
 __mesheR__ is an R-package providing methods for mesh manipulations in R. Its main feature are advanced surface registration algorithms.
 
 ##### Warning: #####
