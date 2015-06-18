@@ -92,7 +92,7 @@ This function runs an elastic-ICP surface matching algorithm, that minimizes the
 }
 \examples{
 require(Morpho)
-require(rgl)
+
 require(Rvcg)
 data(humface)
 data(dummyhead)
@@ -113,9 +113,12 @@ map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
                  lm2=humface.lm, iterations=params$iterations,similarity=similarity,
                  k=params$k, lambda=params$lambda, useiter=params$useiter)
 # compare matched and original face:
+\dontrun{
+require(rgl)
 meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
 # render original mesh as wireframe
 wire3d(humface)
+}
 ##example with different icp matchings:
 rigid <- list(iterations=30,subsample=200,rhotol=pi/2,uprange=0.6)
 similarity <- list(iterations=30, subsample=200,rhotol=pi/2,uprange=0.6)
