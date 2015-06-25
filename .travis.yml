@@ -7,16 +7,14 @@
 language: c
 sudo: required
 before_install:
-  - sudo add-apt-repository ppa:kalakris/cmake -y
-  - sudo add-apt-repository ppa:boost-latest/ppa -y
   - sudo add-apt-repository ppa:zarquon42/precise-backports -y
   - sudo apt-get update -qq
   - sudo apt-get install -y statismo-dev cmake
   - curl -OL http://raw.github.com/craigcitro/r-travis/master/scripts/travis-tool.sh
   - chmod 755 ./travis-tool.sh
   - ./travis-tool.sh bootstrap
-  - ./travis-tool.sh install_r_binary rgl Rcpp RcppEigen RcppArmadillo foreach doParallel yaImpute testthat
-  - ./travis-tool.sh install_github "zarquon42b/Morpho" "zarquon42b/RvtkStatismo"
+  - ./travis-tool.sh install_r_binary rgl Rcpp RcppEigen RcppArmadillo foreach doParallel yaImpute testthat morpho rvcg
+  - ./travis-tool.sh install_github "zarquon42b/RvtkStatismo"
 
 install:
   - ./travis-tool.sh install_deps
