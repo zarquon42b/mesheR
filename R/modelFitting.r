@@ -95,7 +95,7 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
         ## to target
         mm <- vcgUpdateNormals(RvtkStatismo::DrawSample(model,vars))
         if (symmetric %in% c(0,1)) {
-            cc <- vcgClostKD(mm,tarmesh,sign = FALSE)
+            cc <- vcgClostKD(mm,tarmesh,sign = FALSE,angdev=rho)
             ncref <- as.logical(normcheck(cc,mm) < rho)
             distgoodref <- as.logical(abs(cc$quality) <= refdist)
             goodref <- sort(which(as.logical(distgoodref*ncref)))
