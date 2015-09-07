@@ -41,6 +41,7 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @param sdmax constrain parameters (normalized PC-scores) to be within +- sdmax
 #' @param mahaprob character: if != "none", use mahalanobis-distance to determine overall probability (of the shape projected into the model space."chisq" uses the Chi-Square distribution of the squared Mahalanobisdistance, while "dist" restricts the values to be within a multi-dimensional sphere of radius \code{sdmax}. If FALSE the probability will be determined per PC separately.
 #' @param silent logical: if TRUE output will be suppressed.
+#' @param initparams a vector with initial estimations of the model parameters. Set to zeros if NULL.
 #' @param ... additional parameters to be passed to \code{\link{lbfgs}}.
 #' @return
 #' \item{par}{the model's parameters}
@@ -77,10 +78,19 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @note needs RvtkStatismo installed
 #' @importFrom lbfgs lbfgs
 #' @export
-modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),silent=FALSE,...) {
+modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,silent=FALSE,...) {
     if (!requireNamespace("RvtkStatismo"))
         stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
-    vars <- rep(0,length(RvtkStatismo::GetPCAVarianceVector(model)))
+    if (!is.null(initparams)) {
+        if (length(initparams) == length(RvtkStatismo::GetPCAVarianceVector(model)))
+            vars <- initparams
+        else {
+            warning(paste("length of initparams and number model parameters differ"))
+            vars <- rep(0,length(RvtkStatismo::GetPCAVarianceVector(model)))
+        }
+    } else {
+        vars <- rep(0,length(RvtkStatismo::GetPCAVarianceVector(model)))
+    }
     Aorig <- RvtkStatismo::GetPCABasisMatrix(model)
     A <- clost <- NULL
     B <- tarclost <- NULL
