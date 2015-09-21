@@ -40,8 +40,8 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @param symmetric integer: specify which MSE to minimize. 0=search both ways, 1=model to target, 2=target to model.
 #' @param sdmax constrain parameters (normalized PC-scores) to be within +- sdmax
 #' @param mahaprob character: if != "none", use mahalanobis-distance to determine overall probability (of the shape projected into the model space."chisq" uses the Chi-Square distribution of the squared Mahalanobisdistance, while "dist" restricts the values to be within a multi-dimensional sphere of radius \code{sdmax}. If FALSE the probability will be determined per PC separately.
-#' @param silent logical: if TRUE output will be suppressed.
 #' @param initparams a vector with initial estimations of the model parameters. Set to zeros if NULL.
+#' @param silent logical: if TRUE output will be suppressed.
 #' @param ... additional parameters to be passed to \code{\link{lbfgs}}.
 #' @return
 #' \item{par}{the model's parameters}
