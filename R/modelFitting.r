@@ -41,6 +41,7 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @param sdmax constrain parameters (normalized PC-scores) to be within +- sdmax
 #' @param mahaprob character: if != "none", use mahalanobis-distance to determine overall probability (of the shape projected into the model space."chisq" uses the Chi-Square distribution of the squared Mahalanobisdistance, while "dist" restricts the values to be within a multi-dimensional sphere of radius \code{sdmax}. If FALSE the probability will be determined per PC separately.
 #' @param initparams a vector with initial estimations of the model parameters. Set to zeros if NULL.
+#' @param k integer: amount of closest faces to consider during closest point search.
 #' @param silent logical: if TRUE output will be suppressed.
 #' @param ... additional parameters to be passed to \code{\link{lbfgs}}.
 #' @return
@@ -78,7 +79,7 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @note needs RvtkStatismo installed
 #' @importFrom lbfgs lbfgs
 #' @export
-modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,silent=FALSE,...) {
+modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,k=50,silent=FALSE,...) {
     if (!requireNamespace("RvtkStatismo"))
         stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
     if (!is.null(initparams)) {
@@ -105,7 +106,7 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
         ## to target
         mm <- vcgUpdateNormals(RvtkStatismo::DrawSample(model,vars))
         if (symmetric %in% c(0,1)) {
-            cc <- vcgClostKD(mm,tarmesh,sign = FALSE,angdev=rho)
+            cc <- vcgClostKD(mm,tarmesh,sign = FALSE,angdev=rho,k=k)
             ncref <- as.logical(normcheck(cc,mm) < rho)
             distgoodref <- as.logical(abs(cc$quality) <= refdist)
             goodref <- sort(which(as.logical(distgoodref*ncref)))

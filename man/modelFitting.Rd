@@ -7,7 +7,7 @@
 modelFitting(model, tarmesh, iterations = 5, lbfgs.iter = 5,
   symmetric = c(0, 1, 2), refdist = 1e+05, tardist = 1e+05, rho = pi/2,
   sdmax = NULL, mahaprob = c("none", "chisq", "dist"), initparams = NULL,
-  silent = FALSE, ...)
+  k = 50, silent = FALSE, ...)
 }
 \arguments{
 \item{model}{statistical model of class pPCA}
@@ -31,6 +31,8 @@ modelFitting(model, tarmesh, iterations = 5, lbfgs.iter = 5,
 \item{mahaprob}{character: if != "none", use mahalanobis-distance to determine overall probability (of the shape projected into the model space."chisq" uses the Chi-Square distribution of the squared Mahalanobisdistance, while "dist" restricts the values to be within a multi-dimensional sphere of radius \code{sdmax}. If FALSE the probability will be determined per PC separately.}
 
 \item{initparams}{a vector with initial estimations of the model parameters. Set to zeros if NULL.}
+
+\item{k}{integer: amount of closest faces to consider during closest point search.}
 
 \item{silent}{logical: if TRUE output will be suppressed.}
 
