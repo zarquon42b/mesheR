@@ -29,6 +29,7 @@
 #' If the tow meshes have only little or no overlap, "vcg" can be really slow. Otherwise very fast. "morpho" is the stable but somewhat slower algorithm.
 #' @param silent logical: no verbosity
 #' @param subsample integer use a subsample (using kmeans clustering) to find closest points for  - subsample specifies the size of this subsample.
+#' @param subsampletype select type of subsampling (see \code{vcgSample} for details)
 #' @param type set type of affine transformation: options are "affine", "rigid" and "similarity" (rigid + scale)
 #' @param getTransform logical: if TRUE, a list containing the transformed mesh and the 4x4 transformation matrix.
 #' @param pcAlign if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.
@@ -54,7 +55,7 @@
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' }
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE)
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,subsampletype=c("pd","kd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE)
   {
       meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
       mesh2 <- vcgUpdateNormals(mesh2)
@@ -64,8 +65,12 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
                     lm1 <- applyTransform(lm1,computeTransform(mesh2,mesh1))
             }
       
-      if (!is.null(subsample))
-          subs0 <- duplicated(kmeans(vert2points(mesh1),centers=subsample,iter.max =100)$cluster)
+      if (!is.null(subsample)) {
+          subsampletype <- match.arg(subsampletype,c("pd","kd"))
+          mysample <- Rvcg::vcgSample(mesh1,type=subsampletype,SampleNum=subsample,MCsamp = 20)
+          
+      }
+      
       pro <- substring(pro[1],1L,1L)
       if (pro == "v") {
           project3d <- vcgClostKD
@@ -86,14 +91,9 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
               cat("*")
           copymesh <- mesh1
           if (!is.null(subsample)) {
+              mysample <- vcgClostKD(mysample,mesh1)
               minclost <- min(minclost,subsample)
-              nvb <- ncol(copymesh$vb)
-              
-              #subs0 <- sort(sample(1:nvb)[1:min(subsample,nvb)])
-              copymesh$vb <- copymesh$vb[,!subs0]
-              if (!is.null(copymesh$normals))
-                  copymesh$normals <- copymesh$normals[,!subs0]
-              copymesh$it <- NULL
+              copymesh <- mysample
           }
           proMesh <- project3d(copymesh,mesh2,sign=F,k=k) ## project mesh1 onto mesh2
           x1 <- vert2points(copymesh)
@@ -126,6 +126,8 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
           }
           trafo <- computeTransform(x2[good,],x1[good,],type=type)
           mesh1 <- applyTransform(mesh1,trafo)
+          if (!is.null(subsample))
+              mysample <- applyTransform(mysample,trafo)
           count <- count+1
       }
       if (!silent)
