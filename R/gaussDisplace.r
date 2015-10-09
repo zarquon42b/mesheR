@@ -329,8 +329,11 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
     if (!is.null(bboxCrop)) {
         
         mesh1box <- getMeshBox(mesh1,extend=bboxCrop,tri=T)
-        dists <- vcgClostKD(mesh2,mesh1box,k=3)$dist
-        mesh2 <- Morpho::rmVertex(mesh2,which(dists > 0))
+        dists <- vcgClostKD(mesh2,mesh1box,k=16)$quality
+        outside <- which(dists > 0)
+       if (length(outside))
+           mesh2 <- Morpho::rmVertex(mesh2,outside)
+        
         if (!silent)
             cat("cropping target mesh\n")
     } 
