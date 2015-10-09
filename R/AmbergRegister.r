@@ -381,6 +381,6 @@ rigSimAff <- function(mesh1,mesh2,args,type="r",silent=TRUE) {
     reflection <- args$reflection;  if (is.null(reflection)) reflection <- FALSE
     pro <- "vcg"
     subsample <- args$subsample
-    out <- icp(mesh1, mesh2, iterations, lm1, lm2, uprange,maxdist, minclost, distinc, rhotol, k, reflection, pro, silent = silent,subsample, type)
+    out <- icp(mesh1, mesh2, iterations=iterations, lm1=lm1, lm2=lm2, uprange=uprange ,maxdist=maxdist, minclost=minclost, distinc=distinc, rhotol=rhotol, k=k, reflection=reflection, pro=pro, silent = silent,subsample=subsample, type=type)
     return(out)
 }
