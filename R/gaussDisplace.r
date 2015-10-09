@@ -136,8 +136,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' displacement smoothing, default is 150/mesh resolution.
 #' @param toldist Integer: Exclude everything from the whole procedure with a
 #' greater distance from initial point than toldist. 0 disables this feature.
-#' @param pro which projection method to use: "m"= \code{\link{closemeshKD}}
-#' from Morpho; "v"= \code{\link{vcgClost}} from package Rvcg
+#' @param pro which projection method to use: "kd" = \code{\link{Rvcg::vcgClostKD}}, "m"= \code{\link{closemeshKD}}
+#' from Morpho; "v"= \code{\link{Rvcg::vcgClost}} from package Rvcg.
 #' @param k0 Integer: argument passed to closemeshKD (will be argument "k" in
 #' \code{\link{closemeshKD}} .
 #' @param prometh argument passed to closemeshKD.  Integer: 0 or 1. If
@@ -166,7 +166,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param alpha numeric between 0 and 1 controls opacity of target mesh if visualize=TRUE.
 #' @param col1 color of fix mesh (if visualize = TRUE)
 #' @param col2 color of moving mesh (if visualize = TRUE)
-#' @param bbox a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \code{\link{getMeshBox}}, or complying with the specification of \code{corners} in \code{\link{makeBox}}. Everything outside this box will be ignored.
+#' @param bbox extend of the margins around the target shape to be considered.
+#' @param bboxCrop extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -203,7 +204,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,bboxCrop=NULL,...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
@@ -220,8 +221,6 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         mesh1 <- vcgUpdateNormals(mesh1)
         mesh2 <- vcgUpdateNormals(mesh2)
     }
-    if (!is.null(bbox))
-        bbox <- getMeshBox(mesh2,extend=bbox)
     Amberg <- ambergsingle <- FALSE
     ##setup variables
     if (!is.null(AmbergK) && !is.null(AmbergLambda)) {
@@ -275,7 +274,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
             else
                 lm2tmp <- lm2
-            
+            if (!silent)
+                cat("constraining model\n")
             constMod <- RvtkStatismo::statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
             if (useConstrained) {
                 Bayes$model <- constMod
@@ -326,6 +326,20 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
         }
     }
+    if (!is.null(bboxCrop)) {
+        
+        mesh1box <- getMeshBox(mesh1,extend=bboxCrop,tri=T)
+        dists <- vcgClostKD(mesh2,mesh1box,k=3)$dist
+        mesh2 <- Morpho::rmVertex(mesh2,which(dists > 0))
+        if (!silent)
+            cat("cropping target mesh\n")
+    } 
+    
+    
+    if (!is.null(bbox))
+        bbox <- getMeshBox(mesh2,extend=bbox)
+    
+    
     if (visualize) {
         rglid <- NULL
         if (!length(rgl.ids()$id)) 

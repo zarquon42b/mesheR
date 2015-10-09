@@ -13,7 +13,7 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   AmbergLambda = NULL, tol = 1e-05, useConstrained = TRUE,
   angclost = TRUE, noinc = FALSE, silent = FALSE, visualize = FALSE,
   folder = NULL, alpha = 0.7, col1 = "red", col2 = "white",
-  bbox = NULL, ...)
+  bbox = NULL, bboxCrop = NULL, ...)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.}
@@ -59,8 +59,8 @@ displacement smoothing, default is 150/mesh resolution.}
 \item{toldist}{Integer: Exclude everything from the whole procedure with a
 greater distance from initial point than toldist. 0 disables this feature.}
 
-\item{pro}{which projection method to use: "m"= \code{\link{closemeshKD}}
-from Morpho; "v"= \code{\link{vcgClost}} from package Rvcg}
+\item{pro}{which projection method to use: "kd" = \code{\link{Rvcg::vcgClostKD}}, "m"= \code{\link{closemeshKD}}
+from Morpho; "v"= \code{\link{Rvcg::vcgClost}} from package Rvcg.}
 
 \item{k0}{Integer: argument passed to closemeshKD (will be argument "k" in
 \code{\link{closemeshKD}} .}
@@ -108,7 +108,9 @@ discarded. Reduces distortion especially at mesh borders.}
 
 \item{col2}{color of moving mesh (if visualize = TRUE)}
 
-\item{bbox}{a 8 x 3 matrix with each row containing the corner of a bounding box generated with the function \code{\link{getMeshBox}}, or complying with the specification of \code{corners} in \code{\link{makeBox}}. Everything outside this box will be ignored.}
+\item{bbox}{extend of the margins around the target shape to be considered.}
+
+\item{bboxCrop}{extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }
