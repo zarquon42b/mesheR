@@ -53,7 +53,7 @@ rowvec relax_pt(rowvec pt, mat Wvb, mat  Pvb, mat D1, mat D2, double sigma, doub
 }
 
 
-RcppExport SEXP displaceGauss(SEXP iomat_, SEXP Wvb_, SEXP Pvb_, SEXP D1_, SEXP D2_, SEXP sigma_, SEXP gamma_, SEXP clIW_, SEXP clIP_, SEXP tol_, SEXP rt0_, SEXP rt1_, SEXP rc_, SEXP oneway_){
+RcppExport SEXP displaceGauss(SEXP iomat_, SEXP Wvb_, SEXP Pvb_, SEXP D1_, SEXP D2_, SEXP sigma_, SEXP gamma_, SEXP clIW_, SEXP clIP_, SEXP tol_, SEXP rt0_, SEXP rt1_, SEXP rc_, SEXP oneway_,SEXP threads_= wrap(1)){
   try {
   NumericMatrix iomat(iomat_);
   NumericMatrix Wvb(Wvb_);
@@ -80,6 +80,7 @@ RcppExport SEXP displaceGauss(SEXP iomat_, SEXP Wvb_, SEXP Pvb_, SEXP D1_, SEXP 
   double rc = as<double>(rc_);
   double tol = as<double>(tol_);
   bool oneway = as<bool>(oneway_);
+  int threads = as<int>(threads_);
   //omp_set_num_threads(8);
   vec diff1(D1.nrow());
   for (uint i=0; i < D1.nrow();i++) {
@@ -100,8 +101,10 @@ RcppExport SEXP displaceGauss(SEXP iomat_, SEXP Wvb_, SEXP Pvb_, SEXP D1_, SEXP 
       diff2[i] = 0;
   }
   mat out(iomat.begin(), iomat.nrow(), iomat.ncol());
-  // #pragma omp parallel num_threads(cores)
-  #pragma omp parallel for schedule(static)
+#ifdef SUPPORT_OPENMP
+    omp_set_num_threads(threads);
+#endif
+#pragma omp parallel for schedule(static)
   for (uint i = 0; i < iomat.nrow(); i++) {
     rowvec pt = iomat(i,_);
     uvec tmpW = conv_to<uvec>::from(armaclIW.row(i));

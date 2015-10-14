@@ -1,6 +1,6 @@
 ## @export gaussDisplace
 #' @importFrom Rvcg vcgUpdateNormals
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg","kd"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,angclost=FALSE,bbox=NULL,...) {
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg","kd"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,angclost=FALSE,bbox=NULL,threads=parallel::detectCores(),...) {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
     ## set projection function according to input request
     pro <- substring(pro[1],1L,1L)
@@ -14,7 +14,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
         project3d <- protmp
     } else if (pro =="v")
           project3d <- vcgClost
-    
+   
     angdev <- ifelse((is.null(rhotol) || !angclost),0,rhotol)
     rc <- 0
     out <- NULL
@@ -23,21 +23,21 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     M0 <- t(mesh2$vb[1:3,])
     S0 <- t(mesh1$vb[1:3,])
     sigma <- (sigma0*f^(-k))^2
-    Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0,tol=tol,borderchk=!border)
+    Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0,tol=tol,borderchk=!border,threads=threads)
     
     S <- vert2points(Spro)
     ## get symmetric distances and displacement field between meshes
     if (oneway) {
         M <- vert2points(mesh2)
     } else {
-        Mpro <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0,tol=tol,borderchk=!border)
+        Mpro <- project3d(mesh2,mesh1,sign=F,angdev=angdev,k=k0,tol=tol,borderchk=!border,threads=threads)
         M <- vert2points(Mpro)
     }
     ## get neighbourhood for each point to minimize calculation time
     if (!is.null (nh)) {
-        clostIndW <- vcgKDtree(S,W0,k=nh)$index-1
+        clostIndW <- vcgKDtree(S,W0,k=nh,threads=threads)$index-1
         if (!oneway)
-            clostIndP <- vcgKDtree(M,W0,k=nh)$index-1
+            clostIndP <- vcgKDtree(M,W0,k=nh,threads=threads)$index-1
         else
             clostIndP <- matrix(0,dim(W0)[1],nh)
     }
@@ -94,7 +94,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 ### make multicore 
     if (nh < 1)
         stop ("neighbourhood must be at least 1")
-    out <- .Call("displaceGauss",W0,S0,M,D1,D2,sigma,gamma,clostIndW,clostIndP,tol=tol,rt0,rt1,rc,oneway,PACKAGE="mesheR")
+    out <- .Call("displaceGauss",W0,S0,M,D1,D2,sigma,gamma,clostIndW,clostIndP,tol=tol,rt0,rt1,rc,oneway,threads,PACKAGE="mesheR")
     addit <- W0+out
     return(list(addit=addit))
 }
@@ -168,6 +168,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param col2 color of moving mesh (if visualize = TRUE)
 #' @param bbox extend of the margins around the target shape to be considered.
 #' @param bboxCrop extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.
+#' @param threads integer: threads to use in multithreaded routines.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -204,7 +205,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,bboxCrop=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=NULL,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,bboxCrop=NULL,threads=parallel::detectCores(),...) {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
@@ -250,17 +251,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         if (!silent)
             cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
     }
-    ## set projection function according to input request
-    pro <- substring(pro[1],1L,1L)
-    if (pro == "v") {
-        project3d <- vcgClostKD
-    } else if (pro == "m") {
-        protmp <- function(x,y,sign=F) {
-            out <- closemeshKD(x,y,k=k0,sign=sign,...)
-            return(out)
-        }
-        project3d <- protmp
-    }
+        
     t.dist <- 1e12
     hasLM <- FALSE
     if (!is.null(lm1) && !is.null(lm2))
@@ -292,7 +283,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         if (!is.null(rigid)) { ##perform rigid icp-matching
             rigid$lm1 <- lm1
             rigid$lm2 <- lm2
-            mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+            mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent,threads=threads)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
         if (!is.null(similarity)) {##similarity matching
@@ -300,7 +291,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 similarity$lm1 <- lm1
                 similarity$lm2 <- lm2
             }
-            mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+            mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent,threads=threads)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
         if (!is.null(affine)) {##similarity matching
@@ -308,7 +299,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 affine$lm1 <- lm1
                 affine$lm2 <- lm2
             }
-            mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+            mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent,threads=threads)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         }
         if (!is.null(Bayes)) 
@@ -403,7 +394,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         }
         vb0 <- vert2points(mesh1)
         ## call the workhorse doing the displacement
-        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,bbox=bbox,angclost=angclost,...)
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,bbox=bbox,angclost=angclost,threads=threads,...)
         
         tmpold <- mesh1
         if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {
@@ -439,7 +430,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         }
         ## check if distance increases
         distance_old <- distance
-        distance <- mean(vcgClostKD(mesh2,mesh1,k0=10,sign=F)$quality)
+        distance <- mean(vcgClostKD(mesh2,mesh1,k0=2,sign=F,threads=threads)$quality)
         if (distance > distance_old && !is.null(Bayes) && noinc) {
             cat("\n=========================================\n")
             message(paste(" Info: Distance is increasing, matching stopped after ",i,"iterations\n"))

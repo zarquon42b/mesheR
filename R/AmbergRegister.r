@@ -39,7 +39,8 @@
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
 #' @param visualize logical request visualization of deformation process.
 #' @param folder logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.
-#' @param noinc logical: if TRUE and x is of class 'Bayes', the process stops if the distance from the target to the deformed reference increases compared to the previous iteration. 
+#' @param noinc logical: if TRUE and x is of class 'Bayes', the process stops if the distance from the target to the deformed reference increases compared to the previous iteration.
+#' @param threads integer: threads to use in closest point search.
 #' @return 
 #' \item{mesh}{registered mesh}
 #' \item{affine }{affine 4x4 transformation matrix mapping mesh1 onto mesh2}
@@ -90,7 +91,7 @@
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
 #' @importFrom Morpho meshcube applyTransform computeTransform pcAlign
 #' @export AmbergRegister
-AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL, pcAlign=FALSE,nn=20, silent=FALSE, useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL,noinc=FALSE)
+AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL, pcAlign=FALSE,nn=20, silent=FALSE, useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL,noinc=FALSE,threads=parallel::detectCores())
     {
         if (inherits(x, "mesh3d")) {
             mesh1 <- x
@@ -162,7 +163,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     rigid$lm1 <- lm1
                     rigid$lm2 <- lm2
                 }
-                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent,threads=threads)
                 if (hasLM)
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
@@ -171,7 +172,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     similarity$lm1 <- lm1
                     similarity$lm2 <- lm2
                 }
-                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent,threads=threads)
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             if (!is.null(affine)) {##similarity matching
@@ -179,7 +180,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     affine$lm1 <- lm1
                     affine$lm2 <- lm2
                 }
-                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent,threads=threads)
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
             
@@ -271,7 +272,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     mesh1 <- tmp$mesh
                 }
                 vert_old <- vert2points(tmp$mesh)
-                clost <- vcgClostKD(tmp$mesh,mesh2,k=nn)
+                clost <- vcgClostKD(tmp$mesh,mesh2,k=nn,threads=threads)
                 verts1 <- vert2points(clost)
                 nc <- normcheck(clost,tmp$mesh)                        
                 
@@ -329,7 +330,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                     
                 }
                 distance_old <- distance
-                distance <- mean(vcgClostKD(mesh2,tmp$mesh,k0=10,sign=F)$quality)
+                distance <- mean(vcgClostKD(mesh2,tmp$mesh,k0=10,sign=F,threads=threads)$quality)
                 if (distance > distance_old && !is.null(Bayes) && noinc) {
                     cat("\n=========================================\n")
                     message(paste(" Info: Distance is increasing, matching stopped after ",count,"iterations\n"))
@@ -368,7 +369,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
     }
 
 
-rigSimAff <- function(mesh1,mesh2,args,type="r",silent=TRUE) {
+rigSimAff <- function(mesh1,mesh2,args,type="r",silent=TRUE,threads=parallel::detectCores()) {
     iterations <- args$iterations; if (is.null(iterations)) iterations <- 3
     lm1=args$lm1
     lm2 <- args$lm2
@@ -381,6 +382,6 @@ rigSimAff <- function(mesh1,mesh2,args,type="r",silent=TRUE) {
     reflection <- args$reflection;  if (is.null(reflection)) reflection <- FALSE
     pro <- "vcg"
     subsample <- args$subsample
-    out <- icp(mesh1, mesh2, iterations=iterations, lm1=lm1, lm2=lm2, uprange=uprange ,maxdist=maxdist, minclost=minclost, distinc=distinc, rhotol=rhotol, k=k, reflection=reflection, pro=pro, silent = silent,subsample=subsample, type=type)
+    out <- icp(mesh1, mesh2, iterations=iterations, lm1=lm1, lm2=lm2, uprange=uprange ,maxdist=maxdist, minclost=minclost, distinc=distinc, rhotol=rhotol, k=k, reflection=reflection, pro=pro, silent = silent,subsample=subsample, type=type,threads=threads)
     return(out)
 }

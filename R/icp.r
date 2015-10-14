@@ -33,6 +33,7 @@
 #' @param type set type of affine transformation: options are "affine", "rigid" and "similarity" (rigid + scale)
 #' @param getTransform logical: if TRUE, a list containing the transformed mesh and the 4x4 transformation matrix.
 #' @param pcAlign if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.
+#' @param threads integer: threads to use in closest point search.
 #' @return if \code{getTransform=FALSE}, the tranformed mesh1 is returned and otherwise a list containing
 #'
 #' \item{mesh}{tranformed mesh1}
@@ -55,7 +56,7 @@
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' }
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE)
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=parallel::detectCores())
   {
       meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
       mesh2 <- vcgUpdateNormals(mesh2)
@@ -91,11 +92,11 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
               cat("*")
           copymesh <- mesh1
           if (!is.null(subsample)) {
-              mysample <- vcgClostKD(mysample,mesh1)
+              mysample <- vcgClostKD(mysample,mesh1,threads=threads)
               minclost <- min(minclost,subsample)
               copymesh <- mysample
           }
-          proMesh <- project3d(copymesh,mesh2,sign=F,k=k) ## project mesh1 onto mesh2
+          proMesh <- project3d(copymesh,mesh2,sign=F,k=k,threads=threads) ## project mesh1 onto mesh2
           x1 <- vert2points(copymesh)
           x2 <- vert2points(proMesh)
           dists <- abs(proMesh$quality)

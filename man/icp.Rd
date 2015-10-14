@@ -7,8 +7,9 @@
 icp(mesh1, mesh2, iterations = 3, lm1 = NULL, lm2 = NULL, uprange = 0.9,
   maxdist = NULL, minclost = 50, distinc = 0.5, rhotol = pi, k = 50,
   reflection = FALSE, pro = c("vcg", "morpho"), silent = FALSE,
-  subsample = NULL, subsampletype = c("kd", "pd"), type = c("rigid",
-  "similarity", "affine"), getTransform = FALSE, pcAlign = FALSE)
+  subsample = NULL, subsampletype = c("km", "pd"), type = c("rigid",
+  "similarity", "affine"), getTransform = FALSE, pcAlign = FALSE,
+  threads = parallel::detectCores())
 }
 \arguments{
 \item{mesh1}{object of class "mesh3d".}
@@ -55,6 +56,8 @@ If the tow meshes have only little or no overlap, "vcg" can be really slow. Othe
 \item{getTransform}{logical: if TRUE, a list containing the transformed mesh and the 4x4 transformation matrix.}
 
 \item{pcAlign}{if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.}
+
+\item{threads}{integer: threads to use in closest point search.}
 }
 \value{
 if \code{getTransform=FALSE}, the tranformed mesh1 is returned and otherwise a list containing
