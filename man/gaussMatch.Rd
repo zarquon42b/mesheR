@@ -59,8 +59,8 @@ displacement smoothing, default is 150/mesh resolution.}
 \item{toldist}{Integer: Exclude everything from the whole procedure with a
 greater distance from initial point than toldist. 0 disables this feature.}
 
-\item{pro}{which projection method to use: "kd" = \code{\link{Rvcg::vcgClostKD}}, "m"= \code{\link{closemeshKD}}
-from Morpho; "v"= \code{\link{Rvcg::vcgClost}} from package Rvcg.}
+\item{pro}{which projection method to use: "kd" = \code{\link{vcgClostKD}}, "m"= \code{\link{closemeshKD}}
+from Morpho; "v"= \code{\link{vcgClost}} from package Rvcg.}
 
 \item{k0}{Integer: argument passed to closemeshKD (will be argument "k" in
 \code{\link{closemeshKD}} .}
@@ -137,7 +137,7 @@ data(nose)##load data
 warpnose.long <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm)
 ### result won't be too good as the surfaces do stronly differ.
 ## we start with an affine transformation initiated by landmarks
-affine <- list(iterations=200,subsample=100,rhotol=pi/2,uprange=0.9)
+affine <- list(iterations=20,subsample=100,rhotol=pi/2,uprange=0.9)
 match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,
                    lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",
                    smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
