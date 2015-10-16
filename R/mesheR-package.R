@@ -5,8 +5,8 @@
 #' \tabular{ll}{
 #' Package: \tab mesheR\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.4.150716\cr
-#' Date: \tab 2015-07-16\cr
+#' Version: \tab 0.4.151016\cr
+#' Date: \tab 2015-10-16\cr
 #' License: \tab GPL\cr
 #' LazyLoad: \tab yes\cr }
 #' 
