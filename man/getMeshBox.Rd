@@ -4,7 +4,7 @@
 \alias{getMeshBox}
 \title{compute the bounding box of a triangular mesh}
 \usage{
-getMeshBox(mesh, tri = FALSE, extend = 0)
+getMeshBox(mesh, tri = FALSE, extend = 0, pca = TRUE)
 }
 \arguments{
 \item{mesh}{triangular mesh of class "mesh3d"}
@@ -12,6 +12,8 @@ getMeshBox(mesh, tri = FALSE, extend = 0)
 \item{tri}{logical: if TRUE, triangular mesh representing the bounding box is returned}
 
 \item{extend}{numeric: offset extending the bbox (or shrinking if negative)}
+
+\item{pca}{if TRUE, the box will be aligned by the principal axes.}
 }
 \value{
 returns a matrix with the corners of the box or a triangular mesh if tri=TRUE.

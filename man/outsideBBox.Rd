@@ -9,9 +9,9 @@ outsideBBox(x, corners, outside = TRUE)
 \arguments{
 \item{x}{a k x 3 matrix or a triangular mesh of class "mesh3d"}
 
-\item{corners}{a 8 x 3 matrix defining the corners of a bounding box.}
+\item{corners}{a 8 x 3 matrix defining the corners of a bounding box, or a triangular mesh of class "mesh3d" representing the meshBox}
 
-\item{outside}{logical: if TRUE the indices outside the box are returned, those insde}
+\item{outside}{logical: if TRUE the indices outside the box are returned, those inside}
 }
 \value{
 returns the indices of coordinates inside/outside the bounding box.
