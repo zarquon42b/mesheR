@@ -332,22 +332,14 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         }
     }
     if (!is.null(bboxCrop)) {
-        
-        mesh1box <- getMeshBox(mesh1,extend=bboxCrop,tri=T)
-        dists <- vcgClostKD(mesh2,mesh1box,k=16)$quality
-        outside <- which(dists > 0)
-       if (length(outside))
-           mesh2 <- Morpho::rmVertex(mesh2,outside)
-        
+        mesh2 <- cropOutsideBBox(mesh1,mesh2,extend=bboxCrop)
         if (!silent)
             cat("cropping target mesh\n")
     } 
-    
-    
+        
     if (!is.null(bbox))
         bbox <- getMeshBox(mesh2,extend=bbox)
-    
-    
+        
     if (visualize) {
         rglid <- NULL
         if (!length(rgl.ids()$id)) 

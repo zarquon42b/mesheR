@@ -35,9 +35,9 @@ outsideBBox <- function(x, corners, outside=TRUE) {
     test <- normcheck(clost,x)
     #test <- clost$quality
     if (outside)
-        outside <- which(test > pi/2)
-    else
         outside <- which(test < pi/2)
+    else
+        outside <- which(test > pi/2)
     return(outside)
     
 }
@@ -57,7 +57,6 @@ makeBox <- function(corners) {
     bbox4 <- vcgUpdateNormals(bbox4)
     dircheck <- vcgRaySearch(bbox4,meshOffset(bbox4,-1e-5))
     if (sum(dircheck$quality) > 0) {
-        print(1)
         bbox4 <- invertFaces(bbox4)
     }
 
@@ -115,7 +114,7 @@ getMeshBox <- function(mesh,tri=FALSE,extend=0,pca=TRUE) {
 #' @param outside logical: if TRUE the part outside the box is removed
 #' @return returns the cropped mesh2
 #' @export 
-cropOutsideBBox <- function(mesh1,mesh2,extend=0,pca=TRUE,outside=FALSE) {
+cropOutsideBBox <- function(mesh1,mesh2,extend=0,pca=TRUE,outside=TRUE) {
     bbox <- getMeshBox(mesh1,tri=TRUE,extend=extend, pca=pca)
     outsidev <- outsideBBox(mesh2,bbox,outside=outside)
     if (length(outsidev))

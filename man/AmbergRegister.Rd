@@ -10,7 +10,7 @@ AmbergRegister(x, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
   similarity = NULL, affine = NULL, pcAlign = FALSE, nn = 20,
   silent = FALSE, useConstrained = TRUE, forceLM = FALSE,
-  visualize = FALSE, folder = NULL, noinc = FALSE,
+  visualize = FALSE, folder = NULL, noinc = FALSE, bboxCrop = NULL,
   threads = parallel::detectCores())
 }
 \arguments{
@@ -78,6 +78,8 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 \item{folder}{logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.}
 
 \item{noinc}{logical: if TRUE and x is of class 'Bayes', the process stops if the distance from the target to the deformed reference increases compared to the previous iteration.}
+
+\item{bboxCrop}{extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.}
 
 \item{threads}{integer: threads to use in closest point search.}
 }
