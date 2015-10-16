@@ -5,7 +5,8 @@
 \title{create an object of class BayesDeform to be used in gaussMatch and AmbergRegister}
 \usage{
 createBayes(model, sdmax = numeric(0), mahalanobis = "chisq",
-  ptValueNoise = 2, wt = NULL, align = TRUE, shrinkfun = NULL)
+  ptValueNoise = 2, wt = NULL, align = TRUE, shrinkfun = NULL,
+  initparams = NULL)
 }
 \arguments{
 \item{model}{a model of class pPCA created with package RvtkStatismo}
@@ -21,6 +22,8 @@ createBayes(model, sdmax = numeric(0), mahalanobis = "chisq",
 \item{align}{logical: if the target mesh is already aligned to the model, align can be set to FALSE.}
 
 \item{shrinkfun}{a two-valued function for the generation of the weight in the i-th iteration. See examples below.}
+
+\item{initparams}{initial estimation of the model parameters}
 }
 \value{
 returns a list of class "BayesDeform"

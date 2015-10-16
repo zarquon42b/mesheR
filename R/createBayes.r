@@ -8,6 +8,7 @@
 #' @param ptValueNoise parameter according to ptValueNoise in function RvtkStatismo::statismoConstrainModel from RvtkStatismo
 #' @param wt numeric: a weight put on the closest model configuration. E.g. if wt = 2 the deformation will be 0.33*closestPoints + 0.66*most probable model shape. This can either be a constant scalar (that might be modified in each iteration by a shrinkage function - see below) or a vector of length sdmax.
 #' @param align logical: if the target mesh is already aligned to the model, align can be set to FALSE.
+#' @param initparams initial estimation of the model parameters
 #' @param shrinkfun a two-valued function for the generation of the weight in the i-th iteration. See examples below.
 #' @return returns a list of class "BayesDeform"
 #' @examples
@@ -17,7 +18,7 @@
 #' # 
 #' }
 #' @export 
-createBayes <- function(model, sdmax=numeric(0),mahalanobis="chisq",ptValueNoise=2,wt=NULL,align=TRUE,shrinkfun=NULL) {
+createBayes <- function(model, sdmax=numeric(0),mahalanobis="chisq",ptValueNoise=2,wt=NULL,align=TRUE,shrinkfun=NULL,initparams=NULL) {
     Bayes <- list(); class(Bayes) <- "BayesDeform"
     Bayes$model <- model
     Bayes$sdmax <- sdmax
@@ -36,7 +37,8 @@ createBayes <- function(model, sdmax=numeric(0),mahalanobis="chisq",ptValueNoise
             Bayes$wt <- wt
     } else
         Bayes$wt <- wt
-        
+
+    Bayes$initparams <- initparams
         Bayes$align <- align
         return(Bayes)
     }

@@ -127,11 +127,19 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
         meshorig <- mesh1
         stopit <- FALSE
         hasLM <- FALSE
-        if (!is.null(lm1) && !is.null(lm2))
+        if (!is.null(lm1) && !is.null(lm2)) {
             hasLM <- TRUE
-        if (hasLM) {## case: landmarks are provided
             bary <- vcgClost(lm1,mesh1,barycentric = T)
-
+        }
+        if (!is.null(Bayes$initparams)) {
+            mesh1 <- RvtkStatismo::DrawSample(Bayes$model,Bayes$initparams)
+            if (hasLM)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                                        #wire3d(mesh1);spheres3d(lm1)
+                                        #return(1)
+        }
+        if (hasLM) {## case: landmarks are provided
+            
             if (!is.null(Bayes) && hasLM) {
                 ##register landmarks on model and constrain reference
                 lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot

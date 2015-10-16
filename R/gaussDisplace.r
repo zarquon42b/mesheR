@@ -218,6 +218,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
         mesh1 <- RvtkStatismo::DrawMean(Bayes$model)
     }
+        
+    
     if (!is.null(angtol)) {
         mesh1 <- vcgUpdateNormals(mesh1)
         mesh2 <- vcgUpdateNormals(mesh2)
@@ -254,12 +256,22 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         
     t.dist <- 1e12
     hasLM <- FALSE
-    if (!is.null(lm1) && !is.null(lm2))
+    if (!is.null(lm1) && !is.null(lm2)) {
         hasLM <- TRUE
+        bary <- vcgClost(lm1,mesh1,barycentric = T)
+    }
+    if (!is.null(Bayes$initparams)) {
+        mesh1 <- RvtkStatismo::DrawSample(Bayes$model,Bayes$initparams)
+        if (hasLM)
+            lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+        #wire3d(mesh1);spheres3d(lm1)
+        #return(1)
+    }
+    
     ## do icp matching
     lmModel <- NULL
     if (hasLM) {   ## case: landmarks are provided
-        bary <- vcgClost(lm1,mesh1,barycentric = T)
+       
         if (!is.null(Bayes)) {
             if (Bayes$align)
                 lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
@@ -270,8 +282,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             constMod <- RvtkStatismo::statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
             if (useConstrained) {
                 Bayes$model <- constMod
-                mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawMean(Bayes$model))
-                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                if (is.null(Bayes$initparams)) {
+                    mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawMean(Bayes$model))
+                    lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+                }
             }
         }           
         if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
