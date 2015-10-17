@@ -4,7 +4,7 @@
 \alias{cropOutsideBBox}
 \title{remove parts of a mesh outside a bounding box defined by another mesh}
 \usage{
-cropOutsideBBox(mesh1, mesh2, extend = 0, pca = TRUE, outside = FALSE)
+cropOutsideBBox(mesh1, mesh2, extend = 0, pca = TRUE, outside = TRUE)
 }
 \arguments{
 \item{mesh1}{reference mesh of which the bounding box will be computed}

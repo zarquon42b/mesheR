@@ -30,14 +30,14 @@ outsideBBox <- function(x, corners, outside=TRUE) {
         box <- makeBox(corners)
     else
         box <- corners
-    clost <- vcgClostKD(x,box,sign=T,k=16,weightnorm = F,threads = 1)
-    x$normals[1:3,] <- x$vb[1:3,]-clost$vb[1:3,]
-    test <- normcheck(clost,x)
-    #test <- clost$quality
+    clost <- vcgClost(x,box,sign=T,facenormals=T)
+    #x$normals[1:3,] <- x$vb[1:3,]-clost$vb[1:3,]
+    #test <- normcheck(clost,x)
+    test <- clost$quality
     if (outside)
-        outside <- which(test < pi/2)
+        outside <- which(test < 0)
     else
-        outside <- which(test > pi/2)
+        outside <- which(test >= 0)
     return(outside)
     
 }
@@ -45,21 +45,22 @@ outsideBBox <- function(x, corners, outside=TRUE) {
 #' create a bounding box as mesh
 #'
 #' create a bounding box as mesh
-#' @param corners a 8 x 3 matrix defining the corners of a bounding box. With first 4 rows containing the corners of one square and 5:8 their opposing counterparts.
+#' @param corners a 8 x 3 matrix defining the corners of a bounding box.
 #' @importFrom Morpho invertFaces
 #' @importFrom Rvcg vcgRaySearch
 #' @export
 makeBox <- function(corners) {
+    corners <- getMeshBox(corners)
     bbox4 <- list(vb = rbind(t(corners),1))
     it <- c(4,2,1,1,3,4,2,5,1,6,5,2,6,8,7,7,5,6,4,3,7,7,8,4,7,3,1,1,5,7,4,6,2,8,6,4)
     bbox4$it <- matrix(it,3,length(it)/3)
     class(bbox4) <- "mesh3d"
     bbox4 <- vcgUpdateNormals(bbox4)
-    dircheck <- vcgRaySearch(bbox4,meshOffset(bbox4,-1e-5))
-    if (sum(dircheck$quality) > 0) {
+    cbb <- cSize(vert2points(bbox4))
+    cbboff <- cSize(vert2points(meshOffset(bbox4,1)))
+    if (cbb > cbboff)
         bbox4 <- invertFaces(bbox4)
-    }
-
+    
     return(bbox4)
 }
 
@@ -86,7 +87,10 @@ makeBox <- function(corners) {
 #' }
 #' @export
 getMeshBox <- function(mesh,tri=FALSE,extend=0,pca=TRUE) {
-    vv2 <- vert2points(mesh)
+    if (inherits(mesh,"mesh3d"))
+        vv2 <- vert2points(mesh)
+    else
+        vv2 <- mesh
     if (pca) {
         pp <- prcomp(vv2)
         ranges <- apply(pp$x,2,range)

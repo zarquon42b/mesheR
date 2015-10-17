@@ -7,7 +7,7 @@
 makeBox(corners)
 }
 \arguments{
-\item{corners}{a 8 x 3 matrix defining the corners of a bounding box. With first 4 rows containing the corners of one square and 5:8 their opposing counterparts.}
+\item{corners}{a 8 x 3 matrix defining the corners of a bounding box.}
 }
 \description{
 create a bounding box as mesh
