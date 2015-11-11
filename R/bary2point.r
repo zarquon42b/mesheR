@@ -29,10 +29,13 @@ bary2point <- function(bary,faceptr, mesh)
      C <- Matrix::Matrix(0,nbary,ncol(mesh$vb))
      vertptr <- t(mesh$it[,faceptr])
      faceptr <- cbind(1:nbary,vertptr)
-     for(i in 2:4)
-         C[faceptr[,c(1,i)]] <- bary[i-1,]
-     
-     out <- as.matrix(C%*%t(mesh$vb[1:3,]))
+     if (nbary > 1) {
+         for(i in 2:4)
+             C[faceptr[,c(1,i)]] <- bary[i-1,]
+         out <- as.matrix(C%*%t(mesh$vb[1:3,]))
+     } else {
+         out <- t(mesh$vb[1:3,vertptr]%*%bary[,1])
+     }
      return(out)
  }
 
