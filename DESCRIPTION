@@ -24,3 +24,4 @@ LinkingTo: Rcpp, RcppArmadillo
 License: GPL-2
 Copyright: see COPYRIGHTS file
 LazyLoad: yes
+RoxygenNote: 5.0.1
