@@ -261,7 +261,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         bary <- vcgClost(lm1,mesh1,barycentric = T)
     }
     if (!is.null(Bayes$initparams)) {
-        mesh1 <- RvtkStatismo::DrawSample(Bayes$model,Bayes$initparams)
+        mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawSample(Bayes$model,Bayes$initparams))
         if (hasLM)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
         #wire3d(mesh1);spheres3d(lm1)
