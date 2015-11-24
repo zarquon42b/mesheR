@@ -43,7 +43,8 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @param initparams a vector with initial estimations of the model parameters. Set to zeros if NULL.
 #' @param k integer: amount of closest faces to consider during closest point search.
 #' @param silent logical: if TRUE output will be suppressed.
-#' @param ... additional parameters to be passed to \code{\link{lbfgs}}.
+#' @param method optimizer method. Can be one of "lbfgs", "BFGS", "CG", "L-BFGS-B", "SANN", "Brent". lbfgs calls the function from package lbfgs, while the others call \code{\link{optim}}.
+#' @param ... additional parameters to be passed to \code{\link{lbfgs}} or \code{\link{optim}}.
 #' @return
 #' \item{par}{the model's parameters}
 #' \item{mesh}{the fitted mesh}
@@ -79,7 +80,7 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @note needs RvtkStatismo installed
 #' @importFrom lbfgs lbfgs
 #' @export
-modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,k=50,silent=FALSE,...) {
+modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,k=50,silent=FALSE,threads=parallel::detectCores(),method="lbfgs",...) {
     if (!requireNamespace("RvtkStatismo"))
         stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
     if (!is.null(initparams)) {
@@ -106,7 +107,7 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
         ## to target
         mm <- vcgUpdateNormals(RvtkStatismo::DrawSample(model,vars))
         if (symmetric %in% c(0,1)) {
-            cc <- vcgClostKD(mm,tarmesh,sign = FALSE,angdev=rho,k=k)
+            cc <- vcgClostKD(mm,tarmesh,sign = FALSE,angdev=rho,k=k,threads=threads)
             ncref <- as.logical(normcheck(cc,mm) < rho)
             distgoodref <- as.logical(abs(cc$quality) <= refdist)
             goodref <- sort(which(as.logical(distgoodref*ncref)))
@@ -116,7 +117,7 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
         }
             ## from target
         if (symmetric %in% c(0,2)) {
-            tarGet <- vcgKDtree(mm,tarmesh,k=1)
+            tarGet <- vcgKDtree(mm,tarmesh,k=1,threads=threads)
             dummynorms <- list(normals=mm$normals[,tarGet$index])
             nctar <- as.logical(normcheck(dummynorms,tarmesh) < rho)
             distgoodtar <- as.logical(abs(tarGet$distance) <= tardist)
@@ -131,7 +132,12 @@ modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0
             tarclost <- as.vector(tarmesh$vb[1:3,good])-mv[inds]
         }
         ##run optimization
-        out <- lbfgs(objectiveMSQ,objectiveMSQ.grad,vars=vars,A=A,clost=clost,B=B,tarclost=tarclost,max_iterations = lbfgs.iter,invisible=1,...)
+        method <- match.arg(method[1],c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
+                      "Brent","lbfgs"))
+        if (method != "lbfgs")
+            out <- optim(par=vars,objectiveMSQ,objectiveMSQ.grad,A=A,clost=clost,B=B,tarclost=tarclost,method = method,...)
+        else
+            out <- lbfgs(objectiveMSQ,objectiveMSQ.grad,vars=vars,A=A,clost=clost,B=B,tarclost=tarclost,max_iterations = lbfgs.iter,invisible=1,...)
         vars <- out$par
         if (!is.null(sdmax)) {
             vars <-  constrainParams(vars,sdmax=sdmax,mahaprob = mahaprob)
