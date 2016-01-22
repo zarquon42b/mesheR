@@ -9,13 +9,9 @@ RcppExport SEXP trianvol(SEXP vb1_, SEXP vb2_, SEXP it_) {
   double V = 0.0;
   
   try {
-  NumericMatrix vb1(vb1_);
-  NumericMatrix vb2(vb2_);
-  mat armavb1(vb1.begin(),vb1.nrow(),vb1.ncol());
-  mat armavb2(vb2.begin(),vb2.nrow(),vb2.ncol());
-  IntegerMatrix it(it_);
-  imat armacIT(it.begin(),it.nrow(),it.ncol());
-  umat uIT = conv_to<umat>::from(armacIT);
+  mat armavb1 = as<mat>(vb1_);
+  mat armavb2 = as<mat>(vb2_);
+  umat uIT = as<umat>(it_);
   mat allvol(4,6);
   umat subvols(3,4);
   uvec tmp; tmp  << 0 << 1 << 2 << 3 << endr;
@@ -26,7 +22,7 @@ RcppExport SEXP trianvol(SEXP vb1_, SEXP vb2_, SEXP it_) {
   subvols.row(2) = tmp.t();
   uvec tmp02; tmp02 << 0 << 1 << 2 << endr;
   uvec tmp453; tmp453 << 4 << 5 << 3 << endr;
-  int dimit = it.ncol();
+  int dimit = uIT.n_cols;
   for (unsigned int i = 0; i < dimit; i++) {
     double Vtmp = 0.0;
     uvec slice0 = uIT.col(i);

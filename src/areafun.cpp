@@ -20,15 +20,14 @@ vec armacross(vec& x, vec& y) {
 
 RcppExport SEXP areafun(SEXP A_) {
   try {
-  NumericMatrix A(A_);
-  mat armaA(A.begin(), A.nrow(), A.ncol());
-  uvec v02; v02 << 0 << 1 << 2 << endr;
-  uvec v35; v35 << 3 << 4 << 5 << endr;
-  uvec v68; v68 << 6 << 7 << 8 << endr;
-  uvec v911; v911 << 9 << 10 << 11 << endr;
-  vec out(A.nrow());
-  #pragma omp parallel for schedule(static)
-  for (unsigned int i = 0; i < A.nrow();i++) {
+    mat armaA = as<mat>(A_);
+    uvec v02; v02 << 0 << 1 << 2 << endr;
+    uvec v35; v35 << 3 << 4 << 5 << endr;
+    uvec v68; v68 << 6 << 7 << 8 << endr;
+    uvec v911; v911 << 9 << 10 << 11 << endr;
+    vec out(armaA.n_rows);
+#pragma omp parallel for schedule(static)
+    for (unsigned int i = 0; i < armaA.n_rows;i++) {
     uvec ui(1); ui[0] = i;
     mat ac = armaA.submat(ui,v02) - armaA.submat(ui,v35) ;
     mat bd = armaA.submat(ui,v68) - armaA.submat(ui,v911);

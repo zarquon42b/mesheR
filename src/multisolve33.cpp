@@ -11,10 +11,9 @@ using namespace Rcpp;
 using namespace arma;
 RcppExport SEXP multisolve3(SEXP A_, SEXP trans_) {
   try {
-    NumericMatrix A(A_);
     bool trans = as<bool>(trans_);
-    mat armaA(A.begin(), A.nrow(), A.ncol());
-    int k = A.nrow();
+    mat armaA = as<mat>(A_);
+    int k = armaA.n_rows;
     int iterlen = k/3;
     uvec v02; v02 << 0 << 1 << 2 << endr;
     mat outmat = armaA;
