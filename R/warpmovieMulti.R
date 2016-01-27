@@ -110,7 +110,7 @@ warpmovieMulti.list <- function(..., n, col=NULL, folder=NULL, movie="warpmovie"
                 tmesh$material$color <- NULL
                 a <- append(a,wire3d(tmesh,col=1,lwd=2,specular=1))
             }
-            if (i ==0 && j == 1 && ask==TRUE)
+            if (i ==0 && j == 1 && ask==TRUE && interactive())
                 readline("please select view and press return\n")
                                      
             filename <- sprintf(ndec, movie, countbegin+i)

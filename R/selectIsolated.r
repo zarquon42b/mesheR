@@ -17,6 +17,7 @@ selectIsolated <- function(mesh,maxpiece=10) {
     cat(paste0("there are ",ll," pieces\n"))
     open3d()
     out <- list()
+    if (interactive()) {
     for (i in 1:ll) {
         wire3d(pieces[[i]],col=cols[i])
         answer <- readline("select (y/N)")
@@ -27,5 +28,6 @@ selectIsolated <- function(mesh,maxpiece=10) {
             rgl.pop()
     }
     out <- mergeMeshes(out)
+    }
     return(out)
 }

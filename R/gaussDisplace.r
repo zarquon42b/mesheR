@@ -366,7 +366,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             npics <- nchar(iterations+1)
             ndec <- paste0("%s%0",npics,"d.png")
         }
-        readline("please select viewpoint\n")
+        if (interactive())
+            readline("please select viewpoint\n")
         
         
         if (!is.null(folder)) {

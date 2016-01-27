@@ -264,6 +264,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                 npics <- nchar(iterations+1)
                 ndec <- paste0("%s%0",npics,"d.png")
             }
+            if (interactive())
             readline("please select viewpoint\n")
             
             

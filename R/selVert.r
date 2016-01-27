@@ -50,7 +50,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
     selcheck <- 0
     run <- 0
     cat("select a region using the right mouse button\n")
-    
+    if (interactive()) {
     while (run == 0) { #initial selection
         rgl.bringtotop(stay = FALSE)
         if (interactive()) {
@@ -60,7 +60,8 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
             if(visible)
                 tmpsel <- visifun()
             selected <- tmpsel
-            iter=0   
+            iter=0
+            if (interactive()) {
             while (selcheck == 0) {
                 if (iter == 0)
                    view <- points3d(subset[selected,1],subset[selected,2],subset[selected,3], col = 2, cex = 2) 
@@ -111,8 +112,13 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
                 iter <- iter+1
             }
         }
+    
+            return(sort(selected))
+        }
     }
-    return(sort(selected))
+        } else  {
+            return(NULL)
+        }
 }
 
 #' crop triangular surface meshes
