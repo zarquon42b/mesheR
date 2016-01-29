@@ -155,7 +155,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' discarded. Reduces distortion especially at mesh borders.
 #' @param useiter logical: if AmbergK and AmbergLambda are set and useiter is TRUE, the minimization will be performed using the latest iteration (slower). The orginal reference otherwise.
 #' @param AmbergK a single integer or an integer vector vector containing the \code{k0}-value (normal slackness) for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
-#'  @param AmbergLambda as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
+#' @param AmbergLambda as single numeric value or a numeric vector containing the \code{lambda}-value for each iteration for a smooth Deformation using \code{\link{AmbergDeformSpam}}.
 #' @param tol convergence threshold: if RMSE between iterations is below tol, the function stops.
 #' @param useConstrained logical: if TRUE and Bayes and landmarks are defined, the landmarks are not only used to get a suitable reference but the model will also be constrained by the landmarks to subsequently restrict the shape variability. If FALSE, the full model is used.
 #' @param angclost if TRUE, the closest k faces will be evaluated and the closest with the appropriate normal angle will be selected.

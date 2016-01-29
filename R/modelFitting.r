@@ -42,8 +42,9 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @param mahaprob character: if != "none", use mahalanobis-distance to determine overall probability (of the shape projected into the model space."chisq" uses the Chi-Square distribution of the squared Mahalanobisdistance, while "dist" restricts the values to be within a multi-dimensional sphere of radius \code{sdmax}. If FALSE the probability will be determined per PC separately.
 #' @param initparams a vector with initial estimations of the model parameters. Set to zeros if NULL.
 #' @param k integer: amount of closest faces to consider during closest point search.
-#' @param silent logical: if TRUE output will be suppressed.
+#' @param threads integer: number of cores to use for closest point search
 #' @param method optimizer method. Can be one of "lbfgs", "BFGS", "CG", "L-BFGS-B", "SANN", "Brent". lbfgs calls the function from package lbfgs, while the others call \code{\link{optim}}.
+#' @param silent logical: if TRUE output will be suppressed.
 #' @param ... additional parameters to be passed to \code{\link{lbfgs}} or \code{\link{optim}}.
 #' @return
 #' \item{par}{the model's parameters}
@@ -80,7 +81,7 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @note needs RvtkStatismo installed
 #' @importFrom lbfgs lbfgs
 #' @export
-modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,k=50,silent=FALSE,threads=parallel::detectCores(),method="lbfgs",...) {
+modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,k=50,threads=parallel::detectCores(),method="lbfgs",silent=FALSE,...) {
     if (!requireNamespace("RvtkStatismo"))
         stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
     if (!is.null(initparams)) {

@@ -7,8 +7,8 @@
 modelFitting(model, tarmesh, iterations = 5, lbfgs.iter = 5,
   symmetric = c(0, 1, 2), refdist = 1e+05, tardist = 1e+05, rho = pi/2,
   sdmax = NULL, mahaprob = c("none", "chisq", "dist"), initparams = NULL,
-  k = 50, silent = FALSE, threads = parallel::detectCores(),
-  method = "lbfgs", ...)
+  k = 50, threads = parallel::detectCores(), method = "lbfgs",
+  silent = FALSE, ...)
 }
 \arguments{
 \item{model}{statistical model of class pPCA}
@@ -35,9 +35,11 @@ modelFitting(model, tarmesh, iterations = 5, lbfgs.iter = 5,
 
 \item{k}{integer: amount of closest faces to consider during closest point search.}
 
-\item{silent}{logical: if TRUE output will be suppressed.}
+\item{threads}{integer: number of cores to use for closest point search}
 
 \item{method}{optimizer method. Can be one of "lbfgs", "BFGS", "CG", "L-BFGS-B", "SANN", "Brent". lbfgs calls the function from package lbfgs, while the others call \code{\link{optim}}.}
+
+\item{silent}{logical: if TRUE output will be suppressed.}
 
 \item{...}{additional parameters to be passed to \code{\link{lbfgs}} or \code{\link{optim}}.}
 }

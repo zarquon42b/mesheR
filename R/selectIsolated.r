@@ -28,9 +28,7 @@ selectIsolated <- function(mesh,maxpiece=10) {
             rgl.pop()
     }
     if (length(out) > 1)
-    {
         out <- mergeMeshes(out)
-    }
     }
     return(out)
 }
