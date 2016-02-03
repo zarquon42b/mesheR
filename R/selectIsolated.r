@@ -19,43 +19,43 @@ selectIsolated <- function(mesh,maxpiece=10) {
     out <- list()
     answerList <- list()
     if (interactive()) {
-    i <- 1
-    while (i < ll) {
-        print(i)
-        wire3d(pieces[[i]],col=cols[i])
-        answer <- readline("select (y/N/back/stop)")
-        answerList <- append(answerList, answer)
-        if (answer %in% c("y","Y")) {
-            out <- append(out,list(colorMesh(pieces[[i]],cols[i])))
-        }
-        else if ((answer %in% c("n","N")))
-            rgl.pop()
-        else if ((answer %in% c("stop"))) {
-            rgl.pop()
-            break
-        }
-        else if ((answer %in% c("back")) && i > 1) {
+        i <- 1
+        while (i < ll) {
+            print(i)
+            wire3d(pieces[[i]],col=cols[i])
+            answer <- readline("select (y/N/back/stop)")
+            answerList <- append(answerList, answer)
+            if (answer %in% c("y","Y")) {
+                out <- append(out,list(colorMesh(pieces[[i]],cols[i])))
+            }
+            else if ((answer %in% c("n","N")))
+                rgl.pop()
+            else if ((answer %in% c("stop"))) {
+                rgl.pop()
+                break
+            }
+            else if ((answer %in% c("back")) && i > 1) {
 
-            if (answerList[[i-1]] %in% c("y","Y")){
+                if (answerList[[i-1]] %in% c("y","Y")){
+                    out <- out[1:length(out)-1]
+                    rgl.pop()
+                    rgl.pop()
+                }
+                else if (answerList[[i-1]] %in% c("n","N")) {
+                    rgl.pop()
+                }
+                answerList <- answerList[1:(length(answerList)-2)]
+                i <- i - 2
+            }
+            else {
                 out <- out[1:length(out)-1]
-                rgl.pop()
-                rgl.pop()
+                if ((i > 1) && answerList[[i - 1]] %in% c("y","Y"))
+                   rgl.pop()
+                answerList <- answerList[1:(length(answerList)-1)]
+                i <- i - 1
             }
-            else if (answerList[[i-1]] %in% c("n","N")) {
-                rgl.pop()
-            }
-            answerList <- answerList[1:(length(answerList)-2)]
-            i <- i - 2
+            i <- i + 1
         }
-        else {
-            out <- out[1:length(out)-1]
-            if ((i > 1) && answerList[[i - 1]] %in% c("y","Y"))
-               rgl.pop()
-            answerList <- answerList[1:(length(answerList)-1)]
-            i <- i - 1
-        }
-        i <- i + 1
-    }
     if (length(out) > 1)
         out <- mergeMeshes(out)
     }
