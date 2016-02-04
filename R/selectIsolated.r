@@ -14,6 +14,7 @@ selectIsolated <- function(mesh,maxpiece=10) {
     ll <- length(pieces)
     cols <- colorRampPalette(c("red","green","blue"))
     cols <- cols(ll)
+    answerargs <- c("yes","no","back","stop")
     cat(paste0("there are ",ll," pieces\n"))
     open3d()
     out <- list()
@@ -23,25 +24,27 @@ selectIsolated <- function(mesh,maxpiece=10) {
         while (i < ll) {
             print(i)
             wire3d(pieces[[i]],col=cols[i])
-            answer <- readline("select (y/N/back/stop)")
+            answer <- list();class(answer) <- "try-error"
+            while(inherits(answer,"try-error"))
+                answer <- try(match.arg(tolower(readline("select (yes/no/back/stop - abbreviations allowed)\n")),answerargs),silent = TRUE)
             answerList <- append(answerList, answer)
-            if (answer %in% c("y","Y")) {
+            if (answer == "yes") {
                 out <- append(out,list(colorMesh(pieces[[i]],cols[i])))
             }
-            else if ((answer %in% c("n","N")))
+            else if (answer == "no")
                 rgl.pop()
-            else if ((answer %in% c("stop"))) {
+            else if (answer == "stop") {
                 rgl.pop()
                 break
             }
-            else if ((answer %in% c("back")) && i > 1) {
+            else if ((answer == "back") && i > 1) {
 
-                if (answerList[[i-1]] %in% c("y","Y")){
+                if (answerList[[i-1]] == "yes"){
                     out <- out[1:length(out)-1]
                     rgl.pop()
                     rgl.pop()
                 }
-                else if (answerList[[i-1]] %in% c("n","N")) {
+                else if (answerList[[i-1]] %in%("no")) {
                     rgl.pop()
                 }
                 answerList <- answerList[1:(length(answerList)-2)]
@@ -49,7 +52,7 @@ selectIsolated <- function(mesh,maxpiece=10) {
             }
             else {
                 out <- out[1:length(out)-1]
-                if ((i > 1) && answerList[[i - 1]] %in% c("y","Y"))
+                if ((i > 1) && answerList[[i - 1]] == "yes")
                    rgl.pop()
                 answerList <- answerList[1:(length(answerList)-1)]
                 i <- i - 1
