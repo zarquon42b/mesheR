@@ -13,7 +13,8 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   AmbergLambda = NULL, tol = 1e-05, useConstrained = TRUE,
   angclost = TRUE, noinc = FALSE, silent = FALSE, visualize = FALSE,
   folder = NULL, alpha = 0.7, col1 = "red", col2 = "white",
-  bbox = NULL, bboxCrop = NULL, threads = parallel::detectCores(), ...)
+  bbox = NULL, bboxCrop = NULL, threads = parallel::detectCores(),
+  cb = NULL, ...)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.}
@@ -113,6 +114,8 @@ discarded. Reduces distortion especially at mesh borders.}
 \item{bboxCrop}{extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.}
 
 \item{threads}{integer: threads to use in multithreaded routines.}
+
+\item{cb}{optional: callback function that takes arguments i="current iteration", distance= "distance from target to current estimate" and t.dist="average vertex displacement to last iteration"}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }

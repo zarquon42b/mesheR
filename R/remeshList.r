@@ -64,7 +64,8 @@ remeshList <- function(matchlist,reference=1,random=FALSE,voxelSize = NULL, disc
 #' @importFrom Rvcg vcgQEdecim
 #' @export
 decimateList <- function(matchlist,reference=1,random=FALSE, tarface = NULL, percent = NULL, edgeLength = NULL, topo = FALSE, quality = TRUE, bound = FALSE, optiplace = TRUE,     scaleindi = TRUE, normcheck = FALSE, safeheap = FALSE, qthresh = 0.3,  boundweight = 1, normalthr = pi/2, silent = FALSE)  {
-    if (!is.null(random))
+
+    if ((random))
         reference <- sample(length(matchlist),size=1)
 
     ref <- matchlist[[reference]]
