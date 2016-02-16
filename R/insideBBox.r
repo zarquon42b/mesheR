@@ -139,9 +139,14 @@ cropOutsideBBox <- function(mesh1,mesh2,extend=0,pca=TRUE,outside=TRUE) {
 #' box <- getMeshBox(skull_0144_ch_fe.mesh,pca=FALSE)
 #' shade3d(skull_0144_ch_fe.mesh,col="white")
 #' for(i in 1:3) shade3d(BBoxSlices(box,axis = i,percent = 0.7),col=i+1)
+#'
+#' ## use BBoxSlices to cut a mesh
+#' slice1 <- BBoxSlices(box,axis = 1,percent = 0.7)
+#' sliceverts <- vert2points(slice1)
+#' cutmesh <- cutMeshPlane(skull_0144_ch_fe.mesh,v1=sliceverts[1,],sliceverts[2,],sliceverts[3,])
 #' @export
 BBoxSlices <- function(box,axis=c(1,2,3),percent=0.5) {
-    box <- getMeshBox(box)
+    box <- getMeshBox(box,pca = FALSE)
     axis <- axis[1]
     stopifnot(axis %in% 1:3)
     if (axis == 3) {
