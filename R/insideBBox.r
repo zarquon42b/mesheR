@@ -150,16 +150,16 @@ BBoxSlices <- function(box,axis=c(1,2,3),percent=0.5) {
     axis <- axis[1]
     stopifnot(axis %in% 1:3)
     if (axis == 3) {
-        quad0 <- c(1:4)
-        quad1 <- c(5:8)
-    } else if (axis == 2) {
+        quad1 <- c(1:4)
+        quad0 <- c(5:8)
+    } else if (axis == 1) {
         quad0 <- c(2,4,6,8)
         quad1 <- c(1,3,5,7)
-    } else if (axis == 1) {
-        quad0 <- c(1:2,5:6)
-        quad1 <- c(3:4,7:8)
+    } else if (axis == 2) {
+        quad1 <- c(1:2,5:6)
+        quad0 <- c(3:4,7:8)
     }
-    plane <- box[quad0,]+percent*(box[quad1,]-box[quad0,])
+    plane <- box[quad1,]+percent*(box[quad0,]-box[quad1,])
     out <- list(vb=rbind(t(plane),1),it=cbind(c(1,3,4),c(4,2,1)))
     class(out) <- "mesh3d"
                 
