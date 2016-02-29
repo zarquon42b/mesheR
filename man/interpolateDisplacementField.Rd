@@ -26,6 +26,9 @@ returns an interpolated displacement field of class \code{displacement_field} at
 \description{
 evaluate a displacement field using gaussian smoothed interpolation of a given discrete displacement field
 }
+\note{
+The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \link{\code{smoothDisplacementfield}}.
+}
 \examples{
 require(Rvcg);require(Morpho)
 data(dummyhead)

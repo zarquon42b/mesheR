@@ -19,8 +19,6 @@ applyDisplacementField(dispfield, points, k = 10, sigma = 20, gamma = 1,
 \item{gamma}{dampening factor (displacement vectors will be divided by \code{gamma}}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
-
-\item{interpolate}{logical:}
 }
 \value{
 returns the displaced version of points

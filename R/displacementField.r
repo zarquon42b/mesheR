@@ -8,6 +8,7 @@
 #' @param k integer: number of k closest points to evaluate.
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @return returns an interpolated displacement field of class \code{displacement_field} at the positions of \code{points}.
+#' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \link{\code{smoothDisplacementfield}}.
 #' @examples
 #' require(Rvcg);require(Morpho)
 #' data(dummyhead)
@@ -32,6 +33,8 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
     tmp = .Call("smoothField",points, dispfield$displacement_field,sigma,gamma,clost$index, clost$distance,threads)
     out <- list(domain=points,displacement_field=tmp)
     class(out) <- "displacement_field"
+    ## if (smoothresult)
+    ##    out <- smoothDisplacementfield(out,sigma=sigma,k=k,threads = threads)
     return(out)
     
     
@@ -69,13 +72,11 @@ createDisplacementField <- function(reference,target) {
 #' @param gamma dampening factor (displacement vectors will be divided by \code{gamma}
 #' @param k integer: number of k closest points to evaluate.
 #' @param threads integer: number of threads to use for computing the interpolation.
-#' @param interpolate logical:
 #' @note if points is identical to the domain of the displacement field, no interpolation will be performed.
 #' @return returns the displaced version of points
 #' @export
 applyDisplacementField <- function(dispfield,points,k=10,sigma=20,gamma=1, threads=1) {
-    if (!inherits(dispfield,"displacement_field"))
-         stop("please enter displacementfield")
+    validDisplaceField(dispfield)
     ## check if we need to interpolate at all
     if (!checkDispFieldDomain(dispfield,points))
         displacement <- interpolateDisplacementField(dispfield,points=points,k=k,sigma=sigma,gamma=gamma,threads=threads)
@@ -104,8 +105,7 @@ applyDisplacementField <- function(dispfield,points,k=10,sigma=20,gamma=1, threa
 #' @importFrom rgl wire3d
 #' @export
 plotDisplacementField <- function(dispfield,lwd=1,colored=TRUE) {
-     if (!inherits(dispfield,"displacement_field"))
-         stop("please enter displacementfield")
+     validDisplaceField(dispfield)
      if (!colored) {
      tmp <- list(vb=t(dispfield$domain),normals=t(dispfield$displacement_field))
      class(tmp) <- "mesh3d"
@@ -146,4 +146,31 @@ checkDispFieldDomain <- function(dispfield,points,tol=1e-12) {
             return(FALSE)
     }
     return(TRUE)
+}
+
+#' smooth a displacement field using Gaussian smoothing
+#'
+#' smooth a displacement field using Gaussian smoothing
+#' @param dispfield displacement field created using \link{\code{createDisplacementField}}
+#' @param k integer: number of k closest points to evaluate.
+#' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
+#' @param threads integer: number of threads to use for computing the interpolation.
+#' @export
+smoothDisplacementfield <- function(dispfield,k=10,sigma=20,threads=1) {
+    validDisplaceField(dispfield)
+    gamma <- 1
+    clost <- vcgKDtree(dispfield$domain,dispfield$domain,k=k)
+    clost$index <- clost$index-1L
+    tmp = .Call("smoothField",dispfield$domain, dispfield$displacement_field,sigma,gamma,clost$index, clost$distance,threads)
+    dispfield$displacement_field <- tmp
+    return(dispfield)
+}
+
+validDisplaceField <- function(x) {
+    if (!inherits(x,"displacement_field"))
+        stop("not a valid displacement field")
+    dim1 <- dim(x$domain)
+    dim2 <- dim(x$displacement_field)
+    if (!isTRUE(all.equal(dim1,dim2)))
+        stop("not a valid displacement field1")
 }
