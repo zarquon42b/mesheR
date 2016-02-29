@@ -1,14 +1,14 @@
 #' evaluate a displacement field using gaussian smoothed interpolation of a discrete displacement field
 #'
 #' evaluate a displacement field using gaussian smoothed interpolation of a given discrete displacement field
-#' @param dispfield displacement field created using \link{\code{createDisplacementField}}
+#' @param dispfield displacement field created using \code{\link{createDisplacementField}}
 #' @param points matrix or mesh3d at which to evaluate the interpolated displacement field
 #' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
 #' @param gamma dampening factor (displacement vectors will be divided by \code{gamma}
 #' @param k integer: number of k closest points to evaluate.
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @return returns an interpolated displacement field of class \code{displacement_field} at the positions of \code{points}.
-#' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \link{\code{smoothDisplacementfield}}.
+#' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementfield}}.
 #' @examples
 #' require(Rvcg);require(Morpho)
 #' data(dummyhead)
@@ -151,7 +151,7 @@ checkDispFieldDomain <- function(dispfield,points,tol=1e-12) {
 #' smooth a displacement field using Gaussian smoothing
 #'
 #' smooth a displacement field using Gaussian smoothing
-#' @param dispfield displacement field created using \link{\code{createDisplacementField}}
+#' @param dispfield displacement field created using \code{\link{createDisplacementField}}
 #' @param k integer: number of k closest points to evaluate.
 #' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
 #' @param threads integer: number of threads to use for computing the interpolation.

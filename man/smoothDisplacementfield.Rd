@@ -7,7 +7,7 @@
 smoothDisplacementfield(dispfield, k = 10, sigma = 20, threads = 1)
 }
 \arguments{
-\item{dispfield}{displacement field created using \link{\code{createDisplacementField}}}
+\item{dispfield}{displacement field created using \code{\link{createDisplacementField}}}
 
 \item{k}{integer: number of k closest points to evaluate.}
 

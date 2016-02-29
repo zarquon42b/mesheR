@@ -8,7 +8,7 @@ interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
   gamma = 1, threads = parallel::detectCores())
 }
 \arguments{
-\item{dispfield}{displacement field created using \link{\code{createDisplacementField}}}
+\item{dispfield}{displacement field created using \code{\link{createDisplacementField}}}
 
 \item{points}{matrix or mesh3d at which to evaluate the interpolated displacement field}
 
@@ -27,7 +27,7 @@ returns an interpolated displacement field of class \code{displacement_field} at
 evaluate a displacement field using gaussian smoothed interpolation of a given discrete displacement field
 }
 \note{
-The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \link{\code{smoothDisplacementfield}}.
+The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementfield}}.
 }
 \examples{
 require(Rvcg);require(Morpho)
