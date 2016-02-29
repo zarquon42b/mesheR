@@ -13,9 +13,11 @@
 #' data(dummyhead)
 #' humoff <- meshOffset(dummyhead.mesh,offset=5)
 #' dispfield <- createDisplacementField(dummyhead.mesh,humoff)
-#'
+#' \dontrun{
+#' ## this only runs with latest Rvcg build from master
 #' highres <- vcgSubdivide(dummyhead.mesh)
 #' ifield <- interpolateDisplacementField(dispfield,highres,threads=2,sigma = 50,k=500)
+#' }
 #' @export
 interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1, threads=parallel::detectCores()) {
     if (!inherits(dispfield,"displacement_field"))
