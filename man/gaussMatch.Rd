@@ -142,8 +142,8 @@ warpnose.long <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm)
 ## we start with an affine transformation initiated by landmarks
 affine <- list(iterations=20,subsample=100,rhotol=pi/2,uprange=0.9)
 match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,
-                   lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",
-                   smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
+                   lm2=longnose.lm,gamma=2,iterations=10,smooth=1,smoothtype="h",
+                   smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=20)
 }
 \author{
 Stefan Schlager

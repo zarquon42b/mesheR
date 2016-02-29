@@ -35,14 +35,19 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
     }
     ## get neighbourhood for each point to minimize calculation time
     if (!is.null (nh)) {
-        clostIndW <- vcgKDtree(S,W0,k=nh,threads=threads)$index-1
-        if (!oneway)
-            clostIndP <- vcgKDtree(M,W0,k=nh,threads=threads)$index-1
-        else
-            clostIndP <- matrix(0,dim(W0)[1],nh)
+        clostW <- vcgKDtree(S,W0,k=nh,threads=threads)
+        clostIndW <- clostW$index-1L
+        clostIndWdistance <- clostW$distance
+        if (!oneway) {
+            clostP <- vcgKDtree(M,W0,k=nh,threads=threads)
+            clostIndP <- clostP$index-1L
+            clostIndPdistance <- clostP$distance
+        } else {
+            clostIndPdistance <- clostIndP <- matrix(0,dim(W0)[1],nh)
+        }
     }
-    rt0 <- rep(0,dim(S)[1])
-    rt1 <- rep(0,dim(M)[1])
+    rt0 <- rep(0,nrow(S))
+    rt1 <- rep(0,nrow(M))
     if (!is.null(rhotol)) {
         rc <- rhotol
         rt0 <- normcheck(mesh1,Spro)
@@ -94,7 +99,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 ### make multicore 
     if (nh < 1)
         stop ("neighbourhood must be at least 1")
-    out <- .Call("displaceGauss",W0,S0,M,D1,D2,sigma,gamma,clostIndW,clostIndP,tol=tol,rt0,rt1,rc,oneway,threads,PACKAGE="mesheR")
+    out <- .Call("displaceGauss",W0,D1,D2,sigma,gamma,clostIndW,clostIndWdistance,clostIndP,clostIndPdistance,tol=tol,rt0,rt1,rc,oneway,threads,PACKAGE="mesheR")
     addit <- W0+out
     return(list(addit=addit))
 }
@@ -198,8 +203,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' ## we start with an affine transformation initiated by landmarks
 #' affine <- list(iterations=20,subsample=100,rhotol=pi/2,uprange=0.9)
 #' match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,
-#'                    lm2=longnose.lm,gamma=4,iterations=10,smooth=1,smoothtype="h",
-#'                    smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=100)
+#'                    lm2=longnose.lm,gamma=2,iterations=10,smooth=1,smoothtype="h",
+#'                    smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=20)
 #' @importFrom Rvcg vcgClostKD vcgKDtree vcgMeshres
 #' @importFrom rgl rgl.ids
 #' @seealso \code{\link{outsideBBox},\link{getMeshBox} }

@@ -17,7 +17,8 @@ Imports:
     Matrix,
     rgl(>= 0.93.963),
     Rcpp,
-    lbfgs
+    lbfgs,
+    colorRamps
 Suggests:
     RvtkStatismo
 LinkingTo: Rcpp, RcppArmadillo
