@@ -5,7 +5,8 @@
 \title{map two surface meshes using smoothed displacement fields}
 \usage{
 gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
-  smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20, gamma = 2,
+  smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20,
+  displacementsmooth = c("Gauss", "Laplace", "Exponential"), gamma = 2,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, rigid = NULL,
   similarity = NULL, affine = NULL, nh = NULL, toldist = 0,
   pro = c("kd", "vcg", "morpho"), k0 = 50, prometh = 1, angtol = pi/2,
@@ -24,7 +25,7 @@ should be ~1.5.}
 
 \item{iterations}{Iterations of displacement. Default is 10.}
 
-\item{smooth}{Integer: smoothing factor. Default is NULL, no smoothing.}
+\item{smooth}{Integer: smooth the resulting mesh at the \code{smooth-th} iteration. E.g. a value of 2 will smooth the resulting mesh at each 2nd iteration. Not to be confused with \code{displacementsmooth}!! Default is NULL, no smoothing.}
 
 \item{smoothit}{integer: smoothing steps.}
 
@@ -32,9 +33,11 @@ should be ~1.5.}
 details see \code{vcgSmooth}.}
 
 \item{sigma}{starting parameter for smoothed displacement (see Moshfeghi
-1994). Sigma controls the importance of the neighbourhood by defining the standard-deviation for the gaussian smoothing}
+1994). Sigma controls the importance of the neighbourhood by defining the bandwidth of the smoothing kernel.}
 
-\item{gamma}{stiffness factor controlling displacement strength. The smoothed displacement vector for each vertex is divided by \code{gamma}. The larger \code{gamma}, the slower the approximation.}
+\item{displacementsmooth}{kernel function for smoothing are "Gauss","Laplace" and "Exponential"}
+
+\item{gamma}{dampening factor controlling displacement strength. The smoothed displacement vector for each vertex is divided by \code{gamma}. The larger \code{gamma}, the slower the approximation.}
 
 \item{f}{parameter controlling iterative decrease of \code{sigma} making the displacement locally more elastic with each iteration.
 (Moshfeghi 1994). Starting with \code{sigma}, this parameter for the k-th iteration is \code{sigma *f ^(-k)}}
@@ -132,6 +135,16 @@ Map a reference mesh onto a target surface using displacement fields.
 This function implements the mesh matching method suggested by Moshfeghi et
 al. and Bryan et al.. Additional mechanisms for controlling and restricting
 the displacement smoothing are implemented
+}
+\note{
+Based on the closest points (constrained by the various options), the displacement field will be smoothed using kernel functions of the k-closest displacement vectors.
+ The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
+
+Gaussian:  \eqn{w(d) = exp(\frac{-d^2}{2\sigma^2})}{w(d) = exp(-d^2/2*sigma^2)}
+
+Laplacian: \eqn{w(d) = exp(\frac{-d}{\sigma})}{w(d) = exp(-d/sigma)}
+
+Exponential: \eqn{w(d) = exp(\frac{-d}{2\sigma^2})}{w(d) = exp(-d/2*sigma^2)}
 }
 \examples{
 require(Morpho)

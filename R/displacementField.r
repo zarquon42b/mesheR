@@ -2,13 +2,20 @@
 #'
 #' evaluate a displacement field using gaussian smoothed interpolation of a given discrete displacement field
 #' @param dispfield displacement field created using \code{\link{createDisplacementField}}
-#' @param points matrix or mesh3d at which to evaluate the interpolated displacement field
-#' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
-#' @param gamma dampening factor (displacement vectors will be divided by \code{gamma}
 #' @param k integer: number of k closest points to evaluate.
+#' @param points matrix or mesh3d at which to evaluate the interpolated displacement field
+#' @param sigma kernel bandwidth used for smoothing
+#' @param gamma dampening factor (displacement vectors will be divided by \code{gamma}
+#' @param type kernel function for smoothing are "Gauss","Laplace" and "Exponential"
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @return returns an interpolated displacement field of class \code{displacement_field} at the positions of \code{points}.
-#' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementfield}}.
+#' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementfield}}. The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
+#' 
+#' Gaussian:  \eqn{w(d) = exp(\frac{-d^2}{2\sigma^2})}{w(d) = exp(-d^2/2*sigma^2)}
+#' 
+#' Laplacian: \eqn{w(d) = exp(\frac{-d}{\sigma})}{w(d) = exp(-d/sigma)}
+#'
+#' Exponential: \eqn{w(d) = exp(\frac{-d}{2\sigma^2})}{w(d) = exp(-d/2*sigma^2)}
 #' @examples
 #' require(Rvcg);require(Morpho)
 #' data(dummyhead)
@@ -20,7 +27,10 @@
 #' ifield <- interpolateDisplacementField(dispfield,highres,threads=2,sigma = 50,k=500)
 #' }
 #' @export
-interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1, threads=parallel::detectCores()) {
+interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1,type=c("Gauss","Laplace","Exponential"), threads=parallel::detectCores()) {
+    typeargs <- c("gauss","laplace","exponential")
+    type <- match.arg(tolower(type[1]),typeargs)
+    type <- match(type,typeargs)-1
     if (!inherits(dispfield,"displacement_field"))
         stop("please enter displacementfield")
     if (inherits(points,"mesh3d"))
@@ -30,7 +40,7 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
     ## get closest points on domain
     clost <- vcgKDtree(dispfield$domain,points,k=k)
     clost$index <- clost$index-1L
-    tmp = .Call("smoothField",points, dispfield$displacement_field,sigma,gamma,clost$index, clost$distance,threads)
+    tmp = .Call("smoothField",points, dispfield$displacement_field,sigma,gamma,clost$index, clost$distance,threads,type)
     out <- list(domain=points,displacement_field=tmp)
     class(out) <- "displacement_field"
     ## if (smoothresult)
@@ -69,17 +79,18 @@ createDisplacementField <- function(reference,target) {
 #' @param dispfield displacement field of class \code{displacement_field}
 #' @param points matrix or mesh3d at which to evaluate the interpolated displacement field
 #' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
+#' @param type kernel function for smoothing are "Gauss","Laplace" and "Exponential"
 #' @param gamma dampening factor (displacement vectors will be divided by \code{gamma}
 #' @param k integer: number of k closest points to evaluate.
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @note if points is identical to the domain of the displacement field, no interpolation will be performed.
 #' @return returns the displaced version of points
 #' @export
-applyDisplacementField <- function(dispfield,points,k=10,sigma=20,gamma=1, threads=1) {
+applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss","Laplace","Exponential"), gamma=1, threads=1) {
     validDisplaceField(dispfield)
     ## check if we need to interpolate at all
     if (!checkDispFieldDomain(dispfield,points))
-        displacement <- interpolateDisplacementField(dispfield,points=points,k=k,sigma=sigma,gamma=gamma,threads=threads)
+        displacement <- interpolateDisplacementField(dispfield,points=points,k=k,sigma=sigma,type=type,gamma=gamma,threads=threads)
     else
         displacement <- dispfield
     updatePos <- displacement$domain+displacement$displacement_field
@@ -154,14 +165,19 @@ checkDispFieldDomain <- function(dispfield,points,tol=1e-12) {
 #' @param dispfield displacement field created using \code{\link{createDisplacementField}}
 #' @param k integer: number of k closest points to evaluate.
 #' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
+#' @param type kernel function for smoothing are "Gauss","Laplace" and "Exponential"
 #' @param threads integer: number of threads to use for computing the interpolation.
+#' @seealso \code{\link{interpolateDisplacementField}}
 #' @export
-smoothDisplacementfield <- function(dispfield,k=10,sigma=20,threads=1) {
+smoothDisplacementfield <- function(dispfield,k=10,sigma=20,type=c("Gauss","Laplace","Exponential"),threads=1) {
     validDisplaceField(dispfield)
+    typeargs <- c("gauss","laplace","exponential")
+    type <- match.arg(tolower(type[1]),typeargs)
+    type <- match(type,typeargs)-1
     gamma <- 1
     clost <- vcgKDtree(dispfield$domain,dispfield$domain,k=k)
     clost$index <- clost$index-1L
-    tmp = .Call("smoothField",dispfield$domain, dispfield$displacement_field,sigma,gamma,clost$index, clost$distance,threads)
+    tmp = .Call("smoothField",dispfield$domain, dispfield$displacement_field,sigma,gamma,clost$index, clost$distance,threads,type)
     dispfield$displacement_field <- tmp
     return(dispfield)
 }

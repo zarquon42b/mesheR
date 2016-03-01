@@ -5,7 +5,8 @@
 \title{evaluate a displacement field using gaussian smoothed interpolation of a discrete displacement field}
 \usage{
 interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
-  gamma = 1, threads = parallel::detectCores())
+  gamma = 1, type = c("Gauss", "Laplace", "Exponential"),
+  threads = parallel::detectCores())
 }
 \arguments{
 \item{dispfield}{displacement field created using \code{\link{createDisplacementField}}}
@@ -14,9 +15,11 @@ interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
 
 \item{k}{integer: number of k closest points to evaluate.}
 
-\item{sigma}{sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing}
+\item{sigma}{kernel bandwidth used for smoothing}
 
 \item{gamma}{dampening factor (displacement vectors will be divided by \code{gamma}}
+
+\item{type}{kernel function for smoothing are "Gauss","Laplace" and "Exponential"}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }
@@ -27,7 +30,13 @@ returns an interpolated displacement field of class \code{displacement_field} at
 evaluate a displacement field using gaussian smoothed interpolation of a given discrete displacement field
 }
 \note{
-The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementfield}}.
+The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementfield}}. The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
+
+Gaussian:  \eqn{w(d) = exp(\frac{-d^2}{2\sigma^2})}{w(d) = exp(-d^2/2*sigma^2)}
+
+Laplacian: \eqn{w(d) = exp(\frac{-d}{\sigma})}{w(d) = exp(-d/sigma)}
+
+Exponential: \eqn{w(d) = exp(\frac{-d}{2\sigma^2})}{w(d) = exp(-d/2*sigma^2)}
 }
 \examples{
 require(Rvcg);require(Morpho)

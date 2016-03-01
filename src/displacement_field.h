@@ -1,3 +1,7 @@
 #include "RcppArmadillo.h"
 
-double smooth_weight(double distance, double sigma);
+double smooth_gaussian(double distance, double sigma);
+
+double smooth_laplacian(double distance, double sigma);
+
+double smooth_exponential(double distance, double sigma);

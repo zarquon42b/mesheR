@@ -8,20 +8,40 @@
 using namespace Rcpp;
 using namespace arma;
 
-double smooth_weight(double distance, double sigma) {
-  double weight = 0;
-  //if (distance > 0)
-    weight = exp(-distance/sigma);
+// distance is the distance between two points and sigma the bandwidth of the kernel
+double smooth_gaussian(double distance, double sigma) {
+  sigma = 2*sigma*sigma;
+  distance *= distance;
+  double weight = exp(-distance/sigma);
     //else
     //weight = 1e12;
   return weight;
 }
 
-rowvec smooth_field_at_point(mat displacement, rowvec distance, double sigma, double gamma) {
+//exponential kernel
+double smooth_exponential(double distance, double sigma) {
+   sigma = 2*sigma*sigma;
+  double weight = exp(-distance/sigma);
+  return weight;
+}
+
+//laplacian kernel
+double smooth_laplacian(double distance, double sigma) {
+  double weight = exp(-distance/sigma);
+  return weight;
+}
+
+rowvec smooth_field_at_point(mat displacement, rowvec distance, double sigma, double gamma, int smoothtype = 0) {
   rowvec outpt(3); outpt.zeros();
   float g1sum = 0;
   for (uint i = 0; i < distance.size(); i++) {
-    float g1tmp = smooth_weight(distance[i],sigma);
+    float g1tmp = 0;
+    if (smoothtype == 1)
+      g1tmp = smooth_laplacian(distance[i],sigma);
+    else if (smoothtype == 2) 
+      g1tmp = smooth_exponential(distance[i],sigma);
+    else
+      g1tmp = smooth_gaussian(distance[i],sigma);
     outpt += g1tmp*displacement.row(i);
     g1sum += g1tmp;
   }
@@ -32,7 +52,7 @@ rowvec smooth_field_at_point(mat displacement, rowvec distance, double sigma, do
   return outpt;
 }
 
-RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP displacement_, SEXP sigma_, SEXP gamma_, SEXP closestInds_, SEXP distances_, SEXP threads_= wrap(1)){
+RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP displacement_, SEXP sigma_, SEXP gamma_, SEXP closestInds_, SEXP distances_, SEXP threads_= wrap(1), SEXP smoothtype_ = wrap(0)){
   mat evaluatePoints = as<mat>(evaluatePoints_);
   mat displacement = as<mat>(displacement_);
   double sigma = as<double>(sigma_);
@@ -40,6 +60,7 @@ RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP displacement_, SEXP sigma
   imat closestInds = as<imat>(closestInds_);
   mat distances = as<mat>(distances_);
   int threads = as<int>(threads_);
+  int smoothtype = as<int>(smoothtype_);
    mat out = evaluatePoints;
 #ifdef SUPPORT_OPENMP
   omp_set_num_threads(threads);
@@ -49,7 +70,7 @@ RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP displacement_, SEXP sigma
     //rowvec pt = iomat.row(i);
     uvec tmpW = conv_to<uvec>::from(closestInds.row(i));
     //rowvec distances_at_pt = distances.row(i);
-    out.row(i) = smooth_field_at_point(displacement.rows(tmpW),distances.row(i),sigma, gamma);
+    out.row(i) = smooth_field_at_point(displacement.rows(tmpW),distances.row(i),sigma, gamma,smoothtype);
     
   }
   

@@ -4,8 +4,8 @@
 \alias{applyDisplacementField}
 \title{apply a discrete displacement field to a set of points/mesh in its domain}
 \usage{
-applyDisplacementField(dispfield, points, k = 10, sigma = 20, gamma = 1,
-  threads = 1)
+applyDisplacementField(dispfield, points, k = 10, sigma = 20,
+  type = c("Gauss", "Laplace", "Exponential"), gamma = 1, threads = 1)
 }
 \arguments{
 \item{dispfield}{displacement field of class \code{displacement_field}}
@@ -15,6 +15,8 @@ applyDisplacementField(dispfield, points, k = 10, sigma = 20, gamma = 1,
 \item{k}{integer: number of k closest points to evaluate.}
 
 \item{sigma}{sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing}
+
+\item{type}{kernel function for smoothing are "Gauss","Laplace" and "Exponential"}
 
 \item{gamma}{dampening factor (displacement vectors will be divided by \code{gamma}}
 

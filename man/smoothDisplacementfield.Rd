@@ -4,7 +4,8 @@
 \alias{smoothDisplacementfield}
 \title{smooth a displacement field using Gaussian smoothing}
 \usage{
-smoothDisplacementfield(dispfield, k = 10, sigma = 20, threads = 1)
+smoothDisplacementfield(dispfield, k = 10, sigma = 20, type = c("Gauss",
+  "Laplace", "Exponential"), threads = 1)
 }
 \arguments{
 \item{dispfield}{displacement field created using \code{\link{createDisplacementField}}}
@@ -13,9 +14,14 @@ smoothDisplacementfield(dispfield, k = 10, sigma = 20, threads = 1)
 
 \item{sigma}{sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing}
 
+\item{type}{kernel function for smoothing are "Gauss","Laplace" and "Exponential"}
+
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }
 \description{
 smooth a displacement field using Gaussian smoothing
+}
+\seealso{
+\code{\link{interpolateDisplacementField}}
 }
 
