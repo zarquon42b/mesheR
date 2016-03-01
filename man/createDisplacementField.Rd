@@ -12,9 +12,9 @@ createDisplacementField(reference, target)
 \item{target}{k x 3 matrix or a mesh of classe "mesh3d"}
 }
 \value{
-returns an object of class "displacement_field", which is a list containing
+returns an object of class "DisplacementField", which is a list containing
 \item{domain}{k x matrix containing starting points of the displacement field}
-\item{displacement_field}{k x matrix containing direction vectors of the displacement field}
+\item{DisplacementField}{k x matrix containing direction vectors of the displacement field}
 }
 \description{
 create a discrete displacement field based on two sets of coordinates/meshes

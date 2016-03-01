@@ -49,4 +49,7 @@ highres <- vcgSubdivide(dummyhead.mesh)
 ifield <- interpolateDisplacementField(dispfield,highres,threads=2,sigma = 50,k=500)
 }
 }
+\seealso{
+\code{\link{plotDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
+}
 

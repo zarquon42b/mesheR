@@ -7,13 +7,19 @@
 plotDisplacementField(dispfield, lwd = 1, colored = TRUE)
 }
 \arguments{
-\item{dispfield}{displacement field of class \code{displacement_field}}
+\item{dispfield}{displacement field of class \code{DisplacementField}}
 
 \item{lwd}{width of the displacement vectors}
 
 \item{colored}{logical: if TRUE, displacement vectors will be colored according to a heatmap.}
 }
+\value{
+invisible displacment field saved as mesh3d that can be rendered using \code{rgl::wire3d}
+}
 \description{
 visualize a displacement field
+}
+\seealso{
+\code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
 }
 

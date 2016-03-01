@@ -8,7 +8,7 @@ applyDisplacementField(dispfield, points, k = 10, sigma = 20,
   type = c("Gauss", "Laplace", "Exponential"), gamma = 1, threads = 1)
 }
 \arguments{
-\item{dispfield}{displacement field of class \code{displacement_field}}
+\item{dispfield}{displacement field of class \code{DisplacementField}}
 
 \item{points}{matrix or mesh3d at which to evaluate the interpolated displacement field}
 
