@@ -3,6 +3,7 @@
 #' interactively select isolated pieces from a mesh
 #' @param mesh triangular mesh of class mesh3d
 #' @param maxpiece integer: the n-largest (number of vertices) pieces to consider
+#' @importFrom Rvcg vcgIsolated
 #' @return returns a mesh with all selected parts merged and colored
 #' @export
 selectIsolated <- function(mesh,maxpiece=10) {
