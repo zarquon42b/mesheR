@@ -213,6 +213,12 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' match <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,
 #'                    lm2=longnose.lm,gamma=2,iterations=10,smooth=1,smoothtype="h",
 #'                    smoothit=10,nh=50,angtol=pi/2,affine=affine,sigma=20)
+#'
+#' \dontrun{
+#' ## now a more cautiously approach using a larger neighbourhood (400 instead of 50) and no intermediary smoothing:
+#' matchNoSmooth <- gaussMatch(shortnose.mesh,warpnose.long,lm1=shortnose.lm,
+#'                    lm2=longnose.lm,gamma=2,iterations=20,,nh=400,angtol=pi/2,affine=affine,sigma=20)
+#' }
 #' @importFrom Rvcg vcgClostKD vcgKDtree vcgMeshres
 #' @importFrom rgl rgl.ids
 #' @seealso \code{\link{outsideBBox},\link{getMeshBox} }
