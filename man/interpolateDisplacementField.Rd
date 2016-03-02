@@ -9,7 +9,7 @@ interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
   threads = parallel::detectCores())
 }
 \arguments{
-\item{dispfield}{displacement field created using \code{\link{createDisplacementField}}}
+\item{dispfield}{@param dispfield displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
 
 \item{points}{matrix or mesh3d at which to evaluate the interpolated displacement field}
 
@@ -30,7 +30,7 @@ returns an interpolated displacement field of class \code{displacement_field} at
 evaluate a displacement field using gaussian smoothed interpolation of a given discrete displacement field
 }
 \note{
-The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementfield}}. The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
+The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementField}}. The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
 
 Gaussian:  \eqn{w(d) = exp(\frac{-d^2}{2\sigma^2})}{w(d) = exp(-d^2/2*sigma^2)}
 
@@ -50,6 +50,6 @@ ifield <- interpolateDisplacementField(dispfield,highres,threads=2,sigma = 50,k=
 }
 }
 \seealso{
-\code{\link{plotDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
+\code{\link{plot.DisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
 }
 

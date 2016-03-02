@@ -8,7 +8,7 @@ smoothDisplacementField(dispfield, k = 10, sigma = 20, type = c("Gauss",
   "Laplace", "Exponential"), threads = 1)
 }
 \arguments{
-\item{dispfield}{displacement field created using \code{\link{createDisplacementField}}}
+\item{dispfield}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
 
 \item{k}{integer: number of k closest points to evaluate.}
 
@@ -22,6 +22,6 @@ smoothDisplacementField(dispfield, k = 10, sigma = 20, type = c("Gauss",
 smooth a displacement field using Gaussian smoothing
 }
 \seealso{
-\code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{plotDisplacementField}}
+\code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{plot.DisplacementField}}
 }
 

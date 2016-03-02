@@ -1,7 +1,51 @@
+#' create a discrete displacement field
+#'
+#' create a discrete displacement field based on two sets of coordinates/meshes
+#' @param reference k x 3 matrix containing coordinates or a mesh of classe "mesh3d"
+#' @param target k x 3 matrix or a mesh of classe "mesh3d"
+#' @return returns an object of class "DisplacementField", which is a list containing
+#' \item{domain}{k x matrix containing starting points of the displacement field}
+#' \item{DisplacementField}{k x matrix containing direction vectors of the displacement field}
+#' @examples
+#' require(Rvcg)
+#' data(dummyhead)
+#' humoff <- meshOffset(dummyhead.mesh,offset=5)
+#' dispfield <- createDisplacementField(dummyhead.mesh,humoff)
+#' @export
+createDisplacementField <- function(reference,target) {
+    if (inherits(reference,"mesh3d"))
+        reference <- vert2points(reference)
+     if (inherits(target,"mesh3d"))
+         target <- vert2points(target)
+    out <- list(domain=reference,DisplacementField=target-reference)
+    class(out) <- "DisplacementField"
+    return(out)
+}
+
+#' invert a displacement field
+#'
+#' invert a displacement field
+#' @param dispfield displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
+#' @return returns an inverted displacement field
+#' @examples
+#' require(Rvcg);require(Morpho)
+#' data(dummyhead)
+#' humoff <- meshOffset(dummyhead.mesh,offset=5)
+#' dispfield <- createDisplacementField(dummyhead.mesh,humoff)
+#' dispfield_inverted <- invertDisplacementField(dispfield)
+#' @export
+invertDisplacementField <- function(dispfield) {
+    validDisplaceField(dispfield)
+    dispfield$domain <- dispfield$domain+dispfield$DisplacementField
+    dispfield$DisplacementField <- -dispfield$DisplacementField
+    return(dispfield)
+}
+    
+
 #' evaluate a displacement field using gaussian smoothed interpolation of a discrete displacement field
 #'
 #' evaluate a displacement field using gaussian smoothed interpolation of a given discrete displacement field
-#' @param dispfield displacement field created using \code{\link{createDisplacementField}}
+#' @param dispfield @param dispfield displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
 #' @param k integer: number of k closest points to evaluate.
 #' @param points matrix or mesh3d at which to evaluate the interpolated displacement field
 #' @param sigma kernel bandwidth used for smoothing
@@ -9,14 +53,14 @@
 #' @param type kernel function for smoothing are "Gauss","Laplace" and "Exponential"
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @return returns an interpolated displacement field of class \code{displacement_field} at the positions of \code{points}.
-#' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementfield}}. The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
+#' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementField}}. The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
 #' 
 #' Gaussian:  \eqn{w(d) = exp(\frac{-d^2}{2\sigma^2})}{w(d) = exp(-d^2/2*sigma^2)}
 #' 
 #' Laplacian: \eqn{w(d) = exp(\frac{-d}{\sigma})}{w(d) = exp(-d/sigma)}
 #'
 #' Exponential: \eqn{w(d) = exp(\frac{-d}{2\sigma^2})}{w(d) = exp(-d/2*sigma^2)}
-#' @seealso \code{\link{plotDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
+#' @seealso \code{\link{plot.DisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
 #' @examples
 #' require(Rvcg);require(Morpho)
 #' data(dummyhead)
@@ -45,39 +89,41 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
     out <- list(domain=points,DisplacementField=tmp)
     class(out) <- "DisplacementField"
     ## if (smoothresult)
-    ##    out <- smoothDisplacementfield(out,sigma=sigma,k=k,threads = threads)
+    ##    out <- smoothDisplacementField(out,sigma=sigma,k=k,threads = threads)
     return(out)
     
     
 }
-#' create a discrete displacement field
+
+#' smooth a displacement field using Gaussian smoothing
 #'
-#' create a discrete displacement field based on two sets of coordinates/meshes
-#' @param reference k x 3 matrix containing coordinates or a mesh of classe "mesh3d"
-#' @param target k x 3 matrix or a mesh of classe "mesh3d"
-#' @return returns an object of class "DisplacementField", which is a list containing
-#' \item{domain}{k x matrix containing starting points of the displacement field}
-#' \item{DisplacementField}{k x matrix containing direction vectors of the displacement field}
-#' @examples
-#' require(Rvcg)
-#' data(dummyhead)
-#' humoff <- meshOffset(dummyhead.mesh,offset=5)
-#' dispfield <- createDisplacementField(dummyhead.mesh,humoff)
+#' smooth a displacement field using Gaussian smoothing
+#' @param dispfield displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
+#' @param k integer: number of k closest points to evaluate.
+#' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
+#' @param type kernel function for smoothing are "Gauss","Laplace" and "Exponential"
+#' @param threads integer: number of threads to use for computing the interpolation.
+#' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{plot.DisplacementField}}
 #' @export
-createDisplacementField <- function(reference,target) {
-    if (inherits(reference,"mesh3d"))
-        reference <- vert2points(reference)
-     if (inherits(target,"mesh3d"))
-         target <- vert2points(target)
-    out <- list(domain=reference,DisplacementField=target-reference)
-    class(out) <- "DisplacementField"
-    return(out)
+smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Laplace","Exponential"),threads=1) {
+    validDisplaceField(dispfield)
+    typeargs <- c("gauss","laplace","exponential")
+    type <- match.arg(tolower(type[1]),typeargs)
+    type <- match(type,typeargs)-1
+    gamma <- 1
+    clost <- vcgKDtree(dispfield$domain,dispfield$domain,k=k)
+    clost$index <- clost$index-1L
+    tmp = .Call("smoothField",dispfield$domain, dispfield$DisplacementField,sigma,gamma,clost$index, clost$distance,threads,type)
+    dispfield$DisplacementField <- tmp
+    return(dispfield)
 }
+
+
 
 #' apply a discrete displacement field to a set of points/mesh in its domain
 #'
 #' apply a discrete displacement field to a set of points/mesh in its domain by applying the gaussian smoothed interpolation based of k closest neighbours
-#' @param dispfield displacement field of class \code{DisplacementField}
+#' @param dispfield displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}} or 
 #' @param points matrix or mesh3d at which to evaluate the interpolated displacement field
 #' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
 #' @param type kernel function for smoothing are "Gauss","Laplace" and "Exponential"
@@ -109,28 +155,32 @@ applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss"
 #' visualize a displacement field
 #'
 #' visualize a displacement field
-#' @param dispfield displacement field of class \code{DisplacementField}
+#' @param x displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
 #' @param lwd width of the displacement vectors
-#' @param colored logical: if TRUE, displacement vectors will be colored according to a heatmap.
-#' @return invisible displacment field saved as mesh3d that can be rendered using \code{rgl::wire3d}
+#' @param color logical: if TRUE, displacement vectors will be colored according to a heatmap.
+#' @param plot if FALSE only an object of class "DisplacementPlot" is returned without graphical output
+#' @param ... additional arguments. Currently not used.
+#' @return invisible object of class "DisplacementPlot" that can be rendered using \code{plot}
 #' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
 #' @importFrom Morpho plotNormals meshDist
 #' @importFrom colorRamps blue2green2red
 #' @importFrom rgl wire3d
+#' @method plot DisplacementField
 #' @export
-plotDisplacementField <- function(dispfield,lwd=1,colored=TRUE) {
-     validDisplaceField(dispfield)
-     start <- dispfield$domain
-         end <- dispfield$domain+dispfield$DisplacementField
+plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=FALSE,...) {
+     validDisplaceField(x)
+     start <- x$domain
+         end <- x$domain+x$DisplacementField
          vl <- nrow(start)
-         dismesh <- list();class(dismesh) <- "mesh3d"
+         dismesh <- list();class(dismesh) <- list("mesh3d","DisplacementPlot")
          dismesh$vb <- rbind(t(rbind(start,end)),1)
          dismesh$it <- rbind(1:vl,1:vl,(1:vl)+vl)
-     if (!colored) {
-          wire3d(dismesh,lit=FALSE,lwd=lwd)
+     if (!color) {
+         if (plot)
+          plot(dismesh,lit=FALSE,lwd=lwd)
      
      } else {
-         dists <- apply(dispfield$DisplacementField,1,norm,"2")
+         dists <- apply(x$DisplacementField,1,norm,"2")
          ramp <- colorRamps::blue2green2red(19)
          from <- 0
          to <- ceiling(max(dists))
@@ -140,11 +190,47 @@ plotDisplacementField <- function(dispfield,lwd=1,colored=TRUE) {
          colorall <- ramp[distqual]
          dismesh$material$color <- rbind(colorall,colorall,colorall)
          dismesh$material$lit=FALSE
-         wire3d(dismesh,lwd=lwd)
+         if (plot)
+             plot(dismesh,lwd=lwd)
      }
      invisible(dismesh)
      
 }
+
+
+#' plot the output of plot.DisplacementField
+#'
+#' plot the output of plot.DisplacementField
+#' @param x displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
+#' @param lwd width of the displacement vectors
+#' @param color logical: if TRUE, displacement vectors will be colored according to a heatmap.
+#' @param ... additional arguments. Currently not used.
+#' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
+#' @examples
+#' require(Rvcg)
+#' data(dummyhead)
+#' humoff <- meshOffset(dummyhead.mesh,offset=5)
+#' dispfield <- createDisplacementField(dummyhead.mesh,humoff)
+#' displot <- plot(dispfield,plot=FALSE)
+#' plot(displot)
+#' @method plot DisplacementPlot
+#' @export
+plot.DisplacementPlot <- function(x,lwd=1,color=TRUE,...) {
+    nvert <- ncol(x$vb)
+   
+    if (!is.null(x$material$color)) {
+        ptcol <- data.frame(as.vector(x$it),as.vector(x$material$color))
+        ptcol <- unique(ptcol)
+        ptcol <- ptcol[order(ptcol[,1]),2][1:(nvert/2)]
+    } else {
+        ptcol = 1
+    }
+    
+    points3d(vert2points(x)[1:(nvert/2),],col=ptcol,size=lwd+4)
+    wire3d(x,lwd=lwd)
+    
+}
+
 
 ## checks whether a set of points is identical to the domain of a displacement field
 checkDispFieldDomain <- function(dispfield,points,tol=1e-12) {
@@ -164,29 +250,7 @@ checkDispFieldDomain <- function(dispfield,points,tol=1e-12) {
     return(TRUE)
 }
 
-#' smooth a displacement field using Gaussian smoothing
-#'
-#' smooth a displacement field using Gaussian smoothing
-#' @param dispfield displacement field created using \code{\link{createDisplacementField}}
-#' @param k integer: number of k closest points to evaluate.
-#' @param sigma sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing
-#' @param type kernel function for smoothing are "Gauss","Laplace" and "Exponential"
-#' @param threads integer: number of threads to use for computing the interpolation.
-#' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{plotDisplacementField}}
-#' @export
-smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Laplace","Exponential"),threads=1) {
-    validDisplaceField(dispfield)
-    typeargs <- c("gauss","laplace","exponential")
-    type <- match.arg(tolower(type[1]),typeargs)
-    type <- match(type,typeargs)-1
-    gamma <- 1
-    clost <- vcgKDtree(dispfield$domain,dispfield$domain,k=k)
-    clost$index <- clost$index-1L
-    tmp = .Call("smoothField",dispfield$domain, dispfield$DisplacementField,sigma,gamma,clost$index, clost$distance,threads,type)
-    dispfield$DisplacementField <- tmp
-    return(dispfield)
-}
-
+## validates a displacement field
 validDisplaceField <- function(x) {
     if (!inherits(x,"DisplacementField"))
         stop("not a valid displacement field")
@@ -195,3 +259,7 @@ validDisplaceField <- function(x) {
     if (!isTRUE(all.equal(dim1,dim2)))
         stop("not a valid displacement field1")
 }
+
+
+
+
