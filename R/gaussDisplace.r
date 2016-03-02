@@ -277,7 +277,6 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         if (!silent)
             cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
     }
-    print(0)
     t.dist <- 1e12
     hasLM <- FALSE
     if (!is.null(lm1) && !is.null(lm2)) {
