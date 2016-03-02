@@ -277,7 +277,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         if (!silent)
             cat(paste("\nneighbourhood is set to",nh,"\n***************\n"))
     }
-        
+    print(0)
     t.dist <- 1e12
     hasLM <- FALSE
     if (!is.null(lm1) && !is.null(lm2)) {
@@ -348,12 +348,13 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
     } else {
         if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
             if (!is.null(rigid)) ##perform rigid icp-matching
-                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent)
+                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent,threads = threads)
             if (!is.null(similarity))##similarity matching
-                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent)
+                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent,threads = threads)
             if (!is.null(affine))##similarity matching
-                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent)
+                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent,threads = threads)
         }
+        print(1)
     }
     if (!is.null(bboxCrop)) {
         mesh2 <- cropOutsideBBox(mesh1,mesh2,extend=bboxCrop)

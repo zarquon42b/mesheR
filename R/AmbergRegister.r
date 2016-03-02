@@ -384,7 +384,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
     }
 
 
-rigSimAff <- function(mesh1,mesh2,args,type="r",silent=TRUE,threads=parallel::detectCores()) {
+rigSimAff <- function(mesh1,mesh2,args,type="r",silent=TRUE,threads=1) {
     iterations <- args$iterations; if (is.null(iterations)) iterations <- 3
     lm1=args$lm1
     lm2 <- args$lm2
