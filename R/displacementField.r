@@ -167,7 +167,7 @@ applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss"
 #' @importFrom rgl wire3d
 #' @method plot DisplacementField
 #' @export
-plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=FALSE,...) {
+plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=TRUE,...) {
      validDisplaceField(x)
      start <- x$domain
          end <- x$domain+x$DisplacementField
