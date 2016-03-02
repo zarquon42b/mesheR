@@ -170,17 +170,17 @@ applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss"
 plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=TRUE,...) {
      validDisplaceField(x)
      start <- x$domain
-         end <- x$domain+x$DisplacementField
-         vl <- nrow(start)
-         dismesh <- list();class(dismesh) <- list("mesh3d","DisplacementPlot")
-         dismesh$vb <- rbind(t(rbind(start,end)),1)
-         dismesh$it <- rbind(1:vl,1:vl,(1:vl)+vl)
+     end <- x$domain+x$DisplacementField
+     vl <- nrow(start)
+     dismesh <- list();class(dismesh) <- list("mesh3d","DisplacementPlot")
+     dismesh$vb <- rbind(t(rbind(start,end)),1)
+     dismesh$it <- rbind(1:vl,1:vl,(1:vl)+vl)
      if (!color) {
          if (plot)
           plot(dismesh,lit=FALSE,lwd=lwd)
      
      } else {
-         dists <- apply(x$DisplacementField,1,norm,"2")
+         dists <- sqrt(rowSums(x$DisplacementField^2))
          ramp <- colorRamps::blue2green2red(19)
          from <- 0
          to <- ceiling(max(dists))
