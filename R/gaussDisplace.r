@@ -1,6 +1,6 @@
 ## @export gaussDisplace
 #' @importFrom Rvcg vcgUpdateNormals
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg","kd"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,angclost=FALSE,bbox=NULL,threads=parallel::detectCores(),smoothtype=0,...) {
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg","kd"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,angclost=FALSE,bbox=NULL,threads=1,smoothtype=0,...) {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
     ## set projection function according to input request
     pro <- substring(pro[1],1L,1L)
