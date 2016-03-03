@@ -1,7 +1,7 @@
 #include "RcppArmadillo.h"
 #include "displacement_field.h"
 #include <Rconfig.h>
-#ifdef SUPPORT_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -83,7 +83,7 @@ RcppExport SEXP displaceGauss(SEXP iomat_, SEXP D1_, SEXP D2_, SEXP sigma_, SEXP
   bool oneway = as<bool>(oneway_);
   int type = as<int>(type_);
   int threads = as<int>(threads_);
-  //omp_set_num_threads(8);
+  ////omp_set_num_threads(8);
   vec diff1(armaD1.n_rows);
   diff1.fill(1);
   for (uint i=0; i < armaD1.n_rows;i++) {
@@ -103,10 +103,7 @@ RcppExport SEXP displaceGauss(SEXP iomat_, SEXP D1_, SEXP D2_, SEXP sigma_, SEXP
       diff2[i] = 0;
   }
   
-#ifdef SUPPORT_OPENMP
-    omp_set_num_threads(threads);
-#endif
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) num_threads(threads)
   for (uint i = 0; i < out.n_rows; i++) {
     //rowvec pt = iomat.row(i);
     uvec tmpW = conv_to<uvec>::from(armaclIW.row(i));
@@ -116,7 +113,6 @@ RcppExport SEXP displaceGauss(SEXP iomat_, SEXP D1_, SEXP D2_, SEXP sigma_, SEXP
     
   }
   
- 
   return wrap(out);
  }  catch (std::exception& e) {
     ::Rf_error( e.what());

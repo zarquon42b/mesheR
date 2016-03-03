@@ -1,7 +1,7 @@
 #include "RcppArmadillo.h"
 
 #include <Rconfig.h>
-#ifdef SUPPORT_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -62,10 +62,8 @@ RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP displacement_, SEXP sigma
   int threads = as<int>(threads_);
   int smoothtype = as<int>(smoothtype_);
    mat out = evaluatePoints;
-#ifdef SUPPORT_OPENMP
-  omp_set_num_threads(threads);
-#endif
-#pragma omp parallel for schedule(static)
+
+#pragma omp parallel for schedule(static) num_threads(threads)
   for (uint i = 0; i < evaluatePoints.n_rows; i++) {
     //rowvec pt = iomat.row(i);
     uvec tmpW = conv_to<uvec>::from(closestInds.row(i));
@@ -73,6 +71,6 @@ RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP displacement_, SEXP sigma
     out.row(i) = smooth_field_at_point(displacement.rows(tmpW),distances.row(i),sigma, gamma,smoothtype);
     
   }
-  
+
   return wrap(out);
 }
