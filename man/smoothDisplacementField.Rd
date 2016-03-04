@@ -5,16 +5,19 @@
 \title{smooth a displacement field using Gaussian smoothing}
 \usage{
 smoothDisplacementField(dispfield, k = 10, sigma = 20, type = c("Gauss",
-  "Laplace", "Exponential"), threads = 1)
+  "Laplace", "Exponential", "Bspline"), iterations = 1,
+  threads = parallel::detectCores())
 }
 \arguments{
 \item{dispfield}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
 
 \item{k}{integer: number of k closest points to evaluate.}
 
-\item{sigma}{sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing}
+\item{sigma}{kernel bandwidth used for smoothing. For all kernels except B-spline, sigma controls the importance of the neighbourhood by defining the bandwidth of the smoothing kernel. For B-spline it defines the support (the higher, the "wobblier" the deformation field can become.}
 
-\item{type}{kernel function for smoothing are "Gauss","Laplace" and "Exponential"}
+\item{type}{kernel function for smoothing are "Gauss","Laplace", "Exponential" and "Bspline" (or any abbreviation thereof).}
+
+\item{iterations}{number of iterations to run}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }

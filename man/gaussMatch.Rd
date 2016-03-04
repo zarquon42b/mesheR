@@ -32,15 +32,14 @@ should be ~1.5.}
 \item{smoothtype}{Type of smoothing: Taubin, Laplacian, or HClaplacian. For
 details see \code{vcgSmooth}.}
 
-\item{sigma}{starting parameter for smoothed displacement (see Moshfeghi
-1994). Sigma controls the importance of the neighbourhood by defining the bandwidth of the smoothing kernel.}
+\item{sigma}{starting value of kernel bandwidth/B-spline support. For all kernels except B-spline, sigma controls the importance of the neighbourhood by defining the bandwidth of the smoothing kernel. For B-spline it defines the support (the higher, the "wobblier" the deformation field can become.}
 
-\item{displacementsmooth}{kernel function for smoothing are "Gauss","Laplace" and "Exponential"}
+\item{displacementsmooth}{kernel function for smoothing are "Gauss","Laplace", "Exponential" and "Bspline" (or any abbreviation thereof).}
 
 \item{gamma}{dampening factor controlling displacement strength. The smoothed displacement vector for each vertex is divided by \code{gamma}. The larger \code{gamma}, the slower the approximation.}
 
-\item{f}{parameter controlling iterative decrease of \code{sigma} making the displacement locally more elastic with each iteration.
-(Moshfeghi 1994). Starting with \code{sigma}, this parameter for the k-th iteration is \code{sigma *f ^(-k)}}
+\item{f}{parameter controlling iterative decrease (if > 1, increase else) of \code{sigma} making the displacement locally more elastic with each iteration.
+Starting with \code{sigma}, this parameter for the k-th iteration is \code{sigma *f ^(-k)}}
 
 \item{oneway}{logical: only displace towards the target without taking into
 account the displacement from the target.}
@@ -138,7 +137,7 @@ the displacement smoothing are implemented
 }
 \note{
 Based on the closest points (constrained by the various options), the displacement field will be smoothed using kernel functions of the k-closest displacement vectors.
- The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
+ The smoothing kernels are  "Gauss","Laplace", "Exponential" and "Bspline". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
 
 Gaussian:  \eqn{w(d) = exp(\frac{-d^2}{2\sigma^2})}{w(d) = exp(-d^2/2*sigma^2)}
 

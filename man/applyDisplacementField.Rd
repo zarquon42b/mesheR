@@ -14,9 +14,9 @@ applyDisplacementField(dispfield, points, k = 10, sigma = 20,
 
 \item{k}{integer: number of k closest points to evaluate.}
 
-\item{sigma}{sigma controls the weight of the neighbourhood by defining the standard-deviation for the gaussian smoothing}
+\item{sigma}{kernel bandwidth used for smoothing. For all kernels except B-spline, sigma controls the importance of the neighbourhood by defining the bandwidth of the smoothing kernel. For B-spline it defines the support (the higher, the "wobblier" the deformation field can become.}
 
-\item{type}{kernel function for smoothing are "Gauss","Laplace" and "Exponential"}
+\item{type}{kernel function for smoothing are "Gauss","Laplace", "Exponential" and "Bspline" (or any abbreviation thereof).}
 
 \item{gamma}{dampening factor (displacement vectors will be divided by \code{gamma}}
 

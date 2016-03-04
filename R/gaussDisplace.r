@@ -1,6 +1,6 @@
 ## @export gaussDisplace
 #' @importFrom Rvcg vcgUpdateNormals
-gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,tol=0,pro=c("morpho","vcg","kd"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,angclost=FALSE,bbox=NULL,threads=1,smoothtype=0,...) {
+gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,pro=c("morpho","vcg","kd"),k0=50,prometh=1,rhotol=NULL,border=FALSE,horiz.disp=NULL,angclost=FALSE,bbox=NULL,threads=1,smoothtype=0,...) {
 ### the workhorse function running in each iteration of gaussDisplMesh3d
     ## set projection function according to input request
     pro <- substring(pro[1],1L,1L)
@@ -16,13 +16,13 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
           project3d <- vcgClost
    
     angdev <- ifelse((is.null(rhotol) || !angclost),0,rhotol)
+    
     rc <- 0
     out <- NULL
     t0 <- Sys.time()
-    sigma0 <- sigma
+    
     M0 <- t(mesh2$vb[1:3,])
     S0 <- t(mesh1$vb[1:3,])
-    sigma <- (sigma0*f^(-k))^2
     Spro <- project3d(mesh1,mesh2,sign=F,angdev=angdev,k=k0,tol=tol,borderchk=!border,threads=threads)
     
     S <- vert2points(Spro)
@@ -99,7 +99,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 ### make multicore 
     if (nh < 1)
         stop ("neighbourhood must be at least 1")
-    out <- .Call("displaceGauss",W0,D1,D2,sigma,gamma,clostIndW,clostIndWdistance,clostIndP,clostIndPdistance,tol=tol,rt0,rt1,rc,oneway,smoothtype,threads,PACKAGE="mesheR")
+    out <- .Call("displaceGauss",W0,M0,D1,D2,sigma,gamma,clostIndW,clostIndWdistance,clostIndP,clostIndPdistance,tol=tol,rt0,rt1,rc,oneway,smoothtype,threads,PACKAGE="mesheR")
     addit <- W0+out
     return(list(addit=addit))
 }
@@ -122,12 +122,11 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #' @param smoothit integer: smoothing steps.
 #' @param smoothtype Type of smoothing: Taubin, Laplacian, or HClaplacian. For
 #' details see \code{vcgSmooth}.
-#' @param sigma starting parameter for smoothed displacement (see Moshfeghi
-#' 1994). Sigma controls the importance of the neighbourhood by defining the bandwidth of the smoothing kernel. 
-#' @param displacementsmooth kernel function for smoothing are "Gauss","Laplace" and "Exponential"
+#' @param sigma starting value of kernel bandwidth/B-spline support. For all kernels except B-spline, sigma controls the importance of the neighbourhood by defining the bandwidth of the smoothing kernel. For B-spline it defines the support (the higher, the "wobblier" the deformation field can become.
+#' @param displacementsmooth kernel function for smoothing are "Gauss","Laplace", "Exponential" and "Bspline" (or any abbreviation thereof).
 #' @param gamma dampening factor controlling displacement strength. The smoothed displacement vector for each vertex is divided by \code{gamma}. The larger \code{gamma}, the slower the approximation.
-#' @param f parameter controlling iterative decrease of \code{sigma} making the displacement locally more elastic with each iteration.
-#' (Moshfeghi 1994). Starting with \code{sigma}, this parameter for the k-th iteration is \code{sigma *f ^(-k)}
+#' @param f parameter controlling iterative decrease (if > 1, increase else) of \code{sigma} making the displacement locally more elastic with each iteration.
+#' Starting with \code{sigma}, this parameter for the k-th iteration is \code{sigma *f ^(-k)}
 #' @param oneway logical: only displace towards the target without taking into
 #' account the displacement from the target.
 #' 
@@ -183,7 +182,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #'  \item{patch}{displaced patch as specified in input.}
 #' else a mesh of class "mesh3d" is returned.
 #' @note Based on the closest points (constrained by the various options), the displacement field will be smoothed using kernel functions of the k-closest displacement vectors.
-#'  The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
+#'  The smoothing kernels are  "Gauss","Laplace", "Exponential" and "Bspline". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
 #' 
 #' Gaussian:  \eqn{w(d) = exp(\frac{-d^2}{2\sigma^2})}{w(d) = exp(-d^2/2*sigma^2)}
 #' 
@@ -226,10 +225,10 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,k=1,nh=NULL,to
 #'
 #' @useDynLib mesheR
 gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,bboxCrop=NULL,threads=parallel::detectCores(),cb=NULL,...) {
-    typeargs <- c("gauss","laplace","exponential")
+    typeargs <- c("gauss","laplace","exponential","bspline")
     displacementsmooth <- match.arg(tolower(displacementsmooth[1]),typeargs)
     displacementsmooth <- match(displacementsmooth,typeargs)-1
-    
+    sigma0 <- sigma
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
         Bayes <- NULL
@@ -424,8 +423,11 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             }
         }
         vb0 <- vert2points(mesh1)
+        sigma <- sigma0*f^(-(i-1))
+        if (!silent)
+            cat(paste("sigma =",round(sigma,3),"\n"))
         ## call the workhorse doing the displacement
-        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,k=i,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,bbox=bbox,angclost=angclost,threads=threads,smoothtype=displacementsmooth,...)
+        tmp <- gaussDisplace(mesh1,mesh2,sigma=sigma,gamma=gamma,f=f,W0=vert2points(mesh1),nh=nh,tol=toldist,pro=pro,k0=k0,prometh=prometh,rhotol=angtol,border=border,oneway=oneway,horiz.disp = horiz.disp,bbox=bbox,angclost=angclost,threads=threads,smoothtype=displacementsmooth,...)
         
         tmpold <- mesh1
         if (!is.null(Bayes) && length(Bayes$sdmax) >= i) {

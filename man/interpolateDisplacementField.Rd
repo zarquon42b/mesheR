@@ -5,7 +5,7 @@
 \title{evaluate a displacement field using gaussian smoothed interpolation of a discrete displacement field}
 \usage{
 interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
-  gamma = 1, type = c("Gauss", "Laplace", "Exponential"),
+  gamma = 1, type = c("Gauss", "Laplace", "Exponential", "Bspline"),
   threads = parallel::detectCores())
 }
 \arguments{
@@ -15,11 +15,11 @@ interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
 
 \item{k}{integer: number of k closest points to evaluate.}
 
-\item{sigma}{kernel bandwidth used for smoothing}
+\item{sigma}{kernel bandwidth used for smoothing. For all kernels except B-spline, sigma controls the importance of the neighbourhood by defining the bandwidth of the smoothing kernel. For B-spline it defines the support (the higher, the "wobblier" the deformation field can become.}
 
 \item{gamma}{dampening factor (displacement vectors will be divided by \code{gamma}}
 
-\item{type}{kernel function for smoothing are "Gauss","Laplace" and "Exponential"}
+\item{type}{kernel function for smoothing are "Gauss","Laplace", "Exponential" and "Bspline" (or any abbreviation thereof).}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }
