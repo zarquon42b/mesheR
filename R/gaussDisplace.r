@@ -352,7 +352,6 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             if (!is.null(affine))##similarity matching
                 mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent,threads = threads)
         }
-        print(1)
     }
     if (!is.null(bboxCrop)) {
         mesh2 <- cropOutsideBBox(mesh1,mesh2,extend=bboxCrop)
