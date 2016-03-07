@@ -6,6 +6,7 @@
 
 language: c
 sudo: required
+dist: trusty
 before_install:
   - sudo add-apt-repository ppa:zarquon42/travis-trusty -y
   - sudo apt-get update -qq
