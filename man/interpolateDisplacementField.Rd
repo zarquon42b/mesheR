@@ -5,8 +5,8 @@
 \title{evaluate a displacement field using gaussian smoothed interpolation of a discrete displacement field}
 \usage{
 interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
-  gamma = 1, type = c("Gauss", "Laplace", "Exponential", "Bspline"),
-  threads = parallel::detectCores())
+  gamma = 1, type = c("Gauss", "Laplace", "Exponential", "Bspline", "TPS"),
+  subsample = 2000, threads = parallel::detectCores())
 }
 \arguments{
 \item{dispfield}{@param dispfield displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
@@ -19,7 +19,9 @@ interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
 
 \item{gamma}{dampening factor (displacement vectors will be divided by \code{gamma}}
 
-\item{type}{kernel function for smoothing are "Gauss","Laplace", "Exponential" and "Bspline" (or any abbreviation thereof).}
+\item{type}{kernel function for smoothing are "Gauss","Laplace", "Exponential", "Bspline" and "TPS" (or any abbreviation thereof).}
+
+\item{subsample}{integer: amount to subsample the field in case of type="TPS"}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }
@@ -46,7 +48,7 @@ dispfield <- createDisplacementField(dummyhead.mesh,humoff)
 \dontrun{
 ## this only runs with latest Rvcg build from master
 highres <- vcgSubdivide(dummyhead.mesh)
-ifield <- interpolateDisplacementField(dispfield,highres,threads=2,sigma = 50,k=500)
+ifield <- interpolateDisplacementField(dispfield,highres,threads=2,sigma = 10,k=50)
 }
 }
 \seealso{

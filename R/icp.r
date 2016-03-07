@@ -55,9 +55,9 @@
 #' shade3d(rotnose,col=2,alpha=0.7)
 #' shade3d(shortnose.mesh,col=3,alpha=0.7)
 #' }
+#' @importFrom Morpho fastKmeans
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=parallel::detectCores())
-  {
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=parallel::detectCores()) {
       meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
       mesh2 <- vcgUpdateNormals(mesh2)
        if (pcAlign) {
@@ -68,7 +68,10 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
       
       if (!is.null(subsample)) {
           subsampletype <- match.arg(subsampletype[1],c("pd","km"))
-          mysample <- Rvcg::vcgSample(mesh1,type=subsampletype,SampleNum=subsample,MCsamp = 20)
+          if (subsampletype == "pd")
+              mysample <- Rvcg::vcgSample(mesh1,type=subsampletype,SampleNum=subsample,MCsamp = 20)
+          else
+              mysample <- fastKmeans(mesh1,k=subsample,threads=threads)$centers
           
       }
       
