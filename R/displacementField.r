@@ -75,6 +75,7 @@ invertDisplacementField <- function(dispfield) {
 #' @importFrom Morpho tps3d
 #' @export
 interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),subsample=2000, threads=parallel::detectCores()) {
+    validDisplaceField(dispfield)
     typeargs <- c("gauss","laplace","exponential","bspline","tps")
     type <- match.arg(tolower(type[1]),typeargs)
     type <- match(type,typeargs)-1
@@ -85,7 +86,7 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
     if (is.vector(points))
         points <- t(points)
     ## get closest points on domain
-    clost <- vcgKDtree(dispfield$domain,points,k=k)
+    clost <- vcgKDtree(dispfield$domain,points,k=k,threads=threads)
     clost$index <- clost$index-1L
     if (type %in% 0:3) {
         tmp = .Call("smoothField",points, dispfield$domain, dispfield$DisplacementField,sigma,gamma,clost$index, clost$distance,iterations=1,threads,type)
@@ -123,7 +124,7 @@ smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Lapl
     type <- match.arg(tolower(type[1]),typeargs)
     type <- match(type,typeargs)-1
     gamma <- 1
-    clost <- vcgKDtree(dispfield$domain,dispfield$domain,k=k)
+    clost <- vcgKDtree(dispfield$domain,dispfield$domain,k=k,threads=threads)
     clost$index <- clost$index-1L
     if (type %in% 0:3) {
     tmp = .Call("smoothField",dispfield$domain, dispfield$domain, dispfield$DisplacementField,sigma,gamma,clost$index, clost$distance,iterations,threads,type)
@@ -155,7 +156,7 @@ smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Lapl
 applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss","Laplace","Exponential","TPS"), gamma=1, threads=1) {
     validDisplaceField(dispfield)
     ## check if we need to interpolate at all
-    if (!checkDispFieldDomain(dispfield,points)) {
+    if (!checkDispFieldDomain(dispfield,points,threads=threads)) {
         message("dispfield domain and points not identical: interpolating...")
         displacement <- interpolateDisplacementField(dispfield,points=points,k=k,sigma=sigma,type=type,gamma=gamma,threads=threads)
    } else
@@ -253,7 +254,7 @@ plot.DisplacementPlot <- function(x,lwd=1,color=TRUE,...) {
 
 
 ## checks whether a set of points is identical to the domain of a displacement field
-checkDispFieldDomain <- function(dispfield,points,tol=1e-12) {
+checkDispFieldDomain <- function(dispfield,points,tol=1e-12,threads=1) {
     if (inherits(points,"mesh3d"))
         points <- vert2points(points)
     ndisp <- nrow(dispfield$domain)
@@ -261,7 +262,7 @@ checkDispFieldDomain <- function(dispfield,points,tol=1e-12) {
     if (ndisp != npoints)
         return(FALSE)
     else {
-        chk <- vcgKDtree(dispfield$domain,points,k=1)
+        chk <- vcgKDtree(dispfield$domain,points,k=1,threads=threads)
         if (!isTRUE(all.equal(as.vector(chk$index),seq.int(ndisp),check.attributes = FALSE)))
             return(FALSE)
         if (max(chk$distance) > tol)
