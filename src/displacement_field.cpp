@@ -34,7 +34,7 @@ double smooth_laplacian(double distance, double sigma) {
 
 
 
-rowvec smooth_field_at_point(mat displacement, rowvec distance, double sigma, double gamma, int smoothtype,  std::vector<float>  use) {
+rowvec smooth_field_at_point(const mat &displacement, const rowvec &distance, double sigma, double gamma, int smoothtype, const std::vector<float>  &use) {
   rowvec outpt(3); outpt.zeros();
   float g1sum = 0;
   for (uint i = 0; i < distance.size(); i++) {
@@ -60,7 +60,7 @@ rowvec smooth_field_at_point(mat displacement, rowvec distance, double sigma, do
   return outpt;
 }
 
-rowvec smooth_field_at_point_bspline(rowvec pt, mat clostPoints, mat displacement,double support, double gamma,  std::vector<float>  use) {
+rowvec smooth_field_at_point_bspline(const rowvec &pt, const mat &clostPoints, const mat &displacement,double support, double gamma, const std::vector<float>  &use) {
   rowvec outpt(3); outpt.zeros();
   float g1sum = 0;
   for (uint i = 0; i < clostPoints.n_rows; i++) {
