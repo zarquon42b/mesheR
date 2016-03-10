@@ -60,7 +60,7 @@ private:
 
   double m_sigma;
   double m_sigma2;
-  bool m_CanUseDistance = true;
+  const static bool m_CanUseDistance = true;
 };
 
 class LaplacianKernel: public ScalarValuedKernel<rowvec> {
@@ -85,7 +85,7 @@ private:
 
   double m_sigma;
   double m_sigma2;
-  bool m_CanUseDistance=true;
+  const static bool m_CanUseDistance=true;
 };
 
 class ExponentialKernel: public ScalarValuedKernel<rowvec> {
@@ -111,7 +111,7 @@ private:
 
   double m_sigma;
   double m_sigma2;
-  bool m_CanUseDistance=true;
+  const static bool m_CanUseDistance=true;
 
 };
 
@@ -135,5 +135,5 @@ public:
 private:
 
   double m_sigma;
-  bool m_CanUseDistance=false;
+  const static bool m_CanUseDistance=false;
 };
