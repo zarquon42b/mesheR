@@ -1,5 +1,5 @@
 #include "smooth_field.h"
-
+typedef unsigned int uint;
 rowvec smooth_field_at_point_with_distance(const mat &displacement, const rowvec &distance, ScalarValuedKernel<rowvec>* scalarkernel, double gamma, int smoothtype, const std::vector<float>  &use) {
   rowvec outpt(3); outpt.zeros();
   float g1sum = 0;
