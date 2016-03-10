@@ -1,5 +1,6 @@
 #include "RcppArmadillo.h"
-#include "displacement_field.h"
+#include "smooth_field.h"
+
 #include <Rconfig.h>
 #ifdef _OPENMP
 #include <omp.h>
@@ -23,7 +24,6 @@ RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2
     // displacement field D1 = towards, D2 = back
     mat D1 = as<mat>(D1_);
     mat D2 = as<mat>(D2_);
-    
     double sigma = as<double>(sigma_);
     double gamma = as<double>(gamma_);
     imat armaclIW = as<imat>(clIW_);
@@ -49,14 +49,20 @@ RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2
     vec use2(D2.n_rows);
     if (!oneway) {
       use2.fill(1);
-    for (uint i=0; i < D2.n_rows;i++) {
-      if (tol > 0 && sum(square(D2.row(i))) > tol)
-	use2[i] = 0;
-      if (rc > 0 &&  rt1[i] > rc)
-	use2[i] = 0;
+      for (uint i=0; i < D2.n_rows;i++) {
+	if (tol > 0 && sum(square(D2.row(i))) > tol)
+	  use2[i] = 0;
+	if (rc > 0 &&  rt1[i] > rc)
+	  use2[i] = 0;
+      }
     }
-    }
-  
+    ScalarValuedKernel<rowvec>* gk;
+    if (type == 0)
+      gk = new GaussianKernel(sigma);
+    else if (type == 1)
+      gk = new LaplacianKernel(sigma);
+    else if (type == 2)
+      gk = new ExponentialKernel(sigma);
 #pragma omp parallel for schedule(static) num_threads(threads)
     for (uint i = 0; i < out.n_rows; i++) {
       rowvec direction_towards(3), direction_backwards(3);
@@ -65,26 +71,25 @@ RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2
       uvec tmpW = conv_to<uvec>::from(armaclIW.row(i));
       
       std::vector<float> use1tmp = conv_to< std::vector<float> >::from(use1(tmpW));
-      if (type != 3) {
-	direction_towards = smooth_field_at_point(D1.rows(tmpW),clIWdistances.row(i),sigma, gamma,type,use1tmp);
-	if (!oneway) {
-	  uvec tmpP = conv_to<uvec>::from(armaclIP.row(i));
-	   std::vector<float> use2tmp = conv_to< std::vector<float> >::from(use2(tmpP));
-	  direction_backwards = smooth_field_at_point(D2.rows(tmpP),clIPdistances.row(i),sigma, gamma,type,use2tmp);
-	}
-      } else {
-	direction_towards = smooth_field_at_point_bspline(pt,clostPointsW.rows(tmpW),D1.rows(tmpW),sigma, gamma,use1tmp);
+      if (gk->CanUseDistance()) {
+	direction_towards = smooth_field_at_point_with_distance(D1.rows(tmpW),clIWdistances.row(i),gk, gamma,type,use1tmp);
 	if (!oneway) {
 	  uvec tmpP = conv_to<uvec>::from(armaclIP.row(i));
 	  std::vector<float> use2tmp = conv_to< std::vector<float> >::from(use2(tmpP));
-	  direction_backwards = smooth_field_at_point_bspline(pt,clostPointsM.rows(tmpP),D2.rows(tmpP),sigma, gamma,use2tmp);
+	  direction_backwards = smooth_field_at_point_with_distance(D2.rows(tmpP),clIPdistances.row(i),gk, gamma,type,use2tmp);
+	}
+      } else {
+	direction_towards = smooth_field_at_point(pt,clostPointsW.rows(tmpW),D1.rows(tmpW),gk, gamma,use1tmp);
+	if (!oneway) {
+	  uvec tmpP = conv_to<uvec>::from(armaclIP.row(i));
+	  std::vector<float> use2tmp = conv_to< std::vector<float> >::from(use2(tmpP));
+	  direction_backwards = smooth_field_at_point(pt,clostPointsM.rows(tmpP),D2.rows(tmpP),gk, gamma,use2tmp);
 	}
       }
       out.row(i) = direction_towards-direction_backwards;
     
     }
-      
-  
+    delete gk;
     return wrap(out);
   }  catch (std::exception& e) {
     ::Rf_error( e.what());
