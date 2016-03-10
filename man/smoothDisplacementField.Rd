@@ -6,7 +6,7 @@
 \usage{
 smoothDisplacementField(dispfield, k = 10, sigma = 20, type = c("Gauss",
   "Laplace", "Exponential", "Bspline", "TPS"), iterations = 1,
-  subsample = 2000, threads = parallel::detectCores())
+  subsample = 2000, threads = 0)
 }
 \arguments{
 \item{dispfield}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}

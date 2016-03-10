@@ -81,7 +81,7 @@ objectiveMSQ.grad <- function(x,clost,A,B,tarclost) {
 #' @note needs RvtkStatismo installed
 #' @importFrom lbfgs lbfgs
 #' @export
-modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,k=50,threads=parallel::detectCores(),method="lbfgs",silent=FALSE,...) {
+modelFitting <- function(model, tarmesh, iterations=5,lbfgs.iter=5,symmetric=c(0,1,2),refdist=1e5,tardist=1e5,rho=pi/2,sdmax=NULL,mahaprob=c("none","chisq","dist"),initparams=NULL,k=50,threads=0,method="lbfgs",silent=FALSE,...) {
     if (!requireNamespace("RvtkStatismo"))
         stop("you need to install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
     if (!is.null(initparams)) {

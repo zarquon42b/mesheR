@@ -74,7 +74,7 @@ invertDisplacementField <- function(dispfield) {
 #' }
 #' @importFrom Morpho tps3d
 #' @export
-interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),subsample=2000, threads=parallel::detectCores()) {
+interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),subsample=2000, threads=0) {
     validDisplaceField(dispfield)
     typeargs <- c("gauss","laplace","exponential","bspline","tps")
     type <- match.arg(tolower(type[1]),typeargs)
@@ -118,7 +118,7 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{plot.DisplacementField}}
 #' @export
-smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),iterations=1,subsample=2000, threads=parallel::detectCores()) {
+smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),iterations=1,subsample=2000, threads=0) {
     validDisplaceField(dispfield)
     typeargs <- c("gauss","laplace","exponential","bspline","tps")
     type <- match.arg(tolower(type[1]),typeargs)
