@@ -58,11 +58,13 @@ RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2
     }
     ScalarValuedKernel<rowvec>* gk;
     if (type == 0)
-      gk = new GaussianKernel(sigma);
+      gk = new mesheRrow::GaussianKernel(sigma);
     else if (type == 1)
-      gk = new LaplacianKernel(sigma);
+      gk = new mesheRrow::LaplacianKernel(sigma);
     else if (type == 2)
-      gk = new ExponentialKernel(sigma);
+      gk = new mesheRrow::ExponentialKernel(sigma);
+    else if (type == 3)
+      gk = new mesheRrow::BsplineKernel(sigma);
 #pragma omp parallel for schedule(static) num_threads(threads)
     for (uint i = 0; i < out.n_rows; i++) {
       rowvec direction_towards(3), direction_backwards(3);

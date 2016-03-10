@@ -31,109 +31,224 @@ namespace mesheR {
     virtual bool CanUseDistance() const = 0;
 
   };
+
+
+namespace mesheRrow {
+  using namespace Rcpp;
+  using namespace mesheR;
+  using namespace arma;
+
+  typedef rowvec VectorType;
+  class GaussianKernel: public ScalarValuedKernel <VectorType>{
+  public:
+    GaussianKernel(double sigma) : m_sigma(sigma), m_sigma2(2*sigma * sigma){
+    }
+
+    inline double getWeightFromVectors(const VectorType& x, const VectorType& y) const {
+      VectorType r = x-y;
+      return exp(-dot(r,r) / m_sigma2);
+    }
+    inline double getWeightFromDistance(const double& distance) const {
+      double weight = exp(-(distance*distance)/m_sigma2);
+      return weight;
+    }
+    inline bool CanUseDistance() const {
+      return m_CanUseDistance;
+    }
+  
+  private:
+
+    double m_sigma;
+    double m_sigma2;
+    const static bool m_CanUseDistance = true;
+  };
+
+
+  class LaplacianKernel: public ScalarValuedKernel<VectorType> {
+  public:
+    LaplacianKernel(double sigma) : m_sigma(sigma), m_sigma2(sigma * sigma){
+    }
+
+    inline double getWeightFromVectors(const VectorType& x, const VectorType& y) const {
+      VectorType r = x-y;
+      return exp(-sqrt(dot(r,r)) / m_sigma);
+    }
+    inline double getWeightFromDistance(const double& distance) const {
+      double weight = exp(-distance/m_sigma);
+      return weight;
+    }
+    inline bool CanUseDistance() const {
+      return m_CanUseDistance;
+    }
+  
+  
+  private:
+
+    double m_sigma;
+    double m_sigma2;
+    const static bool m_CanUseDistance=true;
+  };
+
+
+  class ExponentialKernel: public ScalarValuedKernel<VectorType> {
+  public:
+    ExponentialKernel(double sigma) : m_sigma(sigma), m_sigma2(2*sigma * sigma){
+    }
+
+    inline double getWeightFromVectors(const VectorType& x, const VectorType& y) const {
+      VectorType r = x-y;
+      return exp(-sqrt(dot(r,r)) / m_sigma2);
+    }
+    inline double getWeightFromDistance(const double& distance) const {
+      double weight = exp(-distance/m_sigma2);
+      return weight;
+    }
+  
+    inline bool CanUseDistance() const {
+      return m_CanUseDistance;
+    }
+  
+  
+  private:
+
+    double m_sigma;
+    double m_sigma2;
+    const static bool m_CanUseDistance=true;
+
+  };
+
+
+  class BsplineKernel: public ScalarValuedKernel<VectorType> {
+  public:
+    BsplineKernel(double sigma) : m_sigma(sigma) {
+    }
+
+    inline double getWeightFromVectors(const VectorType& x, const VectorType& y) const {
+      double weight = get_bspline(x,y,m_sigma);
+      return weight;
+    }
+    inline double getWeightFromDistance(const double& distance) const {
+      return 0;
+    }
+    inline bool CanUseDistance() const {
+      return m_CanUseDistance;
+    }
+  
+  
+  private:
+
+    double m_sigma;
+    const static bool m_CanUseDistance=false;
+  };
+
 }
+//kernel classes for colvec
+namespace mesheRcol {
+  using namespace Rcpp;
+  using namespace mesheR;
+  using namespace arma;
+  typedef colvec VectorType;
+  class GaussianKernel: public ScalarValuedKernel <VectorType>{
+  public:
+    GaussianKernel(double sigma) : m_sigma(sigma), m_sigma2(2*sigma * sigma){
+    }
+
+    inline double getWeightFromVectors(const VectorType& x, const VectorType& y) const {
+      VectorType r = x-y;
+      return exp(-dot(r,r) / m_sigma2);
+    }
+    inline double getWeightFromDistance(const double& distance) const {
+      double weight = exp(-(distance*distance)/m_sigma2);
+      return weight;
+    }
+    inline bool CanUseDistance() const {
+      return m_CanUseDistance;
+    }
+  
+  private:
+
+    double m_sigma;
+    double m_sigma2;
+    const static bool m_CanUseDistance = true;
+  };
+
+
+  class LaplacianKernel: public ScalarValuedKernel<VectorType> {
+  public:
+    LaplacianKernel(double sigma) : m_sigma(sigma), m_sigma2(sigma * sigma){
+    }
+
+    inline double getWeightFromVectors(const VectorType& x, const VectorType& y) const {
+      VectorType r = x-y;
+      return exp(-sqrt(dot(r,r)) / m_sigma);
+    }
+    inline double getWeightFromDistance(const double& distance) const {
+      double weight = exp(-distance/m_sigma);
+      return weight;
+    }
+    inline bool CanUseDistance() const {
+      return m_CanUseDistance;
+    }
+  
+  
+  private:
+
+    double m_sigma;
+    double m_sigma2;
+    const static bool m_CanUseDistance=true;
+  };
+
+
+  class ExponentialKernel: public ScalarValuedKernel<VectorType> {
+  public:
+    ExponentialKernel(double sigma) : m_sigma(sigma), m_sigma2(2*sigma * sigma){
+    }
+
+    inline double getWeightFromVectors(const VectorType& x, const VectorType& y) const {
+      VectorType r = x-y;
+      return exp(-sqrt(dot(r,r)) / m_sigma2);
+    }
+    inline double getWeightFromDistance(const double& distance) const {
+      double weight = exp(-distance/m_sigma2);
+      return weight;
+    }
+  
+    inline bool CanUseDistance() const {
+      return m_CanUseDistance;
+    }
+  
+  
+  private:
+
+    double m_sigma;
+    double m_sigma2;
+    const static bool m_CanUseDistance=true;
+
+  };
+
+
+  class BsplineKernel: public ScalarValuedKernel<VectorType> {
+  public:
+    BsplineKernel(double sigma) : m_sigma(sigma) {
+    }
+
+    inline double getWeightFromVectors(const VectorType& x, const VectorType& y) const {
+      double weight = get_bspline(x,y,m_sigma);
+      return weight;
+    }
+    inline double getWeightFromDistance(const double& distance) const {
+      return 0;
+    }
+    inline bool CanUseDistance() const {
+      return m_CanUseDistance;
+    }
+  
+  
+  private:
+
+    double m_sigma;
+    const static bool m_CanUseDistance=false;
+  };
+}
+  };
 #endif // __KERNELS_H
-
-
-using namespace Rcpp;
-using namespace mesheR;
-using namespace arma;
-typedef rowvec VectorType;
-class GaussianKernel: public ScalarValuedKernel<rowvec> {
-public:
-  GaussianKernel(double sigma) : m_sigma(sigma), m_sigma2(2*sigma * sigma){
-  }
-
-  inline double getWeightFromVectors(const rowvec& x, const rowvec& y) const {
-    VectorType r = x-y;
-    return exp(-dot(r,r) / m_sigma2);
-  }
-  inline double getWeightFromDistance(const double& distance) const {
-    double weight = exp(-(distance*distance)/m_sigma2);
-    return weight;
-  }
-  inline bool CanUseDistance() const {
-    return m_CanUseDistance;
-  }
-  
-private:
-
-  double m_sigma;
-  double m_sigma2;
-  const static bool m_CanUseDistance = true;
-};
-
-class LaplacianKernel: public ScalarValuedKernel<rowvec> {
-public:
-  LaplacianKernel(double sigma) : m_sigma(sigma), m_sigma2(sigma * sigma){
-  }
-
-  inline double getWeightFromVectors(const rowvec& x, const rowvec& y) const {
-    VectorType r = x-y;
-    return exp(-sqrt(dot(r,r)) / m_sigma);
-  }
-  inline double getWeightFromDistance(const double& distance) const {
-    double weight = exp(-distance/m_sigma);
-    return weight;
-  }
-  inline bool CanUseDistance() const {
-    return m_CanUseDistance;
-  }
-  
-  
-private:
-
-  double m_sigma;
-  double m_sigma2;
-  const static bool m_CanUseDistance=true;
-};
-
-class ExponentialKernel: public ScalarValuedKernel<rowvec> {
-public:
-  ExponentialKernel(double sigma) : m_sigma(sigma), m_sigma2(2*sigma * sigma){
-  }
-
-  inline double getWeightFromVectors(const rowvec& x, const rowvec& y) const {
-    VectorType r = x-y;
-    return exp(-sqrt(dot(r,r)) / m_sigma2);
-  }
-  inline double getWeightFromDistance(const double& distance) const {
-    double weight = exp(-distance/m_sigma2);
-    return weight;
-  }
-  
-  inline bool CanUseDistance() const {
-    return m_CanUseDistance;
-  }
-  
-  
-private:
-
-  double m_sigma;
-  double m_sigma2;
-  const static bool m_CanUseDistance=true;
-
-};
-
-class BsplineKernel: public ScalarValuedKernel<rowvec> {
-public:
-  BsplineKernel(double sigma) : m_sigma(sigma) {
-  }
-
-  inline double getWeightFromVectors(const rowvec& x, const rowvec& y) const {
-    double weight = get_bspline(x,y,m_sigma);
-    return weight;
-  }
-  inline double getWeightFromDistance(const double& distance) const {
-    return 0;
-  }
-  inline bool CanUseDistance() const {
-    return m_CanUseDistance;
-  }
-  
-  
-private:
-
-  double m_sigma;
-  const static bool m_CanUseDistance=false;
-};

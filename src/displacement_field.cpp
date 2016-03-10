@@ -8,7 +8,7 @@
 
 using namespace Rcpp;
 using namespace arma;
-
+using namespace mesheR;
 
 RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP clostPoints_, SEXP displacement_, SEXP sigma_, SEXP gamma_, SEXP closestInds_, SEXP distances_, SEXP iterations_, SEXP threads_= wrap(1), SEXP smoothtype_ = wrap(0)){
   try {
@@ -23,15 +23,15 @@ RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP clostPoints_, SEXP displa
     int threads = as<int>(threads_);
     int smoothtype = as<int>(smoothtype_);
     mat out = evaluatePoints;
-    ScalarValuedKernel<rowvec>* gk;
+    mesheR::ScalarValuedKernel<rowvec>* gk;
     if (smoothtype == 0)
-      gk = new GaussianKernel(sigma);
+      gk = new mesheRrow::GaussianKernel(sigma);
     else if (smoothtype == 1)
-      gk = new LaplacianKernel(sigma);
+      gk = new mesheRrow::LaplacianKernel(sigma);
     else if (smoothtype == 2)
-      gk = new ExponentialKernel(sigma);
+      gk = new mesheRrow::ExponentialKernel(sigma);
     else if (smoothtype == 3)
-      gk = new BsplineKernel(sigma);
+      gk = new mesheRrow::BsplineKernel(sigma);
 
     for (int iter = 0; iter < iterations; iter++) {
 #pragma omp parallel for schedule(static) num_threads(threads)
