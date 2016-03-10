@@ -35,7 +35,7 @@ RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP clostPoints_, SEXP displa
 
     for (int iter = 0; iter < iterations; iter++) {
 #pragma omp parallel for schedule(static) num_threads(threads)
-      for (uint i = 0; i < evaluatePoints.n_rows; i++) {
+      for (unsigned int i = 0; i < evaluatePoints.n_rows; i++) {
 	rowvec pt = evaluatePoints.row(i);
 	uvec tmpW = conv_to<uvec>::from(closestInds.row(i));
 	//rowvec distances_at_pt = distances.row(i);
