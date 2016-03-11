@@ -6,7 +6,7 @@
 \usage{
 applyDisplacementField(dispfield, points, k = 10, sigma = 20,
   type = c("Gauss", "Laplace", "Exponential", "TPS"), gamma = 1,
-  threads = 1)
+  lambda = 1e-08, threads = 1)
 }
 \arguments{
 \item{dispfield}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}} or}
@@ -20,6 +20,8 @@ applyDisplacementField(dispfield, points, k = 10, sigma = 20,
 \item{type}{kernel function for smoothing are "Gauss","Laplace", "Exponential" and "Bspline" (or any abbreviation thereof).}
 
 \item{gamma}{dampening factor (displacement vectors will be divided by \code{gamma}}
+
+\item{lambda}{smoothing factor for TP}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }

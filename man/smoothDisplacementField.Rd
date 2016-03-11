@@ -6,7 +6,7 @@
 \usage{
 smoothDisplacementField(dispfield, k = 10, sigma = 20, type = c("Gauss",
   "Laplace", "Exponential", "Bspline", "TPS"), iterations = 1,
-  subsample = 2000, threads = 0)
+  subsample = 2000, lambda = 1e-08, threads = 0)
 }
 \arguments{
 \item{dispfield}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
@@ -19,7 +19,8 @@ smoothDisplacementField(dispfield, k = 10, sigma = 20, type = c("Gauss",
 
 \item{iterations}{number of iterations to run}
 
-\item{subsample}{integer: amount to subsample the field in case of type="TPS"}
+\item{subsample}{integer: amount to subsample the field in case of type="TPS"
+@param lambda smoothing factor for TPS}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }

@@ -52,6 +52,7 @@ invertDisplacementField <- function(dispfield) {
 #' @param gamma dampening factor (displacement vectors will be divided by \code{gamma}
 #' @param type kernel function for smoothing are "Gauss","Laplace", "Exponential", "Bspline" and "TPS" (or any abbreviation thereof).
 #' @param subsample integer: amount to subsample the field in case of type="TPS"
+#' @param lambda smoothing factor for TPS
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @return returns an interpolated displacement field of class \code{displacement_field} at the positions of \code{points}.
 #' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementField}}. The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
@@ -74,7 +75,7 @@ invertDisplacementField <- function(dispfield) {
 #' }
 #' @importFrom Morpho tps3d
 #' @export
-interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),subsample=2000, threads=0) {
+interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),subsample=2000, lambda=1e-8,threads=0) {
     validDisplaceField(dispfield)
     typeargs <- c("gauss","laplace","exponential","bspline","tps")
     type <- match.arg(tolower(type[1]),typeargs)
@@ -93,7 +94,7 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
     } else {
         subind <- fastKmeans(dispfield$domain,k=subsample,threads=threads)
         tar <- dispfield$domain[subind$selected,,drop=FALSE]+dispfield$DisplacementField[subind$selected,,drop=FALSE]
-        tmp <- tps3d(points,dispfield$domain[subind$selected,,drop=FALSE],tar,threads = threads)
+        tmp <- tps3d(points,dispfield$domain[subind$selected,,drop=FALSE],tar,threads = threads,lambda=lambda)
         tmp <- tmp-points
     }
         
@@ -115,10 +116,11 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
 #' @param type kernel function for smoothing are "Gauss","Laplace", "Exponential", "Bspline" and "TPS" (or any abbreviation thereof).
 #' @param iterations number of iterations to run
 #' @param subsample integer: amount to subsample the field in case of type="TPS"
+#'  @param lambda smoothing factor for TPS
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{plot.DisplacementField}}
 #' @export
-smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),iterations=1,subsample=2000, threads=0) {
+smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),iterations=1,subsample=2000, lambda=1e-8,threads=0) {
     validDisplaceField(dispfield)
     typeargs <- c("gauss","laplace","exponential","bspline","tps")
     type <- match.arg(tolower(type[1]),typeargs)
@@ -131,7 +133,7 @@ smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Lapl
      } else {
         subind <- Morpho::fastKmeans(dispfield$domain,k=subsample,threads=threads)
         tar <- dispfield$domain[subind$selected,,drop=FALSE]+dispfield$DisplacementField[subind$selected,,drop=FALSE]
-        tmp <- tps3d(dispfield$domain,dispfield$domain[subind$selected,,drop=FALSE],tar,threads = threads)
+        tmp <- tps3d(dispfield$domain,dispfield$domain[subind$selected,,drop=FALSE],tar,threads = threads,lambda=lambda)
         tmp <- tmp-dispfield$domain
     }
     dispfield$DisplacementField <- tmp
@@ -149,16 +151,17 @@ smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Lapl
 #' @param type kernel function for smoothing are "Gauss","Laplace", "Exponential" and "Bspline" (or any abbreviation thereof).
 #' @param gamma dampening factor (displacement vectors will be divided by \code{gamma}
 #' @param k integer: number of k closest points to evaluate.
+#' @param lambda smoothing factor for TP
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @note if points is identical to the domain of the displacement field, no interpolation will be performed.
 #' @return returns the displaced version of points
 #' @export
-applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss","Laplace","Exponential","TPS"), gamma=1, threads=1) {
+applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss","Laplace","Exponential","TPS"), gamma=1,lambda=1e-8, threads=1) {
     validDisplaceField(dispfield)
     ## check if we need to interpolate at all
     if (!checkDispFieldDomain(dispfield,points,threads=threads)) {
         message("dispfield domain and points not identical: interpolating...")
-        displacement <- interpolateDisplacementField(dispfield,points=points,k=k,sigma=sigma,type=type,gamma=gamma,threads=threads)
+        displacement <- interpolateDisplacementField(dispfield,points=points,k=k,sigma=sigma,type=type,gamma=gamma,lambda=lambda,threads=threads)
    } else
         displacement <- dispfield
     updatePos <- displacement$domain+displacement$DisplacementField

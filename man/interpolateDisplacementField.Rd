@@ -6,7 +6,7 @@
 \usage{
 interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
   gamma = 1, type = c("Gauss", "Laplace", "Exponential", "Bspline", "TPS"),
-  subsample = 2000, threads = 0)
+  subsample = 2000, lambda = 1e-08, threads = 0)
 }
 \arguments{
 \item{dispfield}{@param dispfield displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
@@ -22,6 +22,8 @@ interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
 \item{type}{kernel function for smoothing are "Gauss","Laplace", "Exponential", "Bspline" and "TPS" (or any abbreviation thereof).}
 
 \item{subsample}{integer: amount to subsample the field in case of type="TPS"}
+
+\item{lambda}{smoothing factor for TPS}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }
