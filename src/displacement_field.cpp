@@ -40,7 +40,7 @@ RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP clostPoints_, SEXP displa
 	uvec tmpW = conv_to<uvec>::from(closestInds.row(i));
 	//rowvec distances_at_pt = distances.row(i);
 	if (gk->CanUseDistance())
-	  out.row(i) = smooth_field_at_point_with_distance(displacement.rows(tmpW),distances.row(i),gk, gamma,smoothtype);
+	  out.row(i) = smooth_field_at_point_with_distance(displacement.rows(tmpW),distances.row(i),gk, gamma);
 	else
 	  out.row(i) = smooth_field_at_point(pt, clostPoints.rows(tmpW),displacement.rows(tmpW),gk, gamma);
       }

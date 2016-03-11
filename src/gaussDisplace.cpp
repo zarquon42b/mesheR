@@ -12,7 +12,7 @@ using namespace arma;
 typedef unsigned int uint;
 
 
-RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2_, SEXP sigma_, SEXP gamma_, SEXP clIW_, SEXP clIWdistances_, SEXP clIP_, SEXP clIPdistances_, SEXP tol_, SEXP rt0_, SEXP rt1_, SEXP rc_, SEXP oneway_,SEXP type_, SEXP threads_= wrap(1)){
+RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2_, SEXP sigma_, SEXP gamma_, SEXP clIW_, SEXP clIWdistances_, SEXP clIP_, SEXP clIPdistances_, SEXP tol_, SEXP rt0_, SEXP rt1_, SEXP rc_, SEXP oneway_,SEXP smoothtype_, SEXP threads_= wrap(1)){
   try {
     mat points = as<mat>(points_);
     mat out = points*0;
@@ -36,7 +36,7 @@ RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2
     double rc = as<double>(rc_);
     double tol = as<double>(tol_);
     bool oneway = as<bool>(oneway_);
-    int type = as<int>(type_);
+    int smoothtype = as<int>(smoothtype_);
     int threads = as<int>(threads_);
     vec use1(D1.n_rows);
     use1.fill(1);
@@ -57,13 +57,13 @@ RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2
       }
     }
     ScalarValuedKernel<rowvec>* gk;
-    if (type == 0)
+    if (smoothtype == 0)
       gk = new mesheRrow::GaussianKernel(sigma);
-    else if (type == 1)
+    else if (smoothtype == 1)
       gk = new mesheRrow::LaplacianKernel(sigma);
-    else if (type == 2)
+    else if (smoothtype == 2)
       gk = new mesheRrow::ExponentialKernel(sigma);
-    else if (type == 3)
+    else if (smoothtype == 3)
       gk = new mesheRrow::BsplineKernel(sigma);
 #pragma omp parallel for schedule(static) num_threads(threads)
     for (uint i = 0; i < out.n_rows; i++) {
@@ -74,11 +74,11 @@ RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2
       
       std::vector<float> use1tmp = conv_to< std::vector<float> >::from(use1(tmpW));
       if (gk->CanUseDistance()) {
-	direction_towards = smooth_field_at_point_with_distance(D1.rows(tmpW),clIWdistances.row(i),gk, gamma,type,use1tmp);
+	direction_towards = smooth_field_at_point_with_distance(D1.rows(tmpW),clIWdistances.row(i),gk, gamma,use1tmp);
 	if (!oneway) {
 	  uvec tmpP = conv_to<uvec>::from(armaclIP.row(i));
 	  std::vector<float> use2tmp = conv_to< std::vector<float> >::from(use2(tmpP));
-	  direction_backwards = smooth_field_at_point_with_distance(D2.rows(tmpP),clIPdistances.row(i),gk, gamma,type,use2tmp);
+	  direction_backwards = smooth_field_at_point_with_distance(D2.rows(tmpP),clIPdistances.row(i),gk, gamma,use2tmp);
 	}
       } else {
 	direction_towards = smooth_field_at_point(pt,clostPointsW.rows(tmpW),D1.rows(tmpW),gk, gamma,use1tmp);
