@@ -54,6 +54,7 @@ invertDisplacementField <- function(dispfield) {
 #' @param subsample integer: amount to subsample the field in case of type="TPS"
 #' @param lambda smoothing factor for TPS
 #' @param threads integer: number of threads to use for computing the interpolation.
+#' @param ... additional parameters - currentyl unused.
 #' @return returns an interpolated displacement field of class \code{displacement_field} at the positions of \code{points}.
 #' @note The k-closest coordinates of the displacement field are used to calculate a weighted (smoothed) displacement field for each point. The displacement field can then optionally be further smoothed using the function \code{\link{smoothDisplacementField}}. The smoothing kernels are  "Gauss","Laplace" and "Exponential". The displacement at point \code{x} will be the weighted displacment vectors of the k-closest displacement vectors. Be \code{d} the distance to a neightbouring point, the weight will be calculated as:
 #' 
@@ -75,7 +76,7 @@ invertDisplacementField <- function(dispfield) {
 #' }
 #' @importFrom Morpho tps3d
 #' @export
-interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),subsample=2000, lambda=1e-8,threads=0) {
+interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma=1,type=c("Gauss","Laplace","Exponential","Bspline","TPS"),subsample=2000, lambda=1e-8,threads=0,...) {
     validDisplaceField(dispfield)
     typeargs <- c("gauss","laplace","exponential","bspline","tps")
     type <- match.arg(tolower(type[1]),typeargs)
@@ -285,5 +286,58 @@ validDisplaceField <- function(x) {
 }
 
 
+
+#' convert a discrete irregular displacement field to a displacement grid
+#'
+#' convert a discrete irregular displacement field to a displacement grid
+#' @param displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
+#' @param spacing spacing between grid nodes
+#' @param margin percentage of offset around \code{x}
+#' @param IJK2RAS image to coordinate transform
+#' @param invert if TRUE, the displacement field will be inverted
+#' @param ... additional arguments passed to \code{\link{interpolateDisplacementField}} to choose interpolation etc..
+#' @return an object of class DisplacementField with additional attributes
+#' @export
+displacementField2Grid <- function(x,spacing=rep(2,3),margin=0.05,IJK2RAS=diag(c(-1,-1,1,1)),invert=FALSE,...) {
+    if (!inherits(x,"DisplacementField"))
+        stop("x must be a displacement field")
+    if (invert)
+        x <- invertDisplacementField(x)
+    xtrans <- lapply(x,applyTransform,IJK2RAS)
+    class(xtrans) <- class(x)
+    x <- xtrans
+    pts <- (x$domain)
+    ranges <- apply(pts,2,range)
+    ranges <- apply(ranges,2,extendrange,f=margin)
+    grid <- lapply(1:3,function(x) seq(from=ranges[1,x],to=ranges[2,x],by=spacing[x]))
+    mygrid <- as.matrix(expand.grid(grid[[1]],grid[[2]],grid[[3]]))
+    arrdims <- sapply(grid,length)
+    myarr <- array(NA,dim=arrdims)
+    indices <- as.matrix(expand.grid(1L:arrdims[1],1L:arrdims[2],1L:arrdims[3]))
+    dfgrid <- interpolateDisplacementField(x,mygrid,...)
+   
+    gridattributes <- list(indices=indices,origin=mygrid[1,],arraydim=arrdims,spacing=spacing)
+    attributes(dfgrid) <- append(attributes(dfgrid),gridattributes)
+    class(dfgrid) <- c("DisplacementGrid","DisplacementField")
+    return(dfgrid)
+}
+
+
+displacementGrid2Transform <- function(x) {
+    if (!require(SimpleITK))
+        stop("this function requires SimpleITK to be installed")
+    if (!inherits(x,"DisplacementGrid"))
+        stop("x must be of class DisplacementGrid")
+    attribs <- attributes(x)
+    img <- SimpleITK::Image(attribs$arraydim[1],attribs$arraydim[2],attribs$arraydim[3],"sitkVectorFloat64")
+    inds <- attribs$indices-1L
+     for(i in 1:(nrow(attribs$indices))) {
+        tmp=as.numeric(x$DisplacementField[i,])
+        img$SetPixelAsVectorFloat64(inds[i,],tmp)
+    }
+    img$SetSpacing(attribs$spacing)
+    img$SetOrigin(attribs$origin)
+    return(img)
+}
 
 
