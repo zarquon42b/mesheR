@@ -5,9 +5,10 @@
 \title{fit a model minimizing the (symmetric) mean squared  distance}
 \usage{
 modelFitting(model, tarmesh, iterations = 5, lbfgs.iter = 5,
-  symmetric = c(0, 1, 2), refdist = 1e+05, tardist = 1e+05, rho = pi/2,
-  sdmax = NULL, mahaprob = c("none", "chisq", "dist"), initparams = NULL,
-  k = 50, threads = 0, method = "lbfgs", silent = FALSE, ...)
+  lbfgs.orthantwise_c = 0, symmetric = c(0, 1, 2), refdist = 1e+05,
+  tardist = 1e+05, rho = pi/2, sdmax = NULL, mahaprob = c("none",
+  "chisq", "dist"), initparams = NULL, k = 50, threads = 0,
+  method = "lbfgs", silent = FALSE, ...)
 }
 \arguments{
 \item{model}{statistical model of class pPCA}
@@ -17,6 +18,22 @@ modelFitting(model, tarmesh, iterations = 5, lbfgs.iter = 5,
 \item{iterations}{numbers of iterations to run}
 
 \item{lbfgs.iter}{integer:}
+
+\item{lbfgs.orthantwise_c}{integer or integer vector of length iterations. Contains coefficient(x) for the \code{L1} norm of variables. This parameter should be set to zero for standard minimization
+problems. Setting this parameter to a positive value
+activates Orthant-Wise Limited-memory Quasi-Newton (OWL-QN)
+method, which minimizes the objective function \code{F(x)}
+combined with the L1 norm \code{|x|} of the variables, \code{{F(x) + C
+|x|}}. This parameter is the coefficient for the \code{|x|}, i.e.,
+\code{C}. As the L1 norm \code{|x|} is not differentiable at zero, the
+library modifies function and gradient evaluations from a
+client program suitably. The default value is zero. Note that
+the objective function minimized by alternative packages
+(e.g., \code{glmnet}) is of the form : \code{F(x)/N + C |x|}, where \code{N}
+is the number of parameters. \code{lbfgs} does not divide the
+likelihood function by \code{N}. To achieve equivalence with
+\code{glmnet} result, take this difference of implementation into
+account.}
 
 \item{symmetric}{integer: specify which MSE to minimize. 0=search both ways, 1=model to target, 2=target to model.}
 
@@ -67,11 +84,10 @@ statismo-shaperegistration/raw/master/data/VSD001-lm.csv","./VSD001-lm.csv",meth
 download.file(url="https://github.com/marcelluethi/
 statismo-shaperegistration/raw/master/data/VSD002-lm.csv","./VSD002-lm.csv",method = "w")
 
-ref <- read.vtk("VSD001_femur.vtk")
-tar <- read.vtk("VSD002_femur.vtk")
-ref.lm <- as.matrix(read.csv("VSD001-lm.csv",row.names=1))
-tar.lm <- as.matrix(read.csv("VSD002-lm.csv",row.names=1))
-mymod <- statismoModelFromRepresenter(ref,kernel=list(c(50,50)),ncomp = 100,isoScale = 0.1)
+ref.lm <- as.matrix(read.csv("VSD001-lm.csv",row.names=1,header = FALSE))
+tar.lm <- as.matrix(read.csv("VSD002-lm.csv",row.names=1,header = FALSE))
+Kernels <- SumKernels(GaussianKernel(50,50),IsoKernel(0.1,ref))
+mymod <- statismoModelFromRepresenter(ref,kernel=Kernels)
 mymodC <- RvtkStatismo::statismoConstrainModel(mymod,tar.lm,ref.lm,2)
 fit <- modelFitting(mymodC,tar,iterations = 15)
 #or without landmarks but instead with some icp steps
