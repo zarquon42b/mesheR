@@ -42,8 +42,7 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
 ### close lids ###
         for (i in 1:(lc-1))
             it <- rbind(it,c(lc*2+1,i+1,i))
-        
-        it <- rbind(it,c(lc*2+1,lc,1))
+        it <- rbind(it,c(1,lc,lc*2+1))
         
         for (i in (lc+1):(2*lc-1))
             it <- rbind(it,c(lc*2+2,i,i+1))
