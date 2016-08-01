@@ -78,8 +78,8 @@ registration)
 
 require(Morpho)
 data(nose)
-warpnose.long <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm)
-rotnose <- icp(warpnose.long,shortnose.mesh,lm1=longnose.lm,lm2=shortnose.lm,rhotol=0.7,uprange=0.9)
+longnose.mesh <- tps3d(shortnose.mesh,shortnose.lm,longnose.lm)
+rotnose <- icp(longnose.mesh,shortnose.mesh,lm1=longnose.lm,lm2=shortnose.lm,rhotol=0.7,uprange=0.9)
 \dontrun{
 require(rgl)
 shade3d(rotnose,col=2,alpha=0.7)
