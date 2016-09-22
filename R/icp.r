@@ -74,7 +74,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
               mysample <- fastKmeans(mesh1,k=subsample,threads=threads)$centers
           
       }
-      
+      starticks <- 10
       pro <- substring(pro[1],1L,1L)
       if (pro == "v") {
           project3d <- vcgClostKD
@@ -92,8 +92,10 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
       count <- 0
       while (count < iterations) {
           if (!silent) {
+              if ((count %% starticks)  == 0 && count != 0)
+                  cat(paste0(" ",count," "))
               if ((count %% 50)  == 0 && count != 0)
-                  cat(paste0(" ",count," \n"))
+                  cat("\n")
               cat("*")
               
           }
@@ -138,8 +140,11 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
               mysample <- applyTransform(mysample,trafo)
           count <- count+1
       }
-      if (!silent)
+      if (!silent) {
+          if ((count %% 50)  == 0 && count != 0)
+              cat(paste0(" ",count," \n"))
           cat("\n")
+      }
       if (getTransform) {
           trafo <- computeTransform(vert2points(mesh1),vert2points(meshorig),type=type)
           if (!is.null(lm1))
