@@ -91,8 +91,12 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
           cat(paste0("\n performing ",type," registration\n\n") )
       count <- 0
       while (count < iterations) {
-          if (!silent)
+          if (!silent) {
+              if ((count %% 50)  == 0 && count != 0)
+                  cat(paste0(" ",count," \n"))
               cat("*")
+              
+          }
           copymesh <- mesh1
           if (!is.null(subsample)) {
               mysample <- vcgClostKD(mysample,mesh1,threads=threads)
