@@ -53,9 +53,9 @@ remeshList <- function(matchlist,reference=1,random=FALSE,voxelSize = NULL, disc
 #' @param optiplace logical: if TRUE, mesh boundary is preserved.
 #' @param scaleindi logical: if TRUE, decimatiion is scale independent.
 #' @param normcheck logical: if TRUE, normal directions are considered.
-#' @param safeheap logical: if TRUE, safeheap update option enabled.
+#' @param qweightFactor numeric: >= 1. Quality range is mapped into a squared 01 and than into the 1 - QualityWeightFactor range.
 #' @param qthresh numeric: Quality threshold for decimation process.
-#' @param boundweight numeric: Weight assigned to mesh boundaries.
+#' @param boundweight numeric: Weight /vcgassigned to mesh boundaries.
 #' @param normalthr numeric: threshold for normal check in radians.
 #' @param silent logical, if TRUE no console output is issued.
 #'
@@ -63,13 +63,13 @@ remeshList <- function(matchlist,reference=1,random=FALSE,voxelSize = NULL, disc
 #' @details The decimation is applied to a reference and then the barycentric coordinates of the new vertices on the original surface are calculated. These are used to extract the corresponding positions of the remeshed versions on all meshes in the sample. The Decimation is performed by the function \code{vcgQEdecim} from the Rvcg-package.
 #' @importFrom Rvcg vcgQEdecim
 #' @export
-decimateList <- function(matchlist,reference=1,random=FALSE, tarface = NULL, percent = NULL, edgeLength = NULL, topo = FALSE, quality = TRUE, bound = FALSE, optiplace = TRUE,     scaleindi = TRUE, normcheck = FALSE, safeheap = FALSE, qthresh = 0.3,  boundweight = 1, normalthr = pi/2, silent = FALSE)  {
+decimateList <- function(matchlist,reference=1,random=FALSE, tarface = NULL, percent = NULL, edgeLength = NULL, topo = FALSE, quality = TRUE, bound = FALSE, optiplace = TRUE,     scaleindi = TRUE, normcheck = FALSE, qweightFactor =100, qthresh = 0.3,  boundweight = 1, normalthr = pi/2, silent = FALSE)  {
 
     if ((random))
         reference <- sample(length(matchlist),size=1)
 
     ref <- matchlist[[reference]]
-    remref <- vcgQEdecim(ref,tarface = tarface, percent = percent, edgeLength = edgeLength, topo = topo, quality = quality, bound = bound, optiplace = optiplace,     scaleindi = scaleindi, normcheck = normcheck, safeheap = safeheap, qthresh = qthresh,  boundweight = boundweight, normalthr = boundweight, silent = silent)
+    remref <- vcgQEdecim(ref,tarface = tarface, percent = percent, edgeLength = edgeLength, topo = topo, quality = quality, bound = bound, optiplace = optiplace,     scaleindi = scaleindi, normcheck = normcheck, qweightFactor=qweightFactor, qthresh = qthresh,  boundweight = boundweight, normalthr = boundweight, silent = silent)
     bary <- vcgClostKD(remref,ref,barycentric=T)
 
     outlist <- list()

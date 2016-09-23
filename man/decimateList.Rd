@@ -7,7 +7,7 @@
 decimateList(matchlist, reference = 1, random = FALSE, tarface = NULL,
   percent = NULL, edgeLength = NULL, topo = FALSE, quality = TRUE,
   bound = FALSE, optiplace = TRUE, scaleindi = TRUE, normcheck = FALSE,
-  safeheap = FALSE, qthresh = 0.3, boundweight = 1, normalthr = pi/2,
+  qweightFactor = 100, qthresh = 0.3, boundweight = 1, normalthr = pi/2,
   silent = FALSE)
 }
 \arguments{
@@ -38,11 +38,11 @@ long by dividing the triangle into 4 regular smaller triangles.}
 
 \item{normcheck}{logical: if TRUE, normal directions are considered.}
 
-\item{safeheap}{logical: if TRUE, safeheap update option enabled.}
+\item{qweightFactor}{numeric: >= 1. Quality range is mapped into a squared 01 and than into the 1 - QualityWeightFactor range.}
 
 \item{qthresh}{numeric: Quality threshold for decimation process.}
 
-\item{boundweight}{numeric: Weight assigned to mesh boundaries.}
+\item{boundweight}{numeric: Weight /vcgassigned to mesh boundaries.}
 
 \item{normalthr}{numeric: threshold for normal check in radians.}
 

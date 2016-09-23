@@ -24,7 +24,7 @@
 #' 
 #' @importFrom Rcpp evalCpp
 #' @importFrom graphics plot
-#' @importFrom grDevices col2rgb colorRampPalette extendrangergb
+#' @importFrom grDevices col2rgb colorRampPalette extendrange rgb
 #' @importFrom methods as
 #' @importFrom stats optim pnorm prcomp qchisq quantile
 
