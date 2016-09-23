@@ -20,8 +20,12 @@
 #' @keywords package
 #' @useDynLib mesheR
 #' @importFrom Morpho angle.calc closemeshKD invertFaces facenormals file2mesh mcNNindex meshcube meshDist meshres projRead rmUnrefVertex rmVertex rotmesh.onto rotonmat rotonto tangentPlane tps3d unrefVertex vert2points tps3d
-#' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgRaySearch vcgNonBorderEdge vcgSmooth vcgClostKD
-#' @importFrom Rcpp evalCpp
+#' @importFrom Rvcg vcgBorder vcgClost vcgGetEdge vcgRaySearch vcgNonBorderEdge vcgSmooth vcgClostKD vcgCreateKDtreeFromBarycenters vcgClostOnKDtreeFromBarycenters
 #' 
+#' @importFrom Rcpp evalCpp
+#' @importFrom graphics plot
+#' @importFrom grDevices col2rgb colorRampPalette extendrangergb
+#' @importFrom methods as
+#' @importFrom stats optim pnorm prcomp qchisq quantile
 
 NULL
