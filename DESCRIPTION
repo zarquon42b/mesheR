@@ -17,6 +17,7 @@ Imports:
     rgl(>= 0.93.963),
     Rcpp,
     lbfgs,
+    methods,
     colorRamps
 Suggests:
     RvtkStatismo
