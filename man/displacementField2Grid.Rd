@@ -8,6 +8,8 @@ displacementField2Grid(x, spacing = rep(2, 3), margin = 0.05,
   IJK2RAS = diag(c(-1, -1, 1, 1)), invert = FALSE, ...)
 }
 \arguments{
+\item{x}{field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
+
 \item{spacing}{spacing between grid nodes}
 
 \item{margin}{percentage of offset around \code{x}}
@@ -17,8 +19,6 @@ displacementField2Grid(x, spacing = rep(2, 3), margin = 0.05,
 \item{invert}{if TRUE, the displacement field will be inverted}
 
 \item{...}{additional arguments passed to \code{\link{interpolateDisplacementField}} to choose interpolation etc..}
-
-\item{displacement}{field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
 }
 \value{
 an object of class DisplacementField with additional attributes

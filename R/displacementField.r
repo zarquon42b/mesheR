@@ -117,7 +117,7 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
 #' @param type kernel function for smoothing are "Gauss","Laplace", "Exponential", "Bspline" and "TPS" (or any abbreviation thereof).
 #' @param iterations number of iterations to run
 #' @param subsample integer: amount to subsample the field in case of type="TPS"
-#'  @param lambda smoothing factor for TPS
+#' @param lambda smoothing factor for TPS
 #' @param threads integer: number of threads to use for computing the interpolation.
 #' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{plot.DisplacementField}}
 #' @export
@@ -290,7 +290,7 @@ validDisplaceField <- function(x) {
 #' convert a discrete irregular displacement field to a displacement grid
 #'
 #' convert a discrete irregular displacement field to a displacement grid
-#' @param displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
+#' @param x field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
 #' @param spacing spacing between grid nodes
 #' @param margin percentage of offset around \code{x}
 #' @param IJK2RAS image to coordinate transform

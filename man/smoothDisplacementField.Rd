@@ -19,8 +19,9 @@ smoothDisplacementField(dispfield, k = 10, sigma = 20, type = c("Gauss",
 
 \item{iterations}{number of iterations to run}
 
-\item{subsample}{integer: amount to subsample the field in case of type="TPS"
-@param lambda smoothing factor for TPS}
+\item{subsample}{integer: amount to subsample the field in case of type="TPS"}
+
+\item{lambda}{smoothing factor for TPS}
 
 \item{threads}{integer: number of threads to use for computing the interpolation.}
 }
