@@ -11,8 +11,8 @@ Depends:
     spam
 Imports:
     colorspace,
-    Rvcg (>= 0.7.1.140506),
-    Morpho (> 2.3.1.1),
+    Rvcg (>= 0.14),
+    Morpho (> 2.4),
     Matrix,
     rgl(>= 0.93.963),
     Rcpp,

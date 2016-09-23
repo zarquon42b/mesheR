@@ -24,7 +24,6 @@
 #' @param k integer: number of closest triangles on target that will be
 #' searched for hits.
 #' @param reflection logical: allow reflection.
-#' @param pro character: algorithm for closest point search "morpho" calls
 #' closemeshKD from the package Morpho, while vcg calls vcgClostKD from Rvcg.
 #' If the tow meshes have only little or no overlap, "vcg" can be really slow. Otherwise very fast. "morpho" is the stable but somewhat slower algorithm.
 #' @param silent logical: no verbosity
@@ -57,7 +56,7 @@
 #' }
 #' @importFrom Morpho fastKmeans
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE,pro=c("vcg","morpho"), silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=0) {
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE, silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=0) {
       meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
       mesh2 <- vcgUpdateNormals(mesh2)
        if (pcAlign) {
@@ -74,13 +73,9 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
               mysample <- fastKmeans(mesh1,k=subsample,threads=threads)$centers
           
       }
+      KDtree <- vcgCreateKDtreeFromBarycenters(mesh2)
       starticks <- 10
-      pro <- substring(pro[1],1L,1L)
-      if (pro == "v") {
-          project3d <- vcgClostKD
-      } else if (pro == "m") {
-          project3d <- closemeshKD
-      }
+           
       type <- match.arg(type,c("rigid","similarity","affine"))
       if (!is.null(lm1) && !pcAlign){## perform initial rough registration
           trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection)
@@ -105,7 +100,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
               minclost <- min(minclost,subsample)
               copymesh <- mysample
           }
-          proMesh <- project3d(copymesh,mesh2,sign=F,k=k,threads=threads) ## project mesh1 onto mesh2
+          proMesh <- vcgClostOnKDtreeFromBarycenters(KDtree,copymesh,sign=F,k=k,threads=threads) ## project mesh1 onto mesh2
           x1 <- vert2points(copymesh)
           x2 <- vert2points(proMesh)
           dists <- abs(proMesh$quality)
