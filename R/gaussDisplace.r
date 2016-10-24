@@ -488,7 +488,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         time1 <- Sys.time()
         gc()
         if (!silent && i < 1e10) {
-            cat(paste("completed iteration",i, "in", round(time1-time0,2), "seconds\n"))
+            cat(paste("completed iteration",i, "in", round(as.numeric(time1-time0,unit="secs"),2), "seconds\n"))
             cat(paste(" Info: Average distance to target:",distance,"\n"))
             cat(paste0("average vertex displacement to last iteration = ",t.dist,"\n"))
             cat("****************\n")

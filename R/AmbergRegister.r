@@ -368,7 +368,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                
                 time1 <- Sys.time()
                 if (!silent && count < 1e10) {
-                    cat(paste("-> finished iteration",count,"in",round(time1-time0,2), "seconds\n"))
+                    cat(paste("-> finished iteration",count,"in",round(as.numeric(time1-time0,unit="secs"),2), "seconds\n"))
                     cat(paste(" Info: MSE between iterations:",error,"\n"))
                     cat(paste(" Info: Average distance to target:",distance,"\n"))
                     if (error < tol)
