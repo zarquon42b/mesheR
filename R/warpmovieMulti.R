@@ -64,10 +64,9 @@ warpmovieMulti.list <- function(..., n, col=NULL, folder=NULL, movie="warpmovie"
     
     if (!add)
         open3d()
-
-    render3d <- shade3d
+    back <- front <- "filled"
     if (shade[1] == "w")
-        render3d <- wire3d
+        back <- front <- "lines"
     ## get bbox
     ##bbox <- apply(rbind(vert2points(x),vert2points(y)),2,range)
     bbox0 <- lapply(args,function(x) x <- apply(vert2points(x),2,range))
@@ -104,7 +103,7 @@ warpmovieMulti.list <- function(..., n, col=NULL, folder=NULL, movie="warpmovie"
             }
                     
                 
-            a <- render3d(mesh,col=col,specular=1)
+            a <- shade3d(mesh,col=col,specular=1,back=back,front=front)
             if (shade[1] == "b"){
                 tmesh <- mesh
                 tmesh$material$color <- NULL

@@ -379,7 +379,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         shade3d(mesh2,col=col1,specular=1,alpha=alpha)
         if (!is.null(rglid))
             rgl.pop(id=rglid)
-        rglid <- wire3d(mesh1,col=col2)
+        rglid <- shade3d(mesh1,col=col2,front="lines", back="lines")
         
         if (!is.null(folder)) {
             if (substr(folder,start=nchar(folder),stop=nchar(folder)) != "/") 
@@ -476,7 +476,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             
             if (!is.null(rglid))
                 rgl.pop(id=rglid)
-            rglid <- wire3d(mesh1,col=col2)
+            rglid <- shade3d(mesh1,col=col2,front="lines", back="lines",)
             if (!is.null(folder)) {
                 filename <- sprintf("%s%04d.png", movie, movcount)
                 movcount <- movcount+1
