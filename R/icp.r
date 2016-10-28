@@ -56,7 +56,7 @@
 #' }
 #' @importFrom Morpho fastKmeans
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE, silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=0) {
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE, silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=0) {
       meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
       mesh2 <- vcgUpdateNormals(mesh2)
        if (pcAlign) {
@@ -64,15 +64,16 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
                 if (!is.null(lm1))
                     lm1 <- applyTransform(lm1,computeTransform(mesh2,mesh1))
             }
-      
+      mysample <- NULL
       if (!is.null(subsample)) {
           subsampletype <- match.arg(subsampletype[1],c("pd","km"))
           if (subsampletype == "pd")
               mysample <- Rvcg::vcgSample(mesh1,type=subsampletype,SampleNum=subsample,MCsamp = 20)
           else
               mysample <- fastKmeans(mesh1,k=subsample,threads=threads)$centers
-          
+          mysample <- vcgClostKD(mysample,mesh1,threads=threads)
       }
+      origsample <- mysample
       KDtree <- vcgCreateKDtreeFromBarycenters(mesh2)
       starticks <- 10
            
@@ -92,48 +93,66 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=0.9, maxd
               if ((count %% 50)  == 0 && count != 0)
                   cat("\n")
               cat("*")
-              
           }
           copymesh <- mesh1
-          if (!is.null(subsample)) {
-              mysample <- vcgClostKD(mysample,mesh1,threads=threads)
+          if (!is.null(subsample) ) {
               minclost <- min(minclost,subsample)
               copymesh <- mysample
           }
+
           proMesh <- vcgClostOnKDtreeFromBarycenters(KDtree,copymesh,sign=F,k=k,threads=threads) ## project mesh1 onto mesh2
           x1 <- vert2points(copymesh)
           x2 <- vert2points(proMesh)
           dists <- abs(proMesh$quality)
-         
+          good <- 1:nrow(x1)
+          
           ## check if normals angles are below rhotol
-          
-          normchk <- normcheck(copymesh,proMesh)
-          goodnorm <- which(normchk < rhotol)
-          x1 <- x1[goodnorm,]
-          x2 <- x2[goodnorm,]
-          dists <- dists[goodnorm]
-          
-          ## check distances of remaining points and select points
-          if (is.null(maxdist)) {
-              qud <- quantile(dists,probs=uprange)
-              good <- which(dists <= qud)
-          } else { 
-              qud <- maxdist
-              good <- which(dists <= qud)
-              increase <- distinc
-              while (length(good) < minclost) {
-                  ## distgood <- as.logical(abs(clost$quality) <= (dist+increase))
-                  good <- which(dists <= (qud+increase))
-                  if (!silent)
-                      cat(paste("distance increased to",qud+increase,"\n"))
-                  increase <- increase+distinc
+          if (rhotol < pi) {
+              normchk <- normcheck(copymesh,proMesh)
+              goodnorm <- which(normchk < rhotol)
+              x1 <- x1[goodnorm,]
+              x2 <- x2[goodnorm,]
+              dists <- dists[goodnorm]
+              good <- 1:nrow(x1)
+          }
+          if (!is.null(maxdist) || uprange < 1) {
+              ## check distances of remaining points and select points
+              if (is.null(maxdist)) {
+                  qud <- quantile(dists,probs=uprange)
+                  good <- which(dists <= qud)
+              } else { 
+                  qud <- maxdist
+                  good <- which(dists <= qud)
+                  increase <- distinc
+                  while (length(good) < minclost) {
+                      good <- which(dists <= (qud+increase))
+                      if (!silent)
+                          cat(paste("distance increased to",qud+increase,"\n"))
+                      increase <- increase+distinc
+                  }
               }
           }
+          ## get transform for current iteration
           trafo <- computeTransform(x2[good,],x1[good,],type=type)
-          mesh1 <- applyTransform(mesh1,trafo)
-          if (!is.null(subsample))
+
+          ## apply transformation to mesh1 if no subsampling
+          if (is.null(subsample)) {
+              mesh1 <- applyTransform(mesh1,trafo)
+          }
+          if (!is.null(subsample)) {
+              ## hack until changes from Morpho::applyTransform are published
+              ntrafo <- trafo
+              ntrafo[1:3,4] <- 0
+              orignorms <- mysample$normals
+              orignorms[1:3,] <- t(applyTransform(t(orignorms[1:3,]),ntrafo))
               mysample <- applyTransform(mysample,trafo)
+              mysample$normals <- orignorms
+          }
           count <- count+1
+      }
+      if (!is.null(subsample)) {
+          trafo <- computeTransform(mysample,origsample)
+          mesh1 <- applyTransform(mesh1,trafo)
       }
       if (!silent) {
           if ((count %% 50)  == 0 && count != 0)
