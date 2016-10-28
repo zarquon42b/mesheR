@@ -122,7 +122,7 @@ map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
 require(rgl)
 meshDist(map$mesh, humface ,from=-3,to=3,tol=0.5)
 # render original mesh as wireframe
-wire3d(humface)
+shade3d(humface,front="lines",back="lines")
 }
 ##example with different icp matchings:
 rigid <- list(iterations=30,subsample=200,rhotol=pi/2,uprange=0.6)
