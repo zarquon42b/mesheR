@@ -96,9 +96,9 @@ warpmovieMulti.list <- function(..., n, col=NULL, folder=NULL, movie="warpmovie"
             mesh <- vcgUpdateNormals(mesh)
             if (mixcolor && is.null(whichcolor)) {
                 if (is.null(mesh$material$color)) 
-                    mesh$material$color <- matrix("#FFFFFF",mesh$it[1],mesh$it[2])
+                    mesh$material$color <- matrix("#FFFFFF",nrow(mesh$it),ncol(mesh$it))
                 if (is.null(y$material$color)) 
-                    y$material$color <- matrix("#FFFFFF",y$it[1],y$it[2])
+                    y$material$color <- matrix("#FFFFFF",nrow(y$it),ncol(y$it))
                 mesh <- mixColorMesh(mesh,y, alpha=((i/n)))
             }
                     
