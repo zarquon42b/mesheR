@@ -56,7 +56,7 @@ placeDowels <- function(lm, mesh, ldowel, render=TRUE,col=1,radius=1,meshcol=3, 
                 else
                     ltmp=ldowel
 
-                dowels[[i]] <- cylinder(projLM$vb[1:3,i],projLM$normals[1:3,i],length=ltmp,radius=radius,fine=fine,adNormals=FALSE)
+                dowels[[i]] <- cylinder(projLM$vb[1:3,i],projLM$normals[1:3,i],length=ltmp,radius=radius,fine=fine,addNormals=FALSE)
                 
                 if (!is.null(dowelcol))
                     dowels[[i]]$material$color <- matrix(dowelcol,dim(dowels[[i]]$it)[1],dim(dowels[[i]]$it)[2])
