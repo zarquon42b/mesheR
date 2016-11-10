@@ -7,18 +7,18 @@
 #' @param length length of the cylinder
 #' @param radius radius of the cylinder's base
 #' @param fine amount of vertices to create the base circle
-#' @param adNormals logical: if TRUE, normal vectors for each vertex are calculated.
+#' @param addNormals logical: if TRUE, normal vectors for each vertex are calculated.
 #' @return
 #' a triangular mesh of class 'mesh3d'
 #' @examples
-#' cyl <- cylinder(1:3,1:3,4,adNormals = TRUE)
+#' cyl <- cylinder(1:3,1:3,4,addNormals = TRUE)
 #' \dontrun{
 #' require(rgl)
 #' wire3d(cyl)
 #' }
 #' @importFrom rgl translate3d
 #' @export cylinder
-cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
+cylinder <- function(x,dirs,length,radius=1,fine=20,addNormals=FALSE)
     {
 ### create a 3D mesh representing a cylinder and place it in a requested positon
 ### create initial circle ###
@@ -70,7 +70,7 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,adNormals=FALSE)
         cyl <- invertFaces(cyl)
         cyl$normals <- NULL
         cyl <- translate3d(cyl,x[1],x[2],x[3])
-        if (adNormals)
+        if (addNormals)
             cyl <- vcgUpdateNormals(cyl)
             
         return(cyl)
