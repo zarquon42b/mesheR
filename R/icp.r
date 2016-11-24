@@ -65,6 +65,16 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
                     lm1 <- applyTransform(lm1,computeTransform(mesh2,mesh1))
             }
       mysample <- NULL
+      
+      KDtree <- vcgCreateKDtreeFromBarycenters(mesh2)
+      starticks <- 10
+           
+      type <- match.arg(type,c("rigid","similarity","affine"))
+      if (!is.null(lm1) && !pcAlign){## perform initial rough registration
+          trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection)
+          mesh1 <- applyTransform(mesh1,trafo)
+      }
+      ## create subsample to speed up registration
       if (!is.null(subsample)) {
           subsampletype <- match.arg(subsampletype[1],c("pd","km"))
           if (subsampletype == "pd")
@@ -74,15 +84,6 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
           mysample <- vcgClostKD(mysample,mesh1,threads=threads)
       }
       origsample <- mysample
-      KDtree <- vcgCreateKDtreeFromBarycenters(mesh2)
-      starticks <- 10
-           
-      type <- match.arg(type,c("rigid","similarity","affine"))
-      if (!is.null(lm1) && !pcAlign){## perform initial rough registration
-          trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection)
-          mesh1 <- applyTransform(mesh1,trafo)
-      }
-      
       if (!silent) 
           cat(paste0("\n performing ",type," registration\n\n") )
       count <- 0
