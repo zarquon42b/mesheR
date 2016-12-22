@@ -13,8 +13,8 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
         }
         project3d <- protmp
     } else if (pro =="v")
-          project3d <- vcgClost
-   
+        project3d <- vcgClost
+    
     angdev <- ifelse((is.null(rhotol) || !angclost),0,rhotol)
     
     rc <- 0
@@ -137,6 +137,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @param rigid named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param similarity named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).
 #'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
+#' @param tps logical: if TRUE and landmarks are provided, the reference will be mapped to the target using a Thin-Plate Spline interpolation. Overrides \code{rigid},\code{affine} and \code{similarity}.
 #' @param nh Integer: neighbourhood (number vertices) for controlling
 #' displacement smoothing, default is 150/mesh resolution.
 #' @param toldist Integer: Exclude everything from the whole procedure with a
@@ -226,7 +227,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,bboxCrop=NULL,threads=0,cb=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,tps=FALSE,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,bboxCrop=NULL,threads=0,cb=NULL,...) {
     typeargs <- c("gauss","laplace","exponential","bspline")
     displacementsmooth <- match.arg(tolower(displacementsmooth[1]),typeargs)
     displacementsmooth <- match(displacementsmooth,typeargs)-1
@@ -235,15 +236,15 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         mesh1 <- x
         Bayes <- NULL
     } else if (inherits(x, "BayesDeform"))
-          Bayes <- x
-      else
-          stop("x must be an object of class mesh3d or BayesDeform")
+        Bayes <- x
+    else
+        stop("x must be an object of class mesh3d or BayesDeform")
     if (!is.null(Bayes)) {
         if (!requireNamespace("RvtkStatismo"))
             stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
         mesh1 <- RvtkStatismo::DrawMean(Bayes$model)
     }
-        
+    
     
     if (!is.null(angtol)) {
         mesh1 <- vcgUpdateNormals(mesh1)
@@ -258,7 +259,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             AmbergK <- rep(AmbergK,iterations)
             ambergsingle <- TRUE
         } else if (length(AmbergK) != iterations)
-              stop("AmbergK must be vector of length 'iterations'")
+            stop("AmbergK must be vector of length 'iterations'")
         
         if (length(AmbergLambda) == 1)
             AmbergLambda <- rep(AmbergLambda,iterations)
@@ -288,14 +289,14 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawSample(Bayes$model,Bayes$initparams))
         if (hasLM)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-        #wire3d(mesh1);spheres3d(lm1)
-        #return(1)
+                                        #wire3d(mesh1);spheres3d(lm1)
+                                        #return(1)
     }
     
     ## do icp matching
     lmModel <- NULL
     if (hasLM) {   ## case: landmarks are provided
-       
+        
         if (!is.null(Bayes)) {
             if (Bayes$align)
                 lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
@@ -311,39 +312,44 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
                 }
             }
-        }           
-        if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
-            if (is.null(Bayes))                
-                rigid <- list(iterations=0)
-            else if (Bayes$align)
-                rigid <- list(iterations=0)
         }
-        if (!is.null(rigid)) { ##perform rigid icp-matching
-            rigid$lm1 <- lm1
-            rigid$lm2 <- lm2
-            mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent,threads=threads)
+        if (tps) {
+            mesh1 <- tps3d(mesh1,lm1,lm2,threads=threads)
             lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-        }
-        if (!is.null(similarity)) {##similarity matching
-            if (is.null(rigid)) {
-                similarity$lm1 <- lm1
-                similarity$lm2 <- lm2
+        } else {
+            if (is.null(rigid) && is.null(affine) && is.null(similarity)) {
+                if (is.null(Bayes))                
+                    rigid <- list(iterations=0)
+                else if (Bayes$align)
+                    rigid <- list(iterations=0)
             }
-            mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent,threads=threads)
-            lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
-        }
-        if (!is.null(affine)) {##similarity matching
-            if (is.null(rigid) && is.null(similarity)) {
-                affine$lm1 <- lm1
-                affine$lm2 <- lm2
+            if (!is.null(rigid)) { ##perform rigid icp-matching
+                rigid$lm1 <- lm1
+                rigid$lm2 <- lm2
+                mesh1 <- rigSimAff(mesh1,mesh2,rigid,type="r",silent = silent,threads=threads)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
-            mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent,threads=threads)
-            lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            if (!is.null(similarity)) {##similarity matching
+                if (is.null(rigid)) {
+                    similarity$lm1 <- lm1
+                    similarity$lm2 <- lm2
+                }
+                mesh1 <- rigSimAff(mesh1,mesh2,similarity,type="s",silent = silent,threads=threads)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
+            if (!is.null(affine)) {##similarity matching
+                if (is.null(rigid) && is.null(similarity)) {
+                    affine$lm1 <- lm1
+                    affine$lm2 <- lm2
+                }
+                mesh1 <- rigSimAff(mesh1,mesh2,affine,type="a",silent = silent,threads=threads)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
+            }
         }
         if (!is.null(Bayes)) 
             mesh1 <- vcgUpdateNormals(RvtkStatismo::PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align,sdmax=Bayes$sdmax[1],mahaprob=Bayes$mahaprob))
-    
-        #mesh1 <- vcgUpdateNormals(RvtkStatismo::PredictSample(Bayes$model,mesh1,representer = T,lmDataset=lm1,lmModel=lmModel,align=TRUE))
+        
+                                        #mesh1 <- vcgUpdateNormals(RvtkStatismo::PredictSample(Bayes$model,mesh1,representer = T,lmDataset=lm1,lmModel=lmModel,align=TRUE))
         
     } else {
         if (!is.null(rigid) || !is.null(affine) || !is.null(similarity)) {
@@ -360,10 +366,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         if (!silent)
             cat("cropping target mesh\n")
     } 
-        
+    
     if (!is.null(bbox))
         bbox <- getMeshBox(mesh2,extend=bbox)
-        
+    
     if (visualize) {
         rglid <- NULL
         if (!length(rgl.ids()$id)) 
@@ -449,7 +455,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         
         if (Amberg) {
             if (!useiter) 
-            mytry <- try(ambtry <- AmbergDeformSpam(meshorig,vert2points(meshorig),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i],S=S,Hchol=Hchol),FALSE)
+                mytry <- try(ambtry <- AmbergDeformSpam(meshorig,vert2points(meshorig),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i],S=S,Hchol=Hchol),FALSE)
             else
                 mytry <- try(ambtry <- AmbergDeformSpam(mesh1,vert2points(mesh1),tmp$addit,lambda=AmbergLambda[i],k0=AmbergK[i],S=S,Hchol=Hchol),FALSE)
 
@@ -492,7 +498,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             cat(paste(" Info: Average distance to target:",distance,"\n"))
             cat(paste0("average vertex displacement to last iteration = ",t.dist,"\n"))
             cat("****************\n")
-           
+            
         }
         if (i <1e10 && !is.null(cb))
             cb(i,distance,t.dist)

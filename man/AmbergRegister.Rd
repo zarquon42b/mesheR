@@ -8,8 +8,8 @@ AmbergRegister(x, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   iterations = 15, rho = pi/2, dist = 2, border = FALSE,
   smooth = TRUE, smoothit = 1, smoothtype = "t", tol = 1e-10,
   useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
-  similarity = NULL, affine = NULL, pcAlign = FALSE, nn = 20,
-  silent = FALSE, useConstrained = TRUE, forceLM = FALSE,
+  similarity = NULL, affine = NULL, tps = FALSE, pcAlign = FALSE,
+  nn = 20, silent = FALSE, useConstrained = TRUE, forceLM = FALSE,
   visualize = FALSE, folder = NULL, noinc = FALSE, bboxCrop = NULL,
   threads = 0)
 }
@@ -61,7 +61,8 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 
 \item{similarity}{named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).}
 
-\item{affine}{named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)}
+\item{affine}{named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
+@param tps logical: if TRUE and landmarks are provided, the reference will be mapped to the target using a Thin-Plate Spline interpolation. Overrides \code{rigid},\code{affine} and \code{similarity}.}
 
 \item{pcAlign}{if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.}
 

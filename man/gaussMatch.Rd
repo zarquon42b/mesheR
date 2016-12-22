@@ -8,13 +8,14 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   smoothtype = c("taubin", "laplace", "HClaplace"), sigma = 20,
   displacementsmooth = c("Gauss", "Laplace", "Exponential"), gamma = 2,
   f = 1.2, oneway = F, lm1 = NULL, lm2 = NULL, rigid = NULL,
-  similarity = NULL, affine = NULL, nh = NULL, toldist = 0,
-  pro = c("kd", "vcg", "morpho"), k0 = 50, prometh = 1, angtol = pi/2,
-  border = FALSE, horiz.disp = NULL, useiter = FALSE, AmbergK = NULL,
-  AmbergLambda = NULL, tol = 1e-05, useConstrained = TRUE,
-  angclost = TRUE, noinc = FALSE, silent = FALSE, visualize = FALSE,
-  folder = NULL, alpha = 0.7, col1 = "red", col2 = "white",
-  bbox = NULL, bboxCrop = NULL, threads = 0, cb = NULL, ...)
+  similarity = NULL, affine = NULL, tps = FALSE, nh = NULL,
+  toldist = 0, pro = c("kd", "vcg", "morpho"), k0 = 50, prometh = 1,
+  angtol = pi/2, border = FALSE, horiz.disp = NULL, useiter = FALSE,
+  AmbergK = NULL, AmbergLambda = NULL, tol = 1e-05,
+  useConstrained = TRUE, angclost = TRUE, noinc = FALSE, silent = FALSE,
+  visualize = FALSE, folder = NULL, alpha = 0.7, col1 = "red",
+  col2 = "white", bbox = NULL, bboxCrop = NULL, threads = 0,
+  cb = NULL, ...)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.}
@@ -54,6 +55,8 @@ initial rotation of mesh1 onto mesh2.}
 \item{similarity}{named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).}
 
 \item{affine}{named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)}
+
+\item{tps}{logical: if TRUE and landmarks are provided, the reference will be mapped to the target using a Thin-Plate Spline interpolation. Overrides \code{rigid},\code{affine} and \code{similarity}.}
 
 \item{nh}{Integer: neighbourhood (number vertices) for controlling
 displacement smoothing, default is 150/mesh resolution.}
