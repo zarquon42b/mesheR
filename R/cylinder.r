@@ -18,7 +18,7 @@
 #' }
 #' @importFrom rgl translate3d
 #' @export cylinder
-cylinder <- function(x,dirs,length,radius=1,fine=20,addNormals=FALSE)
+cylinder <- function(x,dirs,length,radius=1,fine=20,addNormals=FALSE,closelids=TRUE)
     {
 ### create a 3D mesh representing a cylinder and place it in a requested positon
 ### create initial circle ###
@@ -40,13 +40,15 @@ cylinder <- function(x,dirs,length,radius=1,fine=20,addNormals=FALSE)
         it <- rbind(it,c(lc,1,lc+1))
         it <- rbind(it,c(2*lc,lc,lc+1))
 ### close lids ###
-        for (i in 1:(lc-1))
-            it <- rbind(it,c(lc*2+1,i+1,i))
-        it <- rbind(it,c(1,lc,lc*2+1))
-        
-        for (i in (lc+1):(2*lc-1))
-            it <- rbind(it,c(lc*2+2,i,i+1))
-        it <- rbind(it,c(lc*2+2,lc*2,lc+1))
+        if (closelids) {
+            for (i in 1:(lc-1))
+                it <- rbind(it,c(lc*2+1,i+1,i))
+            it <- rbind(it,c(1,lc,lc*2+1))
+            
+            for (i in (lc+1):(2*lc-1))
+                it <- rbind(it,c(lc*2+2,i,i+1))
+            it <- rbind(it,c(lc*2+2,lc*2,lc+1))
+        }
 ### end faces creation ###
         
 ### rotate initial circle and create opposing circle ###    
