@@ -4,7 +4,7 @@
 #include <omp.h>
 #endif
 
-#include "angcheck.h"
+//#include "angcheck.h"
 using namespace Rcpp;
 using namespace arma;
 vec armacross(vec& x, vec& y) {

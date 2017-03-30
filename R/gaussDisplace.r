@@ -50,9 +50,9 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
     rt1 <- rep(0,nrow(M))
     if (!is.null(rhotol)) {
         rc <- rhotol
-        rt0 <- normcheck(mesh1,Spro)
+        rt0 <- normcheck(mesh1,Spro,threads = threads)
         if (!oneway)
-            rt1 <- normcheck(mesh2,Mpro)
+            rt1 <- normcheck(mesh2,Mpro,threads = threads)
     }
     if (!is.null(horiz.disp)) {
         if (is.null(rhotol))

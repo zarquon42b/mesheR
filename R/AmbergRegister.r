@@ -294,7 +294,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             vert_old <- vert2points(tmp$mesh)
             clost <- vcgClostKD(tmp$mesh,mesh2,k=nn,threads=threads)
             verts1 <- vert2points(clost)
-            nc <- normcheck(clost,tmp$mesh)                        
+            nc <- normcheck(clost,tmp$mesh,threads = threads)                        
             
             ## find valid hits
             normgood <- as.logical(nc < rho)

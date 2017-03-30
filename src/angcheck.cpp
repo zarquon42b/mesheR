@@ -1,51 +1,48 @@
-#include "Rcpp.h"
+#include "RcppArmadillo.h"
 using namespace Rcpp;
+using namespace arma;
 
-double dot(Rcpp::NumericVector c,Rcpp::NumericVector d)
-   {     int nc= c.size();
-         double e=0;
-         for (int i = 0; i < nc; i++)
-         {  e=e+c(i)*d(i); }
-         return e;
-   }
+// double dot(vec c,vec d)
+//    {     int nc= c.size();
+//          double e=0;
+//          for (int i = 0; i < nc; i++)
+//          {  e=e+c(i)*d(i); }
+//          return e;
+//    }
 
-double norm(Rcpp::NumericVector c)
-   {     
-     double e = sqrt(dot(c,c));
+// double norm(Rcpp::NumericVector c)
+//    {     
+//      double e = sqrt(dot(c,c));
      
-         return e;
-   }
+//          return e;
+//    }
 
 
-double anglecalc(NumericVector a, NumericVector b) {
-   double alen = norm(a);
-   double blen = norm(b);
-   if (alen > 0)
-     a = a/alen;
-   if (blen > 0)
-     b = b/blen;
-   NumericVector diffvec = a -b;
+double anglecalc(vec a, vec b) {
+  a = normalise(a);
+  b = normalise(b);
+  vec diffvec = a -b;
    double angle = acos((dot(diffvec,diffvec)-2)/-2);
    return angle;
 }
 
 
-RcppExport SEXP angcheck(SEXP mat1_, SEXP mat2_) {
+RcppExport SEXP angcheck(SEXP mat1_, SEXP mat2_, SEXP threads_) {
   try {
-    NumericMatrix mat1(mat1_);
-    NumericMatrix mat2(mat2_);
-    NumericVector angles(mat1.ncol());
-    for (int i = 0; i < mat1.ncol();i++) {
-      angles[i] = anglecalc(mat1(_,i), mat2(_,i));
+    mat mat1 = as<mat>(mat1_);
+    mat mat2 = as<mat>(mat2_);
+    int threads = as<int>(threads_);
+    arma::vec angles(mat1.n_cols);
+#pragma omp parallel for schedule(static) num_threads(threads)
+    for (int i = 0; i < mat1.n_cols;i++) {
+      angles(i) = anglecalc(mat1.col(i), mat2.col(i));
     }
     
-    return angles;
+    return wrap(angles);
   }  catch (std::exception& e) {
     ::Rf_error( e.what());
-    return wrap(1);
   } catch (...) {
     ::Rf_error("unknown exception");
-    return wrap(1);
   }
 }
 

@@ -109,7 +109,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
           
           ## check if normals angles are below rhotol
           if (rhotol < pi) {
-              normchk <- normcheck(copymesh,proMesh)
+              normchk <- normcheck(copymesh,proMesh,threads)
               goodnorm <- which(normchk < rhotol)
               x1 <- x1[goodnorm,]
               x2 <- x2[goodnorm,]
@@ -174,14 +174,14 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
 #' compare normal directions between two states of a mesh
 #' @param mesh1 triangular mesh
 #' @param mesh2 triangular mesh
-#'
+#' @param threads number of threads to use
 #' @return numeric vector containing angles between corresponding normals
 #' @export normcheck
 
-normcheck <- function(mesh1,mesh2)
+normcheck <- function(mesh1,mesh2,threads=0)
   {
     x1norm <- mesh1$normals[1:3,]
     x2norm <- mesh2$normals[1:3,]
-    normcheck <- .Call("angcheck",x1norm,x2norm)
+    normcheck <- .Call("angcheck",x1norm,x2norm,threads)
     return(normcheck)
   }
