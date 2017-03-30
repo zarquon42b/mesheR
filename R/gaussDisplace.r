@@ -420,15 +420,6 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
     distance <- 1e10
     while (i <= iterations && t.dist > tol ) {
         time0 <- Sys.time()
-        if (!is.null(smooth) && i > 1) {
-            if (i %% smooth == 0) {
-                if (!silent)
-                    cat("smoothing step\n")
-                mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
-                                        #if (!silent)
-                                        #cat("smoothing finished\n")
-            }
-        }
         vb0 <- vert2points(mesh1)
         sigma <- sigma0*f^(-(i-1))
         if (!silent)
@@ -489,7 +480,15 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 rgl.snapshot(filename,fmt="png")
             }
         }
-        
+        if (!is.null(smooth)) {# && i > 1) {
+            if (i %% smooth == 0) {
+                if (!silent)
+                    cat("smoothing step\n")
+                mesh1 <- vcgSmooth(mesh1,type=smoothtype,iteration=smoothit)
+                                        #if (!silent)
+                                        #cat("smoothing finished\n")
+            }
+        }
         t.dist <- mean(sqrt(rowSums((vert2points(mesh1)-vb0)^2)))
         time1 <- Sys.time()
         gc()
