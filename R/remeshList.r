@@ -41,35 +41,18 @@ remeshList <- function(matchlist,reference=1,random=FALSE,voxelSize = NULL, disc
 #' @param matchlist a list of meshes with corresponding vertices (same amount and pseudo-homologous positions), e.g. registered with \code{\link{gaussMatch}}. Meshes do not need to be aligned.
 #' @param reference integer: select the specimen the to which the decimation is to applied initially.
 #' @param random if TRUE, a random specimen is selected for initial decimation
-#' @param tarface Integer: set number of target faces.
-#' @param percent Numeric: between 0 and 1. Set amount of reduction relative to
-#' existing face number. Overrides tarface argument. 
-#' @param edgeLength Numeric: tries to decimate according to a target mean edge
-#' length. Under the assumption of regular triangles, the edges are half as
-#' long by dividing the triangle into 4 regular smaller triangles.
-#' @param topo logical: if TRUE, mesh topology is preserved.
-#' @param quality logical: if TRUE, vertex quality is considered.
-#' @param bound logical: if TRUE, mesh boundary is preserved.
-#' @param optiplace logical: if TRUE, mesh boundary is preserved.
-#' @param scaleindi logical: if TRUE, decimatiion is scale independent.
-#' @param normcheck logical: if TRUE, normal directions are considered.
-#' @param qweightFactor numeric: >= 1. Quality range is mapped into a squared 01 and than into the 1 - QualityWeightFactor range.
-#' @param qthresh numeric: Quality threshold for decimation process.
-#' @param boundweight numeric: Weight /vcgassigned to mesh boundaries.
-#' @param normalthr numeric: threshold for normal check in radians.
-#' @param silent logical, if TRUE no console output is issued.
-#'
+#' @param ... parameters passed to vcgQEdecim
 #' @return a list of decimated meshes with correspondences preserved.
 #' @details The decimation is applied to a reference and then the barycentric coordinates of the new vertices on the original surface are calculated. These are used to extract the corresponding positions of the remeshed versions on all meshes in the sample. The Decimation is performed by the function \code{vcgQEdecim} from the Rvcg-package.
 #' @importFrom Rvcg vcgQEdecim
 #' @export
-decimateList <- function(matchlist,reference=1,random=FALSE, tarface = NULL, percent = NULL, edgeLength = NULL, topo = FALSE, quality = TRUE, bound = FALSE, optiplace = TRUE,     scaleindi = TRUE, normcheck = FALSE, qweightFactor =100, qthresh = 0.3,  boundweight = 1, normalthr = pi/2, silent = FALSE)  {
+decimateList <- function(matchlist,reference=1,random=FALSE, ...)  {
 
     if ((random))
         reference <- sample(length(matchlist),size=1)
 
     ref <- matchlist[[reference]]
-    remref <- vcgQEdecim(ref,tarface = tarface, percent = percent, edgeLength = edgeLength, topo = topo, quality = quality, bound = bound, optiplace = optiplace,     scaleindi = scaleindi, normcheck = normcheck, qweightFactor=qweightFactor, qthresh = qthresh,  boundweight = boundweight, normalthr = boundweight, silent = silent)
+    remref <- vcgQEdecim(ref,tarface = tarface,...)
     bary <- vcgClostKD(remref,ref,barycentric=T)
 
     outlist <- list()
