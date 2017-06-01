@@ -52,7 +52,7 @@ decimateList <- function(matchlist,reference=1,random=FALSE, ...)  {
         reference <- sample(length(matchlist),size=1)
 
     ref <- matchlist[[reference]]
-    remref <- vcgQEdecim(ref,tarface = tarface,...)
+    remref <- vcgQEdecim(ref,...)
     bary <- vcgClostKD(remref,ref,barycentric=T)
 
     outlist <- list()
