@@ -17,7 +17,8 @@ Imports:
     Rcpp,
     lbfgs,
     methods,
-    colorRamps
+    colorRamps,
+    spam
 Suggests:
     RvtkStatismo
 LinkingTo: Rcpp, RcppArmadillo
