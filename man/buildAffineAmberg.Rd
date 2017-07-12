@@ -12,4 +12,3 @@ buildAffineAmberg(mesh)
 \description{
 subroutine preparing vertex assortment in order to create S using an 'arcface' matrix
 }
-

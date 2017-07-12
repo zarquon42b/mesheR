@@ -30,12 +30,11 @@ visi <- glVisible(shortnose.mesh)
 points3d(vert2points(shortnose.mesh)[which(visi),])
 }
 }
-\author{
-Stefan Schlager
-}
 \seealso{
 \code{\link{selectVertex}}, \code{\link{cutMesh}}
 }
+\author{
+Stefan Schlager
+}
 \keyword{~kwd1}
 \keyword{~kwd2}
-

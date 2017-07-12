@@ -23,4 +23,3 @@ returns the cropped mesh2
 \description{
 remove parts of a mesh outside a bounding box defined by another mesh
 }
-

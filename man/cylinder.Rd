@@ -4,7 +4,8 @@
 \alias{cylinder}
 \title{create a mesh representation of a cylinder}
 \usage{
-cylinder(x, dirs, length, radius = 1, fine = 20, addNormals = FALSE)
+cylinder(x, dirs, length, radius = 1, fine = 20, addNormals = FALSE,
+  closelids = TRUE)
 }
 \arguments{
 \item{x}{coordinates of center of the cylinders base - either a 3D-vector of a matrix of dim k x 3}
@@ -18,6 +19,8 @@ cylinder(x, dirs, length, radius = 1, fine = 20, addNormals = FALSE)
 \item{fine}{amount of vertices to create the base circle}
 
 \item{addNormals}{logical: if TRUE, normal vectors for each vertex are calculated.}
+
+\item{closelids}{logical: if TRUE, the end caps will be closed.}
 }
 \value{
 a triangular mesh of class 'mesh3d'
@@ -32,4 +35,3 @@ require(rgl)
 wire3d(cyl)
 }
 }
-

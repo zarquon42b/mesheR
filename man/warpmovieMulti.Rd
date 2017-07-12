@@ -10,6 +10,8 @@ warpmovieMulti(..., n, col = NULL, folder = NULL, movie = "warpmovie",
   shade = c("s", "w", "b"))
 }
 \arguments{
+\item{\dots}{registered meshes or a list containing registered meshes.}
+
 \item{n}{amount of intermediate images between two meshes}
 
 \item{col}{mesh color - overrides options \code{whichcolor} and \code{mixcolor}}
@@ -35,8 +37,6 @@ warpmovieMulti(..., n, col = NULL, folder = NULL, movie = "warpmovie",
 \item{mixcolor}{logical: if available existing colors are subsequently mixed using \code{\link{mixColorMesh}}.}
 
 \item{shade}{select shade: "s"=shade3d, "w"= wire3d, "b"=both}
-
-\item{\dots}{registered meshes or a list containing registered meshes.}
 }
 \description{
 make a warpmovie with multiple registered meshes - this is a pimped version of warpmovie3d from package 'Morpho'
@@ -52,4 +52,3 @@ bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
 warpmovieMulti(bluemesh, redmesh, n=15)
 }
 }
-

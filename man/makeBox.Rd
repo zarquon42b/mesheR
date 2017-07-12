@@ -12,4 +12,3 @@ makeBox(corners)
 \description{
 create a bounding box as mesh
 }
-

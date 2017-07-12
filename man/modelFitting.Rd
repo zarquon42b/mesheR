@@ -100,4 +100,3 @@ fit2 <- modelFitting(mymod,taricpAff$mesh,iterations = 15)
 fit2aff <- applyTransform(fit2$mesh,combotrafo,inverse=TRUE)
 }
 }
-

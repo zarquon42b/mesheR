@@ -31,4 +31,3 @@ smooth a displacement field using Gaussian smoothing
 \seealso{
 \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{plot.DisplacementField}}
 }
-

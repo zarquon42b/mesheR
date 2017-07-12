@@ -167,9 +167,6 @@ matchNoSmooth <- gaussMatch(shortnose.mesh,longnose.mesh,lm1=shortnose.lm,
                    affine=affine,sigma=20)
 }
 }
-\author{
-Stefan Schlager
-}
 \references{
 Bryan, R., Mohan, P. S., Hopkins, A., Galloway, F., Taylor, M.,
 and Nair, P. B. 2010. Statistical modelling of the whole human femur
@@ -186,6 +183,8 @@ the IEEE Signal Processing Society, 3(2):128-138.
 
 \code{\link{outsideBBox},\link{getMeshBox} }
 }
+\author{
+Stefan Schlager
+}
 \keyword{~kwd1}
 \keyword{~kwd2}
-

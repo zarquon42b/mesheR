@@ -36,4 +36,3 @@ wire3d(transface, col=3)
 spheres3d(newcoord,radius=0.5)
 }
 }
-

@@ -26,4 +26,3 @@ an object of class DisplacementField with additional attributes
 \description{
 convert a discrete irregular displacement field to a displacement grid
 }
-

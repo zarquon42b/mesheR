@@ -24,4 +24,3 @@ a vector containing the shape ids
 \description{
 create a shaded wiremesh
 }
-

@@ -30,12 +30,11 @@ the mesh along their normals.
 This only works for convex meshes, for concave substructures this might
 result in unwanted removals.
 }
-\author{
-Stefan Schlager
-}
 \seealso{
 \code{\link{rmVertex}}
 }
+\author{
+Stefan Schlager
+}
 \keyword{~kwd1}
 \keyword{~kwd2}
-

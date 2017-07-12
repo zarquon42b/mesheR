@@ -38,4 +38,3 @@ shrinkfun <- function(x,i){x <- x*0.9^i; return(x)}
 # 
 }
 }
-

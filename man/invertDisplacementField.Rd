@@ -22,4 +22,3 @@ humoff <- meshOffset(dummyhead.mesh,offset=5)
 dispfield <- createDisplacementField(dummyhead.mesh,humoff)
 dispfield_inverted <- invertDisplacementField(dispfield)
 }
-

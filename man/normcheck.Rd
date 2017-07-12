@@ -4,12 +4,14 @@
 \alias{normcheck}
 \title{compare normal directions between two states of a mesh}
 \usage{
-normcheck(mesh1, mesh2)
+normcheck(mesh1, mesh2, threads = 0)
 }
 \arguments{
 \item{mesh1}{triangular mesh}
 
 \item{mesh2}{triangular mesh}
+
+\item{threads}{number of threads to use}
 }
 \value{
 numeric vector containing angles between corresponding normals
@@ -17,4 +19,3 @@ numeric vector containing angles between corresponding normals
 \description{
 compare normal directions between two states of a mesh
 }
-

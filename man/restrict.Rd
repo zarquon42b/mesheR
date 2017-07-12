@@ -2,8 +2,8 @@
 % Please edit documentation in R/restrict.deform.r
 \name{restrict}
 \alias{restrict}
-\alias{restrict.matrix}
 \alias{restrict.mesh3d}
+\alias{restrict.matrix}
 \title{restrict a landmark config or mesh to probabilistic bounds from a sample of landmarks/vertices}
 \usage{
 restrict(x, model, sd = 3, maxVar = 95, scale = FALSE, nPC = NULL,
@@ -38,4 +38,3 @@ restricted landmarks/mesh
 \description{
 restrict a landmark config or mesh to probabilistic bounds from a sample of landmarks/vertices
 }
-

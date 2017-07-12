@@ -61,8 +61,9 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 
 \item{similarity}{named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).}
 
-\item{affine}{named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
-@param tps logical: if TRUE and landmarks are provided, the reference will be mapped to the target using a Thin-Plate Spline interpolation. Overrides \code{rigid},\code{affine} and \code{similarity}.}
+\item{affine}{named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)}
+
+\item{tps}{logical: if TRUE and landmarks are provided, the reference will be mapped to the target using a Thin-Plate Spline interpolation. Overrides \code{rigid},\code{affine} and \code{similarity}.}
 
 \item{pcAlign}{if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.}
 
@@ -134,15 +135,14 @@ map <- AmbergRegister(dummyhead.mesh, humface, lm1=dummyhead.lm,
                       k=params$k, lambda=params$lambda, useiter=params$useiter,rigid=rigid,
                       similarity=similarity,affine=affine,forceLM = TRUE)
 }
-\author{
-Stefan Schlager
-}
 \references{
 Amberg, B. 2011. Editing faces in videos, University of Basel.
 }
 \seealso{
 \code{\link{gaussMatch}}
 }
+\author{
+Stefan Schlager
+}
 \keyword{~kwd1}
 \keyword{~kwd2}
-

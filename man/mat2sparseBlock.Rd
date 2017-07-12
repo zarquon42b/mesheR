@@ -12,4 +12,3 @@ mat2sparseBlock(mat)
 \description{
 convert affine per-face trafo-matrix
 }
-

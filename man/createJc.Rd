@@ -16,4 +16,3 @@ createJc(lm1, ncol, mesh)
 \description{
 function to setup Jc Jacobian submatrix
 }
-

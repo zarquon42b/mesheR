@@ -16,4 +16,3 @@ closeMeshes(mesh1, mesh2, invert = TRUE)
 \description{
 close two meshes where one is only an offset of the other
 }
-

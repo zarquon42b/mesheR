@@ -31,4 +31,3 @@ slice1 <- BBoxSlices(box,axis = 1,percent = 0.7)
 sliceverts <- vert2points(slice1)
 cutmesh <- cutMeshPlane(skull_0144_ch_fe.mesh,v1=sliceverts[1,],sliceverts[2,],sliceverts[3,])
 }
-

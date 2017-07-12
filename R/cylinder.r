@@ -8,6 +8,7 @@
 #' @param radius radius of the cylinder's base
 #' @param fine amount of vertices to create the base circle
 #' @param addNormals logical: if TRUE, normal vectors for each vertex are calculated.
+#' @param closelids logical: if TRUE, the end caps will be closed.
 #' @return
 #' a triangular mesh of class 'mesh3d'
 #' @examples

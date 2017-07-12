@@ -22,4 +22,3 @@ require(Rvcg)
 data(humface)
 humcol <- colorMesh(humface, "red")
 }
-

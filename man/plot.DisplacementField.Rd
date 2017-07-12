@@ -27,4 +27,3 @@ visualize a displacement field
 \seealso{
 \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
 }
-

@@ -31,4 +31,3 @@ miniSQmodel(clost, model, iterations = 10, initpar = NULL, use = NULL,
 \description{
 minimize mean squared distance between model and a point-cloud with correspondences
 }
-

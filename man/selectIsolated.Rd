@@ -17,4 +17,3 @@ returns a mesh with all selected parts merged and colored
 \description{
 interactively select isolated pieces from a mesh
 }
-

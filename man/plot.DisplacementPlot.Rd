@@ -29,4 +29,3 @@ plot(displot)
 \seealso{
 \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
 }
-

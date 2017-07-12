@@ -58,4 +58,3 @@ ifield <- interpolateDisplacementField(dispfield,highres,threads=2,sigma = 10,k=
 \seealso{
 \code{\link{plot.DisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
 }
-

@@ -15,4 +15,3 @@ a mesh with averaged vertices
 \description{
 average the vertices from a set of corresponding meshes
 }
-

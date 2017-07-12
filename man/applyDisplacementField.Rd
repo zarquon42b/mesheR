@@ -34,4 +34,3 @@ apply a discrete displacement field to a set of points/mesh in its domain by app
 \note{
 if points is identical to the domain of the displacement field, no interpolation will be performed.
 }
-

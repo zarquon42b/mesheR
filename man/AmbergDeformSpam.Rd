@@ -42,15 +42,14 @@ Perform smooth deformation of a triangular mesh, minimizing per-face
 distortions.No loose vertices, edges and degenerated faces are allowed, as
 they lead to singular equation system.
 }
-\author{
-Stefan Schlager
-}
 \references{
 Amberg, B. 2011. Editing faces in videos, University of Basel.
 }
 \seealso{
 \code{\link{gaussMatch}}
 }
+\author{
+Stefan Schlager
+}
 \keyword{~kwd1}
 \keyword{~kwd2}
-

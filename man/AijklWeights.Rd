@@ -14,4 +14,3 @@ AijklWeights(mesh, arcnode)
 \description{
 calculate per face-deform weights for approx. derivation
 }
-

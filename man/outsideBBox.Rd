@@ -38,4 +38,3 @@ wire3d(humface,col=2)#outside
 shade3d(bboxmesh,alpha=0.4)
 }
 }
-

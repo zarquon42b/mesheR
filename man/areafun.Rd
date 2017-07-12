@@ -12,4 +12,3 @@ areafun(x)
 \description{
 calculate area between edge and barycenters of adjacent faces needed in AijkWeights
 }
-

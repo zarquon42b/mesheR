@@ -12,4 +12,3 @@ createS(mesh)
 \description{
 create S - upper block of Jacobian matrix
 }
-

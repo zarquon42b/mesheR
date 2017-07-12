@@ -12,4 +12,3 @@ createArcNode(mesh)
 \description{
 create per face arcnode matrix to differentiate per-face affine trafo based on per edge approximation
 }
-

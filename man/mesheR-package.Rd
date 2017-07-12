@@ -2,8 +2,8 @@
 % Please edit documentation in R/mesheR-package.R
 \docType{package}
 \name{mesheR-package}
-\alias{mesheR}
 \alias{mesheR-package}
+\alias{mesheR}
 \title{Meshing tools}
 \description{
 A toolbox for meshing operations: elastic mesh mapping, Iteratively closest point matching, vertex selection, ...,
@@ -17,13 +17,12 @@ Date: \tab 2016-03-01\cr
 License: \tab GPL\cr
 LazyLoad: \tab yes\cr }
 }
+\references{
+To be announced
+}
 \author{
 Stefan Schlager
 
 Maintainer: Stefan Schlager <zarquon42@gmail.com>
 }
-\references{
-To be announced
-}
 \keyword{package}
-

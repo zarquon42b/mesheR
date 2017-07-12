@@ -17,4 +17,3 @@ Volume (\code{NA_real_} on failure)
 \description{
 Calculate volume between two states of a mesh by dividing it into prisms
 }
-

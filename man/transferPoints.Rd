@@ -41,4 +41,3 @@ wire3d(transface, col=3)
 spheres3d(newcoord)
 }
 }
-

@@ -31,8 +31,8 @@
 #' @param distinc increment of dist, in case minclost is not reached.
 #' @param rigid named list. Passing parameters to \code{\link{icp}}, for rigid registration. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param similarity named list. Passing parameters to \code{\link{icp}}, for similarity registration (rigid +scaling). If landmarks are provided and only those should count, set similarity$iterations=0 (and rigid=NULL).
-#'@param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
-#'  @param tps logical: if TRUE and landmarks are provided, the reference will be mapped to the target using a Thin-Plate Spline interpolation. Overrides \code{rigid},\code{affine} and \code{similarity}.
+#' @param affine named list. Passing parameters to \code{\link{icp}}, for affine registration. If landmarks are provided and only those should count, set similarity$iterations=0 (with rigid=NULL and similarity=NULL)
+#' @param tps logical: if TRUE and landmarks are provided, the reference will be mapped to the target using a Thin-Plate Spline interpolation. Overrides \code{rigid},\code{affine} and \code{similarity}.
 #' @param pcAlign if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.
 #' @param nn integer: closest barycenters. During search for closest points on target, the closest \code{nn} faces are probed. The larger \code{nn} is , the more accurate the closest point search but also the more time consuming. If landmarks are provided and only those should count, set rigid$iterations=0.
 #' @param silent logical: no verbosity

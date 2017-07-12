@@ -32,4 +32,3 @@ require(rgl)
 wire3d(humcenter, col=2)
 }
 }
-

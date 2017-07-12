@@ -36,4 +36,3 @@ Remesh a list of registered meshes (with corresponding vertices), preserving cor
 \details{
 The remeshing is applied to a reference and then the barycentric coordinates of the new vertices on the original surface are calculated. These are used to extract the corresponding positions of the remeshed versions on all meshes in the sample. The remeshing is performed by the function \code{vcgUniformRemesh} from the Rvcg-package.
 }
-

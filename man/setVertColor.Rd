@@ -17,4 +17,3 @@ mesh with updated vertex colors
 \description{
 set the per-vertex colors of an object of class mesh3d
 }
-

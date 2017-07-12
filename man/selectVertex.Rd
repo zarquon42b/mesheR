@@ -46,12 +46,11 @@ data(nose)
 selection <- selectVertex(shortnose.mesh)
 }
 }
-\author{
-Stefan Schlager
-}
 \seealso{
 \code{\link{vcgPlyRead}}, \code{\link{glVisible}}, \code{\link{cutMesh}}
 }
+\author{
+Stefan Schlager
+}
 \keyword{~kwd1}
 \keyword{~kwd2}
-

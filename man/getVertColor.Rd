@@ -15,4 +15,3 @@ vector of hexadecimal rgb values
 \description{
 get the per-vertex colors of an object of class mesh3d
 }
-

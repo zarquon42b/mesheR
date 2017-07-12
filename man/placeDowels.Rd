@@ -53,4 +53,3 @@ placeDowels(lms, humface, rep(5, 4))
 \seealso{
 \code{\link{cylinder}}
 }
-

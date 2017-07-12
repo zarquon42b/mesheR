@@ -35,4 +35,3 @@ shade3d(bbmesh,alpha=0.4)
 wire3d(humface)
 }
 }
-

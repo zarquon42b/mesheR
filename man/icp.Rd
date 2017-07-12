@@ -83,9 +83,6 @@ shade3d(rotnose,col=2,alpha=0.7)
 shade3d(shortnose.mesh,col=3,alpha=0.7)
 }
 }
-\author{
-Stefan Schlager
-}
 \references{
 Zhang Z. 1994. Iterative point matching for registration of
 free-form curves and surfaces International Journal of Computer Vision
@@ -94,6 +91,8 @@ free-form curves and surfaces International Journal of Computer Vision
 \seealso{
 \code{\link{rotmesh.onto}}, \code{\link{rotonto}}
 }
+\author{
+Stefan Schlager
+}
 \keyword{~kwd1}
 \keyword{~kwd2}
-
