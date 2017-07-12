@@ -27,7 +27,7 @@ multisolve3 <- function(A,trans=FALSE)
     if (m %% n !=0)
         stop("number of rows must be multiple of columns")
     trans <- as.integer(trans)
-    out <- .Call("multisolve3",A,trans)
+    out <- .Call("multisolve3Cpp",A,trans)
     return(out)
 }
 

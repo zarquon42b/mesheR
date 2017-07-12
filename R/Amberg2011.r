@@ -85,7 +85,7 @@ createArcNode <- function(mesh)
 #' @export areafun
 areafun <- function(x)
     {
-        out <- as.vector(.Call("areafun",x))
+        out <- as.vector(.Call("areafunCpp",x))
         return(out)
     }
 

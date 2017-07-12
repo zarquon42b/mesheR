@@ -9,7 +9,7 @@
 
 using namespace Rcpp;
 using namespace arma;
-RcppExport SEXP multisolve3(SEXP A_, SEXP trans_) {
+RcppExport SEXP multisolve3Cpp(SEXP A_, SEXP trans_) {
   try {
     bool trans = as<bool>(trans_);
     mat armaA = as<mat>(A_);

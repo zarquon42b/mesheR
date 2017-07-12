@@ -18,7 +18,7 @@ vec armacross(vec& x, vec& y) {
 
 
 
-RcppExport SEXP areafun(SEXP A_) {
+RcppExport SEXP areafunCpp(SEXP A_) {
   try {
     mat armaA = as<mat>(A_);
     uvec v02; v02 << 0 << 1 << 2 << endr;
