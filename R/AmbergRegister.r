@@ -331,7 +331,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             chk <- try(tmp <- AmbergDeformSpam(mesh1,lmtmp1,lmtmp2,k0=k[count],lambda=lambda[count],S=tmp$S),silent = TRUE)
             if (inherits(chk,"try-error")) {
                 tmp <- tmpold
-                cat("iteration failed: previous iteration used")
+                cat(paste("iteration failed with:",chk,"previous iteration used\n"))
             }
             gc()
             if (smooth)

@@ -206,6 +206,7 @@ createJc <- function(lm1,ncol,mesh)
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
 #' @keywords ~kwd1 ~kwd2
 #' @importFrom Rvcg vcgClean
+#' @importFrom spam crossprod.spam
 #' @export AmbergDeformSpam
 AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=FALSE)
     {
@@ -213,6 +214,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=
             mesh <- vcgClean(mesh,sel=c(0:1),silent=T)
         }
         options(spam.cholsymmetrycheck=FALSE)
+        spam::powerboost("on")
         ## assign(".Spam",spamnosym,envir=asNamespace("spam")) #disable symmetry check
         t0 <- Sys.time()
         out <- list()
@@ -239,7 +241,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=
         Jtc <- t(Jc)%*%lm2
         ## calculate Hessian H
         if (is.null(Hchol)) {
-            H <- t(J)%*%J
+            H <- crossprod.spam(J)
             Hchk <- as.logical(length(which(!diff(H@rowpointers) > 0)))
             if (Hchk)
                 diag(H) <- diag(H)
