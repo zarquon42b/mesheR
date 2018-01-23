@@ -4,7 +4,7 @@ Title: Meshing Operations on Triangular Meshes
 Version: 0.4.160301
 Date: 2016-03-01
 Author: Stefan Schlager
-Maintainer: Stefan Schlager <stefan.schlager@uniklinik-freiburg.de>
+Maintainer: Stefan Schlager <zarquon42@gmail.com>
 Description: Meshing operations on triangular meshes.
 Depends:
     R (>= 3.0.0),
