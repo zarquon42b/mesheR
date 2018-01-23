@@ -172,6 +172,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @param alpha numeric between 0 and 1 controls opacity of target mesh if visualize=TRUE.
 #' @param col1 color of fix mesh (if visualize = TRUE)
 #' @param col2 color of moving mesh (if visualize = TRUE)
+#' @param add logical: if FALSE, the 3D window will be reset.
 #' @param bbox extend of the margins around the target shape to be considered.
 #' @param bboxCrop extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.
 #' @param threads integer: threads to use in multithreaded routines.
@@ -227,7 +228,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,tps=FALSE,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",bbox=NULL,bboxCrop=NULL,threads=0,cb=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,tps=FALSE,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",add=FALSE,bbox=NULL,bboxCrop=NULL,threads=0,cb=NULL,...) {
     typeargs <- c("gauss","laplace","exponential","bspline")
     displacementsmooth <- match.arg(tolower(displacementsmooth[1]),typeargs)
     displacementsmooth <- match(displacementsmooth,typeargs)-1
@@ -376,7 +377,8 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             open3d()
         else {
             rgl.bringtotop()
-            rgl.clear()
+            if (!add)
+                rgl.clear()
         }
         bb <- meshcube(mesh1)
         bmean <- apply(bb,2,mean)
