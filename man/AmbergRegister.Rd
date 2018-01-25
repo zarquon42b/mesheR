@@ -10,8 +10,8 @@ AmbergRegister(x, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
   similarity = NULL, affine = NULL, tps = FALSE, pcAlign = FALSE,
   nn = 20, silent = FALSE, useConstrained = TRUE, forceLM = FALSE,
-  visualize = FALSE, folder = NULL, noinc = FALSE, bboxCrop = NULL,
-  threads = 0)
+  visualize = FALSE, folder = NULL, noinc = FALSE, angclost = FALSE,
+  bboxCrop = NULL, threads = 0)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed.No loose vertices, edges and degenerated faces are allowed.}
@@ -80,6 +80,8 @@ correspondences are found, dist will be increased by "distinc" (see below).}
 \item{folder}{logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.}
 
 \item{noinc}{logical: if TRUE and x is of class 'Bayes', the process stops if the distance from the target to the deformed reference increases compared to the previous iteration.}
+
+\item{angclost}{if TRUE, the closest k faces will be evaluated and the closest with the appropriate normal angle will be selected.}
 
 \item{bboxCrop}{extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.}
 

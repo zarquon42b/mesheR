@@ -40,6 +40,7 @@
 #' @param forceLM logical: if icp is requested landmark based deformation will be applied after icp-based transformation.
 #' @param visualize logical request visualization of deformation process.
 #' @param folder logical: if visualize=TRUE, this can specify a folder to save screenshots of each deformation state, in order to create a movie or an animated gif.
+#' @param angclost if TRUE, the closest k faces will be evaluated and the closest with the appropriate normal angle will be selected.
 #' @param noinc logical: if TRUE and x is of class 'Bayes', the process stops if the distance from the target to the deformed reference increases compared to the previous iteration.
 #' @param bboxCrop extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.
 #' @param threads integer: threads to use in closest point search.
@@ -93,7 +94,7 @@
 #' @importFrom Rvcg vcgClean vcgClost vcgUpdateNormals
 #' @importFrom Morpho meshcube applyTransform computeTransform pcAlign
 #' @export AmbergRegister
-AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,tps=FALSE, pcAlign=FALSE,nn=20, silent=FALSE, useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL,noinc=FALSE,bboxCrop=NULL,threads=0)
+AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iterations=15, rho=pi/2, dist=2, border=FALSE, smooth=TRUE, smoothit=1, smoothtype="t", tol=1e-10, useiter=TRUE, minclost=50, distinc=1, rigid=NULL,similarity=NULL, affine=NULL,tps=FALSE, pcAlign=FALSE,nn=20, silent=FALSE, useConstrained=TRUE, forceLM=FALSE,visualize=FALSE, folder=NULL,noinc=FALSE,angclost=FALSE,bboxCrop=NULL,threads=0)
 {
     if (inherits(x, "mesh3d")) {
         mesh1 <- x
@@ -108,6 +109,8 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
         mesh1 <- RvtkStatismo::DrawMean(Bayes$model)
     }
+    angdev <- ifelse((is.null(rho) || !angclost),0,rho)
+
     mesh1 <- rmUnrefVertex(mesh1, silent=TRUE)
     mesh1 <- vcgUpdateNormals(mesh1)
     mesh2 <- vcgUpdateNormals(mesh2)
@@ -292,7 +295,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
                 mesh1 <- tmp$mesh
             }
             vert_old <- vert2points(tmp$mesh)
-            clost <- vcgClostKD(tmp$mesh,mesh2,k=nn,threads=threads)
+            clost <- vcgClostKD(tmp$mesh,mesh2,k=nn,threads=threads,angdev = angdev)
             verts1 <- vert2points(clost)
             nc <- normcheck(clost,tmp$mesh,threads = threads)                        
             
