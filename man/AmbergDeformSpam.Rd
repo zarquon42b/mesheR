@@ -5,7 +5,7 @@
 \title{Deform triangular mesh based on correspondences}
 \usage{
 AmbergDeformSpam(mesh, lm1, lm2, k0 = 1, lambda = 1, S = NULL,
-  Hchol = NULL, clean = FALSE)
+  Hchol = NULL, clean = FALSE, ridgetol = 1e-08)
 }
 \arguments{
 \item{mesh}{triangular mesh of class "mesh3d". No loose vertices, edges and
@@ -24,6 +24,8 @@ degenerated faces are allowed.}
 \item{Hchol}{Cholesky decomposition of Hessian (obtained by a previous run of AmbergDeformSpam), speeds up things significantly.}
 
 \item{clean}{logical: if TRUE, \code{vcgClean} from package Rvcg is run to remove duplicated and unreferenced vertices from the mesh and preventing segfaults.}
+
+\item{ridgetol}{in case of a singular matrix, this value will be added to the diagonal (similar to a ridge regression) to avoid singularity.}
 }
 \value{
 \item{mesh}{deformed mesh}

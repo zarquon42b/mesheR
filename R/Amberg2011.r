@@ -193,7 +193,8 @@ createJc <- function(lm1,ncol,mesh)
 #' @param lambda numeric: parameter regularizing faces's distortion.  
 #' @param S optional: object from function createS from previous calculation.
 #' @param Hchol Cholesky decomposition of Hessian (obtained by a previous run of AmbergDeformSpam), speeds up things significantly.
-#' @param clean logical: if TRUE, \code{vcgClean} from package Rvcg is run to remove duplicated and unreferenced vertices from the mesh and preventing segfaults. 
+#' @param clean logical: if TRUE, \code{vcgClean} from package Rvcg is run to remove duplicated and unreferenced vertices from the mesh and preventing segfaults.
+#' @param ridgetol in case of a singular matrix, this value will be added to the diagonal (similar to a ridge regression) to avoid singularity.
 #' @return
 #' \item{mesh}{deformed mesh}
 #' \item{Jn}{Jacobi submatrix Jn}
@@ -208,12 +209,13 @@ createJc <- function(lm1,ncol,mesh)
 #' @importFrom Rvcg vcgClean
 #' @importFrom spam crossprod.spam
 #' @export AmbergDeformSpam
-AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=FALSE)
+AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=FALSE,ridgetol=1e-08)
     {
         if (clean) {
             mesh <- vcgClean(mesh,sel=c(0:1),silent=T)
         }
-        options(spam.cholsymmetrycheck=FALSE)
+        options(spam.cholsymmetrycheck=FALSE,spam.eps=.Machine$double.eps)
+        
         spam::powerboost("on")
         ## assign(".Spam",spamnosym,envir=asNamespace("spam")) #disable symmetry check
         t0 <- Sys.time()
@@ -241,17 +243,19 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=
         Jtc <- t(Jc)%*%lm2
         ## calculate Hessian H
         if (is.null(Hchol)) {
+            options(spam.cholsymmetrycheck=FALSE,spam.eps=.Machine$double.eps)
             H <- crossprod.spam(J)
             Hchk <- as.logical(length(which(!diff(H@rowpointers) > 0)))
             if (Hchk)
                 diag(H) <- diag(H)
-           
+            
             ## Cholesky decomposition of Hessian H
-            chk <- try(suppressWarnings(Hchol <- chol(H)),silent = T)
+            chk <- try(suppressWarnings(Hchol <- spam::chol(H)),silent = T)
             if (inherits(chk,"try-error")) {
-                diag(H) <- diag(H)+1e-12
-                Hchol <- suppressWarnings(chol(H))
-                warning("singularity avoided by adding 1e-12 to diagonal, please check result")
+                diag(H) <- diag(H)+ridgetol
+                Hchol <- suppressWarnings(spam::chol(H))
+                warning(paste("singularity avoided by adding",ridgetol," to diagonal, please check result"))
+               
             }
         } else {
             H <- NULL
