@@ -1,5 +1,5 @@
 #  List all imports necessary in this file
-#' @importFrom Matrix sparseMatrix Matrix cBind
+#' @importFrom Matrix sparseMatrix Matrix
 #' @importClassesFrom Matrix dgCMatrix sparseMatrix
 #' @importMethodsFrom Matrix t
 #' @importFrom spam as.spam.dgCMatrix rbind.spam solve.spam spam.options diag.spam diag.spam<-
@@ -167,7 +167,7 @@ createJc <- function(lm1,ncol,mesh)
     {
         C <- createC(lm1,mesh)
         Jc <- Matrix(0,nrow(lm1),ncol-ncol(C))
-        Jc <- cBind(C,Jc)
+        Jc <- cbind(C,Jc)
         Jc <- as.spam.dgCMatrix(Jc)
         return(Jc)
     }
@@ -234,7 +234,7 @@ AmbergDeformSpam <- function(mesh,lm1,lm2,k0=1,lambda=1,S=NULL,Hchol=NULL,clean=
         ## setup Jn Jacobian submatrix
         Jn0 <- sparseMatrix(i=1:ncol(mesh$it),j=1:ncol(mesh$it),x=rep(1,ncol(mesh$it)))
         Jn <- Matrix(0,ncol(mesh$it),ncol(J)-ncol(Jn0))
-        Jn <- cBind(Jn,Jn0)
+        Jn <- cbind(Jn,Jn0)
         Jn <- k0*Jn
         Jn <- as.spam.dgCMatrix(Jn)
         
