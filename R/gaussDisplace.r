@@ -303,10 +303,12 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 lm2tmp <- rotonto(lm1,lm2,scale=Bayes$model@scale,reflection=FALSE)$yrot
             else
                 lm2tmp <- lm2
-            if (!silent)
-                cat("constraining model\n")
-            constMod <- RvtkStatismo::statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
+          
+            
             if (useConstrained) {
+                if (!silent)
+                    cat("constraining model\n")
+                constMod <- RvtkStatismo::statismoConstrainModel(Bayes$model,lm2tmp,lm1,Bayes$ptValueNoise)
                 Bayes$model <- constMod
                 if (is.null(Bayes$initparams)) {
                     mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawMean(Bayes$model))
