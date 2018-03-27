@@ -57,6 +57,10 @@
 #' @importFrom Morpho fastKmeans
 #' @export icp
 icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE, silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=0) {
+    if (is.matrix(mesh1)) {
+        mesh1 <- list(vb=t(mesh1))
+        class(mesh1) <- "mesh3d"
+    }
       meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
       mesh2 <- vcgUpdateNormals(mesh2)
        if (pcAlign) {
