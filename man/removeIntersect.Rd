@@ -4,8 +4,9 @@
 \alias{removeIntersect}
 \title{This functions aims to translate two meshes to remove an intersection}
 \usage{
-removeIntersect(reference, target, stepsize = 0.2, maxit = 100, tol = 1,
-  outside = TRUE, rot = FALSE)
+removeIntersect(reference, target, stepsize = 0.2, maxit = 100,
+  tol = 1, outside = TRUE, gradthresh = -Inf, gradn = Inf,
+  realign = TRUE, inflate = 1, visualize = TRUE, silent = FALSE)
 }
 \arguments{
 \item{reference}{matrix or mesh}
@@ -19,6 +20,18 @@ removeIntersect(reference, target, stepsize = 0.2, maxit = 100, tol = 1,
 \item{tol}{positive number: stop if intersection is less than \code{tol}}
 
 \item{outside}{logical: if TRUE the reference will be placed outside of the target. Inside otherwise}
+
+\item{gradthresh}{numerical: (abs) gradient threshold to determine convergence}
+
+\item{gradn}{integer: number of steps to include in computing gradient}
+
+\item{realign}{logical: if TRUE, \code{reference} will be aligned to a model inflated along normals by the max. distance to intersection.}
+
+\item{inflate}{numerical}
+
+\item{visualize}{logical: if TRUE watch the approximation}
+
+\item{inflate}{numeric factor to multiply the max distance to intersect for inflating (only if \code{inflate=TRUE}}
 }
 \description{
 This functions aims to translate two meshes to remove an intersection. This is done based on signed distance
