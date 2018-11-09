@@ -61,7 +61,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
         mesh1 <- list(vb=t(mesh1))
         class(mesh1) <- "mesh3d"
     }
-      meshorig <- mesh1 <- vcgUpdateNormals(mesh1)
+    meshorig <- mesh1 <- vcgUpdateNormals(mesh1,silent=silent)
       mesh2 <- vcgUpdateNormals(mesh2)
        if (pcAlign) {
                 mesh1 <- pcAlign(mesh1,mesh2,optim=FALSE)
