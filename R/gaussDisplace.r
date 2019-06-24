@@ -466,7 +466,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         ## check if distance increases
         distance_old <- distance
         distance <- mean(vcgClostKD(mesh2,mesh1,k0=2,sign=F,threads=threads)$quality)
-        if (distance > distance_old && !is.null(Bayes) && noinc) {
+        if (distance > distance_old && noinc) {
             cat("\n=========================================\n")
             message(paste(" Info: Distance is increasing, matching stopped after ",i,"iterations\n"))
             i <- 1e10
