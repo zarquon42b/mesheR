@@ -15,8 +15,8 @@
 createDisplacementField <- function(reference,target) {
     if (inherits(reference,"mesh3d"))
         reference <- vert2points(reference)
-     if (inherits(target,"mesh3d"))
-         target <- vert2points(target)
+    if (inherits(target,"mesh3d"))
+        target <- vert2points(target)
     out <- list(domain=reference,DisplacementField=target-reference)
     class(out) <- "DisplacementField"
     return(out)
@@ -40,7 +40,7 @@ invertDisplacementField <- function(dispfield) {
     dispfield$DisplacementField <- -dispfield$DisplacementField
     return(dispfield)
 }
-    
+
 
 #' evaluate a displacement field using gaussian smoothed interpolation of a discrete displacement field
 #'
@@ -98,8 +98,8 @@ interpolateDisplacementField <- function(dispfield, points, k=10, sigma=20,gamma
         tmp <- tps3d(points,dispfield$domain[subind$selected,,drop=FALSE],tar,threads = threads,lambda=lambda)
         tmp <- tmp-points
     }
-        
-        out <- list(domain=points,DisplacementField=tmp)
+    
+    out <- list(domain=points,DisplacementField=tmp)
     class(out) <- "DisplacementField"
     ## if (smoothresult)
     ##    out <- smoothDisplacementField(out,sigma=sigma,k=k,threads = threads)
@@ -130,8 +130,8 @@ smoothDisplacementField <- function(dispfield,k=10,sigma=20,type=c("Gauss","Lapl
     clost <- vcgKDtree(dispfield$domain,dispfield$domain,k=k,threads=threads)
     clost$index <- clost$index-1L
     if (type %in% 0:3) {
-    tmp = .Call("smoothField",dispfield$domain, dispfield$domain, dispfield$DisplacementField,sigma,gamma,clost$index, clost$distance,iterations,threads,type)
-     } else {
+        tmp = .Call("smoothField",dispfield$domain, dispfield$domain, dispfield$DisplacementField,sigma,gamma,clost$index, clost$distance,iterations,threads,type)
+    } else {
         subind <- Morpho::fastKmeans(dispfield$domain,k=subsample,threads=threads)
         tar <- dispfield$domain[subind$selected,,drop=FALSE]+dispfield$DisplacementField[subind$selected,,drop=FALSE]
         tmp <- tps3d(dispfield$domain,dispfield$domain[subind$selected,,drop=FALSE],tar,threads = threads,lambda=lambda)
@@ -163,7 +163,7 @@ applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss"
     if (!checkDispFieldDomain(dispfield,points,threads=threads)) {
         message("dispfield domain and points not identical: interpolating...")
         displacement <- interpolateDisplacementField(dispfield,points=points,k=k,sigma=sigma,type=type,gamma=gamma,lambda=lambda,threads=threads)
-   } else
+    } else
         displacement <- dispfield
     updatePos <- displacement$domain+displacement$DisplacementField
     if (inherits(points,"mesh3d")) {
@@ -174,7 +174,7 @@ applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss"
     } else {
         return(updatePos)
     }
-   
+    
     
 }
 #' visualize a displacement field
@@ -192,34 +192,35 @@ applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss"
 #' @importFrom rgl wire3d
 #' @method plot DisplacementField
 #' @export
-plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=TRUE,...) {
-     validDisplaceField(x)
-     start <- x$domain
-     end <- x$domain+x$DisplacementField
-     vl <- nrow(start)
-     dismesh <- list();class(dismesh) <- list("mesh3d","DisplacementPlot")
-     dismesh$vb <- rbind(t(rbind(start,end)),1)
-     dismesh$it <- rbind(1:vl,1:vl,(1:vl)+vl)
-     if (!color) {
-         if (plot)
-          plot(dismesh,lit=FALSE,lwd=lwd)
-     
-     } else {
-         dists <- sqrt(rowSums(x$DisplacementField^2))
-         ramp <- colorRamps::blue2green2red(19)
-         from <- 0
-         to <- ceiling(max(dists))
-         colseq <- seq(from=from,to=to,length.out=20)
-         coldif <- colseq[2]-colseq[1]
-         distqual <- ceiling((dists/coldif)+1e-14)
-         colorall <- ramp[distqual]
-         dismesh$material$color <- rbind(colorall,colorall,colorall)
-         dismesh$material$lit=FALSE
-         if (plot)
-             plot(dismesh,lwd=lwd)
-     }
-     invisible(dismesh)
-     
+plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=TRUE,size=NULL,...) {
+    validDisplaceField(x)
+    start <- x$domain
+    end <- x$domain+x$DisplacementField
+    vl <- nrow(start)
+    dismesh <- list();class(dismesh) <- list("mesh3d","DisplacementPlot")
+    dismesh$vb <- rbind(t(rbind(start,end)),1)
+    dismesh$it <- rbind(1:vl,1:vl,(1:vl)+vl)
+    if (!color) {
+        if (plot)
+            plot(dismesh,lit=FALSE,lwd=lwd,size=size,...)
+        
+    } else {
+        dists <- sqrt(rowSums(x$DisplacementField^2))
+        ramp <- colorRamps::blue2green2red(19)
+        from <- 0
+        to <- ceiling(max(dists))
+        colseq <- seq(from=from,to=to,length.out=20)
+        coldif <- colseq[2]-colseq[1]
+        distqual <- ceiling((dists/coldif)+1e-14)
+        colorall <- ramp[distqual]
+        dismesh$material$color <- rbind(colorall,colorall,colorall)
+        dismesh$material$lit=FALSE
+        
+        if (plot)
+            plot(dismesh,lwd=lwd,size=size,...)
+    }
+    invisible(dismesh)
+    
 }
 
 
@@ -229,6 +230,7 @@ plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=TRUE,...) {
 #' @param x displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}
 #' @param lwd width of the displacement vectors
 #' @param color logical: if TRUE, displacement vectors will be colored according to a heatmap.
+#' @param size size of grid points
 #' @param ... additional arguments. Currently not used.
 #' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
 #' @examples
@@ -240,9 +242,8 @@ plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=TRUE,...) {
 #' plot(displot)
 #' @method plot DisplacementPlot
 #' @export
-plot.DisplacementPlot <- function(x,lwd=1,color=TRUE,...) {
+plot.DisplacementPlot <- function(x,lwd=1,color=TRUE,size=NULL,...) {
     nvert <- ncol(x$vb)
-   
     if (!is.null(x$material$color)) {
         ptcol <- data.frame(as.vector(x$it),as.vector(x$material$color))
         ptcol <- unique(ptcol)
@@ -250,8 +251,9 @@ plot.DisplacementPlot <- function(x,lwd=1,color=TRUE,...) {
     } else {
         ptcol = 1
     }
-    
-    points3d(vert2points(x)[1:(nvert/2),],col=ptcol,size=lwd+4)
+    if (is.null(size))
+        size <- lwd+4
+    points3d(vert2points(x)[1:(nvert/2),],col=ptcol,size=size)
     wire3d(x,lwd=lwd)
     
 }
@@ -315,7 +317,7 @@ displacementField2Grid <- function(x,spacing=rep(2,3),margin=0.05,IJK2RAS=diag(c
     myarr <- array(NA,dim=arrdims)
     indices <- as.matrix(expand.grid(1L:arrdims[1],1L:arrdims[2],1L:arrdims[3]))
     dfgrid <- interpolateDisplacementField(x,mygrid,...)
-   
+    
     gridattributes <- list(indices=indices,origin=mygrid[1,],arraydim=arrdims,spacing=spacing)
     attributes(dfgrid) <- append(attributes(dfgrid),gridattributes)
     class(dfgrid) <- c("DisplacementGrid","DisplacementField")
@@ -331,7 +333,7 @@ displacementGrid2Transform <- function(x) {
     attribs <- attributes(x)
     img <- SimpleITK::Image(attribs$arraydim[1],attribs$arraydim[2],attribs$arraydim[3],"sitkVectorFloat64")
     inds <- attribs$indices-1L
-     for(i in 1:(nrow(attribs$indices))) {
+    for(i in 1:(nrow(attribs$indices))) {
         tmp=as.numeric(x$DisplacementField[i,])
         img$SetPixelAsVectorFloat64(inds[i,],tmp)
     }

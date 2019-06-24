@@ -4,7 +4,8 @@
 \alias{plot.DisplacementPlot}
 \title{plot the output of plot.DisplacementField}
 \usage{
-\method{plot}{DisplacementPlot}(x, lwd = 1, color = TRUE, ...)
+\method{plot}{DisplacementPlot}(x, lwd = 1, color = TRUE,
+  size = NULL, ...)
 }
 \arguments{
 \item{x}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}
@@ -12,6 +13,8 @@
 \item{lwd}{width of the displacement vectors}
 
 \item{color}{logical: if TRUE, displacement vectors will be colored according to a heatmap.}
+
+\item{size}{size of grid points}
 
 \item{...}{additional arguments. Currently not used.}
 }
