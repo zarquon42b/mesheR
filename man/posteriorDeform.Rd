@@ -42,11 +42,18 @@ posteriorDeform(model, target, reference = NULL, partsample = NULL,
 
 \item{silent}{logical: supress debug output}
 }
+\value{
+returns a deformed version of a model instance fitted to the target
+}
 \description{
 Fit an SSM to a target based on subsampling corresponding points and compute the posterior mean
 }
 \note{
 Please note that it is required to align the target mesh to the model mean beforehand. This can be performed using the function \code{\link{icp}}, for example.
+}
+\examples{
+\dontrun{
+require(RvtkStatismo)
 download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD001_femur.vtk","./VSD001_femur.vtk",method = "w")
 download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD002_femur.vtk","./VSD002_femur.vtk",method = "w")
 download.file(url="https://github.com/marcelluethi/statismo-shaperegistration/raw/master/data/VSD001-lm.csv","./VSD001-lm.csv",method = "w")
@@ -56,14 +63,18 @@ tar <- read.vtk("VSD002_femur.vtk")
 ref.lm <- as.matrix(read.csv("VSD001-lm.csv",row.names=1,header = FALSE))
 tar.lm <- as.matrix(read.csv("VSD002-lm.csv",row.names=1,header = FALSE))
 Kernels <- SumKernels(GaussianKernel(50,50),IsoKernel(0.1,ref))
-mymod <- statismoModelFromRepresenter(ref,kernel=Kernels)
-postDef <- posteriorDeform(mymod,tar,modlm=ref.lm,tarlm = tar.lm,samplenum = 10000,bending=F)
+mymod <- statismoModelFromRepresenter(ref,kernel=Kernels,ncomp=100)
+postDef <- posteriorDeform(mymod,tar,modlm=ref.lm,tarlm = tar.lm,samplenum = 1000)
 ## run a loop redoing that step using the result of the previous step as input
 for (i in 1:5)
-   postDef <- posteriorDeform(mymod,tar,modlm=ref.lm,tarlm = tar.lm,samplenum = 10000,reference=postDef,bending=F)
+   postDef <- posteriorDeform(mymod,tar,modlm=ref.lm,tarlm = tar.lm,samplenum = 1000,reference=postDef)
 
 ## now we leave the model space for a final deform involving a TPS deform
 postDefFinal <- postDef
 for (i in 1:3)
-    postDefFinal <- posteriorDeform(mymod,tar,modlm=ref.lm,tarlm = tar.lm,samplenum = 2000,reference=postDefFinal,nodeform=F,distance=4,bending=T)
+    postDefFinal <- posteriorDeform(mymod,tar,modlm=ref.lm,tarlm = tar.lm,samplenum = 3000,reference=postDefFinal,deform=T,distance=3)
+
+Morpho::meshDist(postDefFinal,tar,from=-2,to=2,tol=.5)
+rgl::wire3d(tar,col="white")
+}
 }
