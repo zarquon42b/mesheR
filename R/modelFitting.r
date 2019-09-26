@@ -251,7 +251,8 @@ miniSQmodel <- function(clost,model,iterations=10,initpar=NULL,use=NULL,sdmax=NU
 ## find correspondences
 getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse(bending,3,10),bending=TRUE,partsample=partsample,ray=TRUE,tol=pi/5,k=200,meanmod,modlm=NULL, tarlm=NULL) {
     myslide <- NULL
-    parttofixed <- vcgClostKD(transferPoints(partsample,meanmod,mesh,tolwarn = 5),mesh,k=50)
+    customLM <- FALSE
+    parttofixed <- vcgClostKD(transferPoints(partsample,meanmod,mesh,tolwarn = 5),mesh,k=100,angdev=tol)
     if (ray)
         part2raw    <- vcgRaySearch(parttofixed,targetmesh,mindist=T)
     else {
@@ -271,15 +272,19 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
         #iterations=10
     }
     if (!is.null(modlm) && !is.null(tarlm)) {
+        customLM <- TRUE
         ## print("using landmarks")
         modlm <- transferPoints(modlm,meanmod,mesh,tolwarn = 5)
+        nref <- nrow(referencepoints)
+        nlm <- nrow(modlm)
+        npos <- (1:nlm)+nref
         referencepoints <- rbind(referencepoints,modlm)
         targetpoints <- rbind(targetpoints,tarlm)
     }
     if (slide > 0) {
         myslide    <- relaxLM(referencepoints,targetpoints,mesh=mesh,iterations = slide,SMvector = 1:length(goodclost),surp=1:nrow(referencepoints),silent=silent,bending=bending,stepsize =stepsize ,tol=0)
     }
-    targetpoints <- vert2points(part2raw)[goodclost,]
+        
     return(list(goodclost=goodclost,myslide=myslide,targetpoints=targetpoints))
 }
 
@@ -347,9 +352,8 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
         deformfun <- tps3d
     if (is.null(partsample))
         partsample <- vcgSample(meanmod,samplenum)
-    corrs   <- getCorrespondences(reference,target,distance,silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol)
+    corrs   <- getCorrespondences(reference,target,distance,silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol,modlm = modlm,tarlm = tarlm)
     myslide <- corrs$myslide
-    part2raw <- corrs$part2raw
     targetpoints <- corrs$targetpoints
     back2mod <- transferPoints(myslide,reference,meanmod,tolwarn = 5)
     deformed <- PredictSample(model,lmDataset = targetpoints,lmModel=back2mod,sdmax=7,mahaprob="dist",align=align2mod)
