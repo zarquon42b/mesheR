@@ -2,7 +2,7 @@
 #' @importFrom Matrix sparseMatrix Matrix
 #' @importClassesFrom Matrix dgCMatrix sparseMatrix
 #' @importMethodsFrom Matrix t
-#' @importFrom spam as.spam.dgCMatrix rbind.spam solve.spam spam.options diag.spam diag.spam<-
+#' @importFrom spam as.spam.dgCMatrix rbind.spam solve.spam diag.spam diag.spam<-
 #' @importClassesFrom spam spam spam.chol.NgPeyton
 #' @importMethodsFrom spam t chol rbind diag 
 NULL
