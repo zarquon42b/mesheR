@@ -10,8 +10,8 @@ AmbergRegister(x, mesh2, lm1 = NULL, lm2 = NULL, k = 1, lambda = 1,
   useiter = TRUE, minclost = 50, distinc = 1, rigid = NULL,
   similarity = NULL, affine = NULL, tps = FALSE, pcAlign = FALSE,
   nn = 20, silent = FALSE, useConstrained = TRUE, forceLM = FALSE,
-  visualize = FALSE, folder = NULL, noinc = FALSE, angclost = FALSE,
-  bboxCrop = NULL, threads = 0)
+  visualize = FALSE, folder = NULL, noinc = FALSE,
+  angclost = FALSE, bboxCrop = NULL, threads = 0)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed.No loose vertices, edges and degenerated faces are allowed.}

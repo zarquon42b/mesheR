@@ -4,9 +4,9 @@
 \alias{smoothDisplacementField}
 \title{smooth a displacement field using Gaussian smoothing}
 \usage{
-smoothDisplacementField(dispfield, k = 10, sigma = 20, type = c("Gauss",
-  "Laplace", "Exponential", "Bspline", "TPS"), iterations = 1,
-  subsample = 2000, lambda = 1e-08, threads = 0)
+smoothDisplacementField(dispfield, k = 10, sigma = 20,
+  type = c("Gauss", "Laplace", "Exponential", "Bspline", "TPS"),
+  iterations = 1, subsample = 2000, lambda = 1e-08, threads = 0)
 }
 \arguments{
 \item{dispfield}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}

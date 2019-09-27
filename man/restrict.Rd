@@ -9,11 +9,11 @@
 restrict(x, model, sd = 3, maxVar = 95, scale = FALSE, nPC = NULL,
   probab = FALSE, reference = NULL)
 
-\method{restrict}{mesh3d}(x, model, sd = 3, maxVar = 95, scale = FALSE,
-  nPC = NULL, probab = FALSE, reference = NULL)
+\method{restrict}{mesh3d}(x, model, sd = 3, maxVar = 95,
+  scale = FALSE, nPC = NULL, probab = FALSE, reference = NULL)
 
-\method{restrict}{matrix}(x, model, sd = 3, maxVar = 95, scale = FALSE,
-  nPC = NULL, probab = FALSE, reference = NULL)
+\method{restrict}{matrix}(x, model, sd = 3, maxVar = 95,
+  scale = FALSE, nPC = NULL, probab = FALSE, reference = NULL)
 }
 \arguments{
 \item{x}{matrix or triangular mesh of class "mesh3d"}
