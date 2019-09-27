@@ -1,5 +1,5 @@
 ## find correspondences
-getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse(bending,3,10),bending=TRUE,partsample=partsample,ray=TRUE,tol=pi/5,k=200,meanmod,modlm=NULL, tarlm=NULL) {
+getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse(bending,3,10),bending=TRUE,partsample=partsample,ray=TRUE,tol=pi/5,k=200,meanmod,modlm=NULL, tarlm=NULL,forceLM=FALSE) {
     myslide <- NULL
     customLM <- FALSE
     parttofixed <- vcgClostKD(transferPoints(partsample,meanmod,mesh,tolwarn = 5),mesh,k=50)
@@ -32,7 +32,13 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
         targetpoints <- rbind(targetpoints,tarlm)
     }
     if (slide > 0) {
-        myslide    <- relaxLM(referencepoints,targetpoints,mesh=mesh,iterations = slide,SMvector = 1:length(goodclost),surp=1:nrow(referencepoints),silent=silent,bending=bending,stepsize =stepsize ,tol=0)
+        if (forceLM) {
+            SMvector <- surp <- 1:nrow(partsample)
+        } else {
+            SMvector <- surp <- 1:nrow(referencepoints)
+        }
+                
+                myslide    <- relaxLM(referencepoints,targetpoints,mesh=mesh,iterations = slide,SMvector = SMvector,surp=surp,silent=silent,bending=bending,stepsize =stepsize ,tol=0)
     }
         
     return(list(goodclost=goodclost,myslide=myslide,targetpoints=targetpoints))
@@ -58,6 +64,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @param modlm matrix containing 3D landmarks on the model mean (not for alignment)
 #' @param tarlm  matrix containing 3D landmarks on the target surface
 #' @param align2mod logical: if TRUE, the prediction step will perform an alignment to the model using the valid correspondences.
+#' @param forceLM if TRUE, predfined landmarks \code{modlm} are not allowed to slide. For cases with high uncertainty, this can lead to unwanted mesh distortions.
 #' @param silent logical: supress debug output
 #'
 #' @return returns a deformed version of a model instance fitted to the target
@@ -91,7 +98,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @importFrom Rvcg vcgSample
 #' @importFrom Morpho relaxLM
 #' @export
-posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,silent=FALSE) {
+posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,forceLM=FALSE,silent=FALSE) {
     meanmod <- DrawMean(model)
     if (is.null(reference))
         reference <- meanmod
@@ -102,7 +109,7 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
         deformfun <- tps3d
     if (is.null(partsample))
         partsample <- vcgSample(meanmod,samplenum)
-    corrs   <- getCorrespondences(reference,target,distance,silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol,modlm = modlm,tarlm = tarlm)
+    corrs   <- getCorrespondences(reference,target,distance,silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol,modlm = modlm,tarlm = tarlm,forceLM=forceLM)
     myslide <- corrs$myslide
     targetpoints <- corrs$targetpoints
     back2mod <- transferPoints(myslide,reference,meanmod,tolwarn = 5)
