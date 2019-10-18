@@ -15,6 +15,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
     
     referencepoints <- vert2points(parttofixed)[goodclost,]
     targetpoints <- vert2points(part2raw)[goodclost,]
+    nref <- nrow(referencepoints)
     stepsize=1
     #iterations=3
     if (!bending) {
@@ -25,7 +26,6 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
         customLM <- TRUE
         ## print("using landmarks")
         modlm <- transferPoints(modlm,meanmod,mesh,tolwarn = 5)
-        nref <- nrow(referencepoints)
         nlm <- nrow(modlm)
         npos <- (1:nlm)+nref
         referencepoints <- rbind(referencepoints,modlm)
@@ -33,7 +33,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
     }
     if (slide > 0) {
         if (forceLM) {
-            SMvector <- surp <- 1:nrow(partsample)
+            SMvector <- surp <- 1:nref
         } else {
             SMvector <- surp <- 1:nrow(referencepoints)
         }
