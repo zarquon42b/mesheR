@@ -30,12 +30,14 @@ outsideBBox <- function(x, corners, outside=TRUE) {
         box <- makeBox(corners)
     else
         box <- corners
-    clost <- vcgClost(x,box,sign=T,facenormals=T)
+    
+    maxdist <- min(vcgKDtree(box,box,k=8)$distance[,-1])/2
+    clost <- vcgClost(x,box,sign=T,facenormals=F,tol=1e10,smoothNormals=F)
     #x$normals[1:3,] <- x$vb[1:3,]-clost$vb[1:3,]
     #test <- normcheck(clost,x)
     test <- clost$quality
     if (outside)
-        outside <- which(test < 0)
+        outside <- which(as.logical((test < 0) + (abs(test) > maxdist)))
     else
         outside <- which(test >= 0)
     return(outside)
