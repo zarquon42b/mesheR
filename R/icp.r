@@ -33,6 +33,7 @@
 #' @param getTransform logical: if TRUE, a list containing the transformed mesh and the 4x4 transformation matrix.
 #' @param pcAlign if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.
 #' @param threads integer: threads to use in closest point search.
+#' @param weights vector containing weights for inital landmark transform
 #' @return if \code{getTransform=FALSE}, the tranformed mesh1 is returned and otherwise a list containing
 #'
 #' \item{mesh}{tranformed mesh1}
@@ -56,7 +57,7 @@
 #' }
 #' @importFrom Morpho fastKmeans
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE, silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=0) {
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE, silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=0,weights=NULL) {
     if (is.matrix(mesh1)) {
         mesh1 <- list(vb=t(mesh1))
         class(mesh1) <- "mesh3d"
@@ -75,7 +76,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
            
       type <- match.arg(type,c("rigid","similarity","affine"))
       if (!is.null(lm1) && !pcAlign){## perform initial rough registration
-          trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection)
+          trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection,weights=weights)
           mesh1 <- applyTransform(mesh1,trafo)
       }
       ## create subsample to speed up registration
