@@ -9,7 +9,7 @@ icp(mesh1, mesh2, iterations = 3, lm1 = NULL, lm2 = NULL,
   rhotol = pi, k = 50, reflection = FALSE, silent = FALSE,
   subsample = NULL, subsampletype = c("km", "pd"), type = c("rigid",
   "similarity", "affine"), getTransform = FALSE, pcAlign = FALSE,
-  threads = 0)
+  threads = 0, weights = NULL)
 }
 \arguments{
 \item{mesh1}{object of class "mesh3d".}
@@ -56,6 +56,8 @@ If the tow meshes have only little or no overlap, "vcg" can be really slow. Othe
 \item{pcAlign}{if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.}
 
 \item{threads}{integer: threads to use in closest point search.}
+
+\item{weights}{vector containing weights for inital landmark transform}
 }
 \value{
 if \code{getTransform=FALSE}, the tranformed mesh1 is returned and otherwise a list containing
