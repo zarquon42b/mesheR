@@ -4,13 +4,17 @@
 \alias{rmInternals}
 \title{remove vertices within a convex surface mesh}
 \usage{
-rmInternals(mesh, mindist = NULL, explode = FALSE, center = NULL)
+rmInternals(mesh, mindist = 0, maxdist = 1e+12, explode = FALSE,
+  center = NULL)
 }
 \arguments{
 \item{mesh}{triangular mesh of class "mesh3d"}
 
 \item{mindist}{numeric: restrict to those vertices whose intersection point
 is further away as mindist.}
+
+\item{maxdist}{nummeric: restrict to those vertices whose intersection point
+is closer away as maxdist.}
 
 \item{explode}{logical: instead of surface normals use the direction outward
 from a center of the mesh. Per default, the center of the meshes bounding

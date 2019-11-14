@@ -8,7 +8,9 @@
 #' 
 #' @param mesh triangular mesh of class "mesh3d" 
 #' @param mindist numeric: restrict to those vertices whose intersection point
-#' is further away as mindist. 
+#' is further away as mindist.
+#' @param maxdist nummeric: restrict to those vertices whose intersection point
+#' is closer away as maxdist.
 #' @param explode logical: instead of surface normals use the direction outward
 #' from a center of the mesh. Per default, the center of the meshes bounding
 #' box is used. 
@@ -19,8 +21,7 @@
 #' @seealso \code{\link{rmVertex}}
 #' @keywords ~kwd1 ~kwd2
 #' @export rmInternals
-rmInternals <- function(mesh,mindist=NULL,explode=FALSE,center=NULL)
-  {
+rmInternals <- function(mesh,mindist=0,maxdist=1e12,explode=FALSE,center=NULL) {
 
     
     if (explode)
@@ -32,10 +33,8 @@ rmInternals <- function(mesh,mindist=NULL,explode=FALSE,center=NULL)
       }
     meshoff <- meshOffset(mesh,0.005)
     check <- vcgRaySearch(meshoff,mesh)
-    if (is.null(mindist))
-      intern <- which(as.logical(check$quality))
-    else
-      intern <- which(((check$quality) * (check$distance > mindist))==1)
+    intern <- which(as.logical((check$quality * (check$distance > mindist)) * (check$quality * (check$distance < maxdist))))
+     
 
     if (length(intern))
         out <- rmVertex(mesh,intern)
