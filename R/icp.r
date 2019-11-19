@@ -32,6 +32,7 @@
 #' @param type set type of affine transformation: options are "affine", "rigid" and "similarity" (rigid + scale)
 #' @param getTransform logical: if TRUE, a list containing the transformed mesh and the 4x4 transformation matrix.
 #' @param pcAlign if TRUE, surfaces are prealigned by principal axis. Overrides intial landmark based alignment.
+#' @param pcOptim if TRUE, all posible alignments to the PC-Axes are evaluated and the one with the lowest LSE will be used. Can be time consuming for large meshes.
 #' @param threads integer: threads to use in closest point search.
 #' @param weights vector containing weights for inital landmark transform
 #' @return if \code{getTransform=FALSE}, the tranformed mesh1 is returned and otherwise a list containing
@@ -57,7 +58,7 @@
 #' }
 #' @importFrom Morpho fastKmeans
 #' @export icp
-icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE, silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,threads=0,weights=NULL) {
+icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdist=NULL, minclost=50, distinc=0.5, rhotol=pi, k=50, reflection=FALSE, silent=FALSE,subsample=NULL,subsampletype=c("km","pd"),type=c("rigid","similarity","affine"),getTransform=FALSE,pcAlign=FALSE,pcOptim=TRUE,threads=0,weights=NULL) {
     if (is.matrix(mesh1)) {
         mesh1 <- list(vb=t(mesh1))
         class(mesh1) <- "mesh3d"
@@ -65,7 +66,7 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
     meshorig <- mesh1 <- vcgUpdateNormals(mesh1,silent=silent)
       mesh2 <- vcgUpdateNormals(mesh2)
        if (pcAlign) {
-                mesh1 <- pcAlign(mesh1,mesh2,optim=FALSE)
+                mesh1 <- pcAlign(mesh1,mesh2,optim=pcOptim)
                 if (!is.null(lm1))
                     lm1 <- applyTransform(lm1,computeTransform(mesh2,mesh1))
             }
