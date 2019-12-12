@@ -7,8 +7,8 @@
 posteriorDeform(model, target, reference = NULL, partsample = NULL,
   samplenum = 1000, distance = 1e+10, slide = 3, bending = TRUE,
   ray = FALSE, deform = FALSE, Amberg = FALSE, rhotol = pi/2,
-  modlm = NULL, tarlm = NULL, align2mod = TRUE, forceLM = FALSE,
-  silent = FALSE)
+  modlm = NULL, tarlm = NULL, align2mod = TRUE,
+  alignbymesh = FALSE, forceLM = FALSE, silent = FALSE)
 }
 \arguments{
 \item{model}{statismo shape model}
@@ -40,6 +40,8 @@ posteriorDeform(model, target, reference = NULL, partsample = NULL,
 \item{tarlm}{matrix containing 3D landmarks on the target surface}
 
 \item{align2mod}{logical: if TRUE, the prediction step will perform an alignment to the model using the valid correspondences.}
+
+\item{alignbymesh}{logical: if TRUE, the alignment to the SSM will be computed by the entire mesh, if FALSE only the valid correspondences are used.}
 
 \item{forceLM}{if TRUE, predfined landmarks \code{modlm} are not allowed to slide. For cases with high uncertainty, this can lead to unwanted mesh distortions.}
 

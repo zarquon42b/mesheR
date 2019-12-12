@@ -7,7 +7,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
         part2raw    <- vcgRaySearch(parttofixed,targetmesh,mindist=T)
     else {
         
-        part2raw <- vcgClostKD(parttofixed,targetmesh,angdev = tol,k=k)
+        part2raw <- vcgClostKD(parttofixed,targetmesh,angdev = tol,k=k,sign=FALSE)
         part2raw$distance <- part2raw$quality
         part2raw$quality <- rep(1,length(part2raw$quality))
     }
@@ -64,6 +64,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @param modlm matrix containing 3D landmarks on the model mean (not for alignment)
 #' @param tarlm  matrix containing 3D landmarks on the target surface
 #' @param align2mod logical: if TRUE, the prediction step will perform an alignment to the model using the valid correspondences.
+#' @param alignbymesh logical: if TRUE, the alignment to the SSM will be computed by the entire mesh, if FALSE only the valid correspondences are used.
 #' @param forceLM if TRUE, predfined landmarks \code{modlm} are not allowed to slide. For cases with high uncertainty, this can lead to unwanted mesh distortions.
 #' @param silent logical: supress debug output
 #'
@@ -98,7 +99,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @importFrom Rvcg vcgSample
 #' @importFrom Morpho relaxLM
 #' @export
-posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,forceLM=FALSE,silent=FALSE) {
+posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,alignbymesh=FALSE,forceLM=FALSE,silent=FALSE) {
     meanmod <- DrawMean(model)
     if (is.null(reference))
         reference <- meanmod
@@ -113,7 +114,18 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
     myslide <- corrs$myslide
     targetpoints <- corrs$targetpoints
     back2mod <- transferPoints(myslide,reference,meanmod,tolwarn = 5)
-    deformed <- PredictSample(model,lmDataset = targetpoints,lmModel=back2mod,sdmax=7,mahaprob="dist",align=align2mod)
+    if (!alignbymesh)
+        deformed <- PredictSample(model,lmDataset = targetpoints,lmModel=back2mod,sdmax=7,mahaprob="dist",align=align2mod)
+    else {
+        if (align2mod)
+            trafo <- computeTransform(meanmod,reference)
+        else
+            trafo <- diag(4)
+        targetpoints2mod <- applyTransform(targetpoints,trafo)
+        deformed <- applyTransform(PredictSample(model,lmDataset = targetpoints2mod,lmModel=back2mod,sdmax=7,mahaprob="dist",align=FALSE),trafo,inverse = TRUE)        
+        
+        
+    }
     cat("Relaxing landmarks\n")
     if (deform) {
         myslide <- transferPoints(myslide,reference,deformed,tolwarn = 5)
