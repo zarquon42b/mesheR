@@ -314,6 +314,9 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                     mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawMean(Bayes$model))
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
                 }
+            } else {
+                mesh1 <- PredictSample(Bayes$model,lmDataset=lm2tmp,lmModel=lm1)
+                lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
         }
         if (tps) {
