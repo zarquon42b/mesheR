@@ -9,9 +9,9 @@ sudo: required
 #dist: bionic
 
 before_install:
-  - sudo add-apt-repository -y ppa:zarquon42b/ppa
+  - sudo add-apt-repository -y ppa:zarquon42/ppa
   - sudo apt-get -q update
-  - sudo apt-get -y statismo
+  - sudo apt-get install -y statismo
 
 repos:
   CRAN: https://cloud.r-project.org
