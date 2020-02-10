@@ -67,6 +67,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @param alignbymesh logical: if TRUE, the alignment to the SSM will be computed by the entire mesh, if FALSE only the valid correspondences are used.
 #' @param forceLM if TRUE, predfined landmarks \code{modlm} are not allowed to slide. For cases with high uncertainty, this can lead to unwanted mesh distortions.
 #' @param silent logical: supress debug output
+#' @param threads integer: number of threads to use for tps interpolation (set to 1 if using openblas, or otherwise it can become instable)
 #'
 #' @return returns a deformed version of a model instance fitted to the target
 #' @note Please note that it is required to align the target mesh to the model mean beforehand. This can be performed using the function \code{\link{icp}}, for example.
@@ -99,7 +100,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @importFrom Rvcg vcgSample
 #' @importFrom Morpho relaxLM
 #' @export
-posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,alignbymesh=FALSE,forceLM=FALSE,silent=FALSE) {
+posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,alignbymesh=FALSE,forceLM=FALSE,silent=FALSE,threads=1) {
     meanmod <- DrawMean(model)
     if (is.null(reference))
         reference <- meanmod
@@ -107,7 +108,7 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
     if (Amberg)
         deformfun <- function(mesh,lm1,lm2) { return( AmbergDeformSpam(mesh,lm1,lm2,k0=10)$mesh)}
     else
-        deformfun <- tps3d
+        deformfun <- function(x,y,z)  {return(tps3d(x,y,z,threads=threads))}
     if (is.null(partsample))
         partsample <- vcgSample(meanmod,samplenum)
     corrs   <- getCorrespondences(reference,target,distance,silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol,modlm = modlm,tarlm = tarlm,forceLM=forceLM)
