@@ -8,14 +8,15 @@
 #' @param maxit maximum iterations
 #' @param tol positive number: stop if intersection is less than \code{tol}
 #' @param outside logical: if TRUE the reference will be placed outside of the target. Inside otherwise
-#' @param inflate numerical
 #' @param gradthresh numerical: (abs) gradient threshold to determine convergence
 #' @param gradn integer: number of steps to include in computing gradient
 #' @param realign logical: if TRUE, \code{reference} will be aligned to a model inflated along normals by the max. distance to intersection.
 #' @param inflate numeric factor to multiply the max distance to intersect for inflating (only if \code{inflate=TRUE}
 #' @param visualize logical: if TRUE watch the approximation
+#' @param silent logical: suppress messages
 #' @details This is a quite simple attempt to remove an intersection after the alignment of two meshes. This is achieved by translating \code{reference} along the average difference vectors of all vertices
 #' @importFrom pracma gradient
+#' @importFrom rgl rgl.cur rgl.clear
 #' @export
 removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outside=TRUE,gradthresh=-Inf,gradn=Inf,realign=TRUE,inflate=1,visualize=TRUE,silent=FALSE) {
     mesh <- FALSE

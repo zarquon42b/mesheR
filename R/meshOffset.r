@@ -7,7 +7,7 @@
 #' @param offset distance to translate the vertices
 #' @return returns modified mesh.
 #' @author Stefan Schlager
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' 
 #' require(Morpho)

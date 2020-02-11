@@ -184,6 +184,7 @@ applyDisplacementField <- function(dispfield,points,k=10,sigma=20,type=c("Gauss"
 #' @param lwd width of the displacement vectors
 #' @param color logical: if TRUE, displacement vectors will be colored according to a heatmap.
 #' @param plot if FALSE only an object of class "DisplacementPlot" is returned without graphical output
+#' @param size determines size of grid points
 #' @param ... additional arguments. Currently not used.
 #' @return invisible object of class "DisplacementPlot" that can be rendered using \code{plot}
 #' @seealso \code{\link{interpolateDisplacementField}, \link{applyDisplacementField}, \link{smoothDisplacementField}}
@@ -325,21 +326,21 @@ displacementField2Grid <- function(x,spacing=rep(2,3),margin=0.05,IJK2RAS=diag(c
 }
 
 
-displacementGrid2Transform <- function(x) {
-    if (!require(SimpleITK))
-        stop("this function requires SimpleITK to be installed")
-    if (!inherits(x,"DisplacementGrid"))
-        stop("x must be of class DisplacementGrid")
-    attribs <- attributes(x)
-    img <- SimpleITK::Image(attribs$arraydim[1],attribs$arraydim[2],attribs$arraydim[3],"sitkVectorFloat64")
-    inds <- attribs$indices-1L
-    for(i in 1:(nrow(attribs$indices))) {
-        tmp=as.numeric(x$DisplacementField[i,])
-        img$SetPixelAsVectorFloat64(inds[i,],tmp)
-    }
-    img$SetSpacing(attribs$spacing)
-    img$SetOrigin(attribs$origin)
-    return(img)
-}
+## displacementGrid2Transform <- function(x) {
+##     if (!requireNamespace(SimpleITK))
+##         stop("this function requires SimpleITK to be installed")
+##     if (!inherits(x,"DisplacementGrid"))
+##         stop("x must be of class DisplacementGrid")
+##     attribs <- attributes(x)
+##     img <- SimpleITK::Image(attribs$arraydim[1],attribs$arraydim[2],attribs$arraydim[3],"sitkVectorFloat64")
+##     inds <- attribs$indices-1L
+##     for(i in 1:(nrow(attribs$indices))) {
+##         tmp=as.numeric(x$DisplacementField[i,])
+##         img$SetPixelAsVectorFloat64(inds[i,],tmp)
+##     }
+##     img$SetSpacing(attribs$spacing)
+##     img$SetOrigin(attribs$origin)
+##     return(img)
+## }
 
 

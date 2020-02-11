@@ -22,7 +22,7 @@ glView <- function()
 #' @return returns logical vector, assigning TRUE/FALSE to each vertex of a
 #' mesh.
 #' @author Stefan Schlager
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @seealso \code{\link{selectVertex}}, \code{\link{cutMesh}}
 #' @examples
 #' \dontrun{

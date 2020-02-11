@@ -21,7 +21,7 @@
 #' cutMesh returns the trimmed mesh.
 #' @author Stefan Schlager
 #' @seealso \code{\link{vcgPlyRead}}, \code{\link{glVisible}}, \code{\link{cutMesh}}
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' 
 #' \dontrun{
@@ -146,7 +146,7 @@ selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wir
 #' cutMesh returns the trimmed mesh.
 #' @author Stefan Schlager
 #' @seealso \code{\link{vcgPlyRead}},  \code{\link{glVisible}}, \code{\link{selectVertex}}
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' 
 #' \dontrun{

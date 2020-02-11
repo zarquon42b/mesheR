@@ -27,11 +27,11 @@ removeIntersect(reference, target, stepsize = 0.2, maxit = 100,
 
 \item{realign}{logical: if TRUE, \code{reference} will be aligned to a model inflated along normals by the max. distance to intersection.}
 
-\item{inflate}{numerical}
+\item{inflate}{numeric factor to multiply the max distance to intersect for inflating (only if \code{inflate=TRUE}}
 
 \item{visualize}{logical: if TRUE watch the approximation}
 
-\item{inflate}{numeric factor to multiply the max distance to intersect for inflating (only if \code{inflate=TRUE}}
+\item{silent}{logical: suppress messages}
 }
 \description{
 This functions aims to translate two meshes to remove an intersection. This is done based on signed distance

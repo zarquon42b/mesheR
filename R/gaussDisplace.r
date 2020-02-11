@@ -202,7 +202,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' Moshfeghi, M., Ranganath, S., and Nawyn, K. 1994. Three-dimensional elastic
 #' matching of volumes. IEEE Transactions on Image Processing: A Publication of
 #' the IEEE Signal Processing Society, 3(2):128-138.
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' require(Morpho)
 #' data(nose)##load data
@@ -315,7 +315,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
                 }
             } else {
-                mesh1 <- PredictSample(Bayes$model,lmDataset=lm2tmp,lmModel=lm1)
+                mesh1 <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm2tmp,lmModel=lm1)
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
         }

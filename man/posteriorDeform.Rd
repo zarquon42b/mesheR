@@ -8,7 +8,8 @@ posteriorDeform(model, target, reference = NULL, partsample = NULL,
   samplenum = 1000, distance = 1e+10, slide = 3, bending = TRUE,
   ray = FALSE, deform = FALSE, Amberg = FALSE, rhotol = pi/2,
   modlm = NULL, tarlm = NULL, align2mod = TRUE,
-  alignbymesh = FALSE, forceLM = FALSE, silent = FALSE)
+  alignbymesh = FALSE, forceLM = FALSE, silent = FALSE,
+  threads = 1)
 }
 \arguments{
 \item{model}{statismo shape model}
@@ -46,6 +47,8 @@ posteriorDeform(model, target, reference = NULL, partsample = NULL,
 \item{forceLM}{if TRUE, predfined landmarks \code{modlm} are not allowed to slide. For cases with high uncertainty, this can lead to unwanted mesh distortions.}
 
 \item{silent}{logical: supress debug output}
+
+\item{threads}{integer: number of threads to use for tps interpolation (set to 1 if using openblas, or otherwise it can become instable)}
 }
 \value{
 returns a deformed version of a model instance fitted to the target

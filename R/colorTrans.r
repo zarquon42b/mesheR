@@ -9,7 +9,7 @@
 
 #' @return returns the mesh1 with transfered vertex colors.
 #' @author Stefan Schlager
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' 
 #' require(Morpho)

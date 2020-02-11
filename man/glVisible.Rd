@@ -36,5 +36,3 @@ points3d(vert2points(shortnose.mesh)[which(visi),])
 \author{
 Stefan Schlager
 }
-\keyword{~kwd1}
-\keyword{~kwd2}

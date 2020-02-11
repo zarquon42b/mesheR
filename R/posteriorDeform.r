@@ -101,14 +101,16 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @importFrom Morpho relaxLM
 #' @export
 posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,alignbymesh=FALSE,forceLM=FALSE,silent=FALSE,threads=1) {
-    meanmod <- DrawMean(model)
+      if (!requireNamespace("RvtkStatismo"))
+          stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
+    meanmod <- RvtkStatismo::DrawMean(model)
     if (is.null(reference))
         reference <- meanmod
 ## cat("Deformation step without curvature\n")
     if (Amberg)
         deformfun <- function(mesh,lm1,lm2) { return( AmbergDeformSpam(mesh,lm1,lm2,k0=10)$mesh)}
     else
-        deformfun <- function(x,y,z)  {return(tps3d(x,y,z,threads=threads))}
+        deformfun <- function(mesh,lm1,lm2)  {return(tps3d(mesh,lm1,lm2,threads=threads))}
     if (is.null(partsample))
         partsample <- vcgSample(meanmod,samplenum)
     corrs   <- getCorrespondences(reference,target,distance,silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol,modlm = modlm,tarlm = tarlm,forceLM=forceLM)
@@ -116,14 +118,14 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
     targetpoints <- corrs$targetpoints
     back2mod <- transferPoints(myslide,reference,meanmod,tolwarn = 5)
     if (!alignbymesh)
-        deformed <- PredictSample(model,lmDataset = targetpoints,lmModel=back2mod,sdmax=7,mahaprob="dist",align=align2mod)
+        deformed <- RvtkStatismo::PredictSample(model,lmDataset = targetpoints,lmModel=back2mod,sdmax=7,mahaprob="dist",align=align2mod)
     else {
         if (align2mod)
             trafo <- computeTransform(meanmod,reference)
         else
             trafo <- diag(4)
         targetpoints2mod <- applyTransform(targetpoints,trafo)
-        deformed <- applyTransform(PredictSample(model,lmDataset = targetpoints2mod,lmModel=back2mod,sdmax=7,mahaprob="dist",align=FALSE),trafo,inverse = TRUE)        
+        deformed <- applyTransform(RvtkStatismo::PredictSample(model,lmDataset = targetpoints2mod,lmModel=back2mod,sdmax=7,mahaprob="dist",align=FALSE),trafo,inverse = TRUE)        
         
         
     }

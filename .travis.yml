@@ -5,8 +5,10 @@
 #   https://github.com/craigcitro/r-travis/wiki
 
 language: r
+cache: packages
 sudo: required
 #dist: bionic
+warnings_are_errors: false
 
 repos:
   CRAN: https://cloud.r-project.org

@@ -53,7 +53,7 @@
 #' @author Stefan Schlager
 #' @seealso \code{\link{gaussMatch}}
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' require(Morpho)
 #' 

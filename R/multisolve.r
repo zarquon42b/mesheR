@@ -12,7 +12,7 @@
 #' \code{trans} here~~
 #' @return Returns matrix containing inverted submatrices.
 #' @author Stefan Schlager
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' 
 #' A <- matrix(rnorm(18),6,3)

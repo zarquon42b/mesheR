@@ -37,5 +37,3 @@ shade3d(mixmesh)
 \author{
 Stefan Schlager
 }
-\keyword{~kwd1}
-\keyword{~kwd2}

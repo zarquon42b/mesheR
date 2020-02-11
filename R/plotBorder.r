@@ -7,7 +7,7 @@
 #' @param col color of lines.  
 #' @param lwd line width
 #' @author Stefan Schlager
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' \dontrun{
 #' require(rgl)

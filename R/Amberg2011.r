@@ -205,7 +205,7 @@ createJc <- function(lm1,ncol,mesh)
 #' @author Stefan Schlager
 #' @seealso \code{\link{gaussMatch}}
 #' @references Amberg, B. 2011. Editing faces in videos, University of Basel.
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @importFrom Rvcg vcgClean
 #' @importFrom spam crossprod.spam
 #' @export AmbergDeformSpam

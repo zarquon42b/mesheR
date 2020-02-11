@@ -19,7 +19,7 @@
 #' @return returns a cleaned mesh
 #' @author Stefan Schlager
 #' @seealso \code{\link{rmVertex}}
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @export rmInternals
 rmInternals <- function(mesh,mindist=0,maxdist=1e12,explode=FALSE,center=NULL) {
 

@@ -99,5 +99,3 @@ free-form curves and surfaces International Journal of Computer Vision
 \author{
 Stefan Schlager
 }
-\keyword{~kwd1}
-\keyword{~kwd2}

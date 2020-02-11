@@ -44,7 +44,7 @@
 #' @references Zhang Z. 1994. Iterative point matching for registration of
 #' free-form curves and surfaces International Journal of Computer Vision
 #' 13:119-152.
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' 
 #' require(Morpho)

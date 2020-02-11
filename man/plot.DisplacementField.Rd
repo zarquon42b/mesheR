@@ -16,6 +16,8 @@
 
 \item{plot}{if FALSE only an object of class "DisplacementPlot" is returned without graphical output}
 
+\item{size}{determines size of grid points}
+
 \item{...}{additional arguments. Currently not used.}
 }
 \value{

@@ -8,7 +8,7 @@
 #' @param alpha numeric: 0 <= alpha <=1 weight of color associated with mesh2.
 #' @return returns mesh1 with mixed vertex colors.
 #' @author Stefan Schlager
-#' @keywords ~kwd1 ~kwd2
+#' 
 #' @examples
 #' 
 #' require(Morpho)

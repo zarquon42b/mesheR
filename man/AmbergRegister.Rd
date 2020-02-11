@@ -146,5 +146,3 @@ Amberg, B. 2011. Editing faces in videos, University of Basel.
 \author{
 Stefan Schlager
 }
-\keyword{~kwd1}
-\keyword{~kwd2}

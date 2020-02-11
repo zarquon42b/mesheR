@@ -188,5 +188,3 @@ the IEEE Signal Processing Society, 3(2):128-138.
 \author{
 Stefan Schlager
 }
-\keyword{~kwd1}
-\keyword{~kwd2}

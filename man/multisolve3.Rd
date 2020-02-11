@@ -31,5 +31,3 @@ B <- multisolve3(A)
 \author{
 Stefan Schlager
 }
-\keyword{~kwd1}
-\keyword{~kwd2}
