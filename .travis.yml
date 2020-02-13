@@ -10,6 +10,18 @@ sudo: required
 #dist: bionic
 warnings_are_errors: false
 
+addons:
+  apt:
+    packages:
+      - libpng-dev
+      - libfreetype6-dev
+      - libglu1-mesa-dev
+      - libgl1-mesa-dev
+      - libx11-dev
+      - libxt-dev
+      - x11proto-core-dev
+      - autotools-dev
+      
 repos:
   CRAN: https://cloud.r-project.org
 
