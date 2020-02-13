@@ -18,8 +18,9 @@
 #' @importFrom pracma gradient
 #' @importFrom rgl rgl.cur rgl.clear
 #' @export
-removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outside=TRUE,gradthresh=-Inf,gradn=Inf,realign=TRUE,inflate=1,visualize=TRUE,silent=FALSE) {
+removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outside=TRUE,gradthresh=-Inf,gradn=Inf,realign=FALSE,inflate=1,visualize=FALSE,silent=FALSE) {
     mesh <- FALSE
+    ref.orig <- reference
     if (inherits(reference,"mesh3d")) {
          reference <- vert2points(reference)
          reference_old <- reference
@@ -33,7 +34,7 @@ removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outsid
         shade3d(target,col=3)
         points3d(reference)
     }
-    if (interactive()) 
+    if (interactive() && visualize) 
         readline("please select viewpoint\n")
     final <- FALSE
     count <- 0
@@ -86,6 +87,8 @@ removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outsid
             cat(paste0("finished iteration ",count,"\n\n"))
         }
     }
+    if (mesh)
+        reference <- updateVertices(ref.orig,reference)
     return(reference)
 }
 
