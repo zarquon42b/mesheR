@@ -14,9 +14,9 @@
 #' require(Morpho)
 #' data(nose)
 #' redmesh <- shortnose.mesh
-#' redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
+#' redmesh$material$color <- rep("#FF0000",,ncol(shortnose.mesh$vb))
 #' bluemesh <- shortnose.mesh
-#' bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
+#' bluemesh$material$color <- rep("#0000FF",ncol(shortnose.mesh$vb))
 #' mixmesh <- mixColorMesh(bluemesh,redmesh)
 #' \dontrun{
 #' require(rgl)
@@ -37,7 +37,7 @@ mixColorMesh <- function(mesh1,mesh2,alpha=0.5)
             col1[nas2] <- "#FFFFFF"
 
         mx <- hex(mixcolor(alpha=alpha,hex2RGB(col1),hex2RGB(col2)))
-        mesh1$material$color <- matrix(mx,dim(mesh1$material$color))
+        mesh1$material$color <- mx
         return(mesh1)
     }
 

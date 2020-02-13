@@ -214,7 +214,7 @@ plot.DisplacementField <- function(x,lwd=1,color=TRUE,plot=TRUE,size=NULL,...) {
         coldif <- colseq[2]-colseq[1]
         distqual <- ceiling((dists/coldif)+1e-14)
         colorall <- ramp[distqual]
-        dismesh$material$color <- rbind(colorall,colorall,colorall)
+        dismesh$material$color <- colorall
         dismesh$material$lit=FALSE
         
         if (plot)

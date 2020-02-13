@@ -18,7 +18,7 @@ colorMesh <- function(mesh, col) {
 
     col <- rgb(t(col2rgb(col[1])),maxColorValue = 255)
     material <- list()
-    material$color <- matrix(col, nrow(mesh$it), ncol(mesh$it))
+    material$color <- rep(col,ncol(mesh$vb))
     mesh$material <- material
     invisible(mesh)
 }
@@ -51,7 +51,7 @@ setVertColor <- function(x,colorvec) {
     if (ncol(x$vb) != length(colorvec))
         stop("provide a color value for each vertex")
     colfun <- function(x){x <- colorvec[x];return(x)}
-    x$material$color <- matrix(colfun(x$it),dim(x$it))
+    x$material$color <- colorvec
     x$material$color[is.na(x$material$color)] <- #000000
     return(x)
 }

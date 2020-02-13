@@ -25,8 +25,6 @@ placeDowels(lm, mesh, ldowel, render = TRUE, col = 1, radius = 1,
 \item{fine}{integer: amount of vertices to generate the cylinders representing tissue thickness.}
 
 \item{smooth}{logical: use smoothed normals for dowel orientation}
-
-\item{dowelcol}{specify dowelcolor.}
 }
 \value{
 an invisible list with

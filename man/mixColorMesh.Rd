@@ -25,9 +25,9 @@ registered meshes (identical faces and corresponding vertices).
 require(Morpho)
 data(nose)
 redmesh <- shortnose.mesh
-redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
+redmesh$material$color <- rep("#FF0000",,ncol(shortnose.mesh$vb))
 bluemesh <- shortnose.mesh
-bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
+bluemesh$material$color <- rep("#0000FF",ncol(shortnose.mesh$vb))
 mixmesh <- mixColorMesh(bluemesh,redmesh)
 \dontrun{
 require(rgl)

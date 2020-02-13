@@ -45,9 +45,9 @@ make a warpmovie with multiple registered meshes - this is a pimped version of w
 require(Morpho)
 data(nose)
 redmesh <- shortnose.mesh
-redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
+redmesh$material$color <- rep("#FF0000",ncol(shortnose.mesh$vb))
 bluemesh <- shortnose.mesh
-bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
+bluemesh$material$color <- rep("#0000FF",ncol(shortnose.mesh$vb))
 \dontrun{
 warpmovieMulti(bluemesh, redmesh, n=15)
 }

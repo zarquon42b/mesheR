@@ -21,9 +21,9 @@
 #' require(Morpho)
 #' data(nose)
 #' redmesh <- shortnose.mesh
-#' redmesh$material$color <- matrix("#FF0000",dim(shortnose.mesh$it))
+#' redmesh$material$color <- rep("#FF0000",ncol(shortnose.mesh$vb))
 #' bluemesh <- shortnose.mesh
-#' bluemesh$material$color <- matrix("#0000FF",dim(shortnose.mesh$it))
+#' bluemesh$material$color <- rep("#0000FF",ncol(shortnose.mesh$vb))
 #' \dontrun{
 #' warpmovieMulti(bluemesh, redmesh, n=15)
 #' }
@@ -96,9 +96,9 @@ warpmovieMulti.list <- function(..., n, col=NULL, folder=NULL, movie="warpmovie"
             mesh <- vcgUpdateNormals(mesh)
             if (mixcolor && is.null(whichcolor)) {
                 if (is.null(mesh$material$color)) 
-                    mesh$material$color <- matrix("#FFFFFF",nrow(mesh$it),ncol(mesh$it))
+                    mesh$material$color <- rep("#FFFFFF",ncol(mesh$vb))
                 if (is.null(y$material$color)) 
-                    y$material$color <- matrix("#FFFFFF",nrow(y$it),ncol(y$it))
+                    y$material$color <- rep("#FFFFFF",ncol(y$vb))
                 mesh <- mixColorMesh(mesh,y, alpha=((i/n)))
             }
                     
