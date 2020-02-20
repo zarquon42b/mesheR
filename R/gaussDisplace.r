@@ -99,9 +99,9 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 ### make multicore 
     if (nh < 1)
         stop ("neighbourhood must be at least 1")
-    out <- .Call("displaceGauss",W0,M0,D1,D2,sigma,gamma,clostIndW,clostIndWdistance,clostIndP,clostIndPdistance,tol=tol,rt0,rt1,rc,oneway,smoothtype,threads,PACKAGE="mesheR")
+    out <- .Call("displaceGauss",W0,M0,D1,D2,sigma,gamma,clostIndW,clostIndWdistance,clostIndP,clostIndPdistance,tol=tol,rt0=rt0,rt1,rc,oneway,smoothtype,threads,PACKAGE="mesheR")
     addit <- W0+out
-    return(list(addit=addit))
+    return(list(addit=addit,rt0=rt0))
 }
 
 
@@ -177,6 +177,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @param bboxCrop extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.
 #' @param threads integer: threads to use in multithreaded routines.
 #' @param cb optional: callback function that takes arguments i="current iteration", distance= "distance from target to current estimate" and t.dist="average vertex displacement to last iteration"
+#' @param useValid2constrain logical: if TRUE and \code{x} is a shape model, then only those vertices with valid hits are used to compute the PosteriorMean.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -228,7 +229,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,tps=FALSE,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",add=FALSE,bbox=NULL,bboxCrop=NULL,threads=0,cb=NULL,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,tps=FALSE,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",add=FALSE,bbox=NULL,bboxCrop=NULL,threads=0,cb=NULL,useValid2Constrain=FALSE,...) {
     typeargs <- c("gauss","laplace","exponential","bspline")
     displacementsmooth <- match.arg(tolower(displacementsmooth[1]),typeargs)
     displacementsmooth <- match(displacementsmooth,typeargs)-1
@@ -442,11 +443,20 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 wt <- Bayes$wt[i]
                 wts <- c(1,wt)
                 wts <- wts/sum(wts)
-                tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,dataset=mesh0,representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob)
+                good <- which(tmp$rt0 != 4)
+                if (! useValid2constrain)
+                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,dataset=mesh0,representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob)
+                else
+                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=vert2points(mesh0)[good,],vert2points(DrawMean(Bayes$model)[good,]),representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob)
                 tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
                 
             } else {
-                tmp$addit <- RvtkStatismo::PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
+                if (! useValid2constrain)
+                    tmp$addit <- RvtkStatismo::PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
+                else {
+                    good <- which(tmp$rt0 != 4)
+                    tmp$addit <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=tmp$addit[good,],lmModel=GetDomainPoints(Bayes$model)[good,],representer=FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
+                }
             }
             
         }
