@@ -103,7 +103,7 @@ warpmovieMulti.list <- function(..., n, col=NULL, folder=NULL, movie="warpmovie"
             }
                     
                 
-            a <- shade3d(mesh,col=col,specular=1,back=back,front=front)
+            a <- shade3d(mesh,specular=1,back=back,front=front)
             if (shade[1] == "b"){
                 tmesh <- mesh
                 tmesh$material$color <- NULL
