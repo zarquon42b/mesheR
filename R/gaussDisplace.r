@@ -178,6 +178,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @param threads integer: threads to use in multithreaded routines.
 #' @param cb optional: callback function that takes arguments i="current iteration", distance= "distance from target to current estimate" and t.dist="average vertex displacement to last iteration"
 #' @param useValid2constrain logical: if TRUE and \code{x} is a shape model, then only those vertices with valid hits are used to compute the PosteriorMean.
+#' @param mahasafe numeric: define the max allowed per-vertex mahalanobis distance (only available if the fitting is model based)
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
@@ -229,7 +230,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @export
 #'
 #' @useDynLib mesheR
-gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,tps=FALSE,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",add=FALSE,bbox=NULL,bboxCrop=NULL,threads=0,cb=NULL,useValid2Constrain=FALSE,...) {
+gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=c("taubin","laplace","HClaplace"),sigma=20,displacementsmooth=c("Gauss","Laplace","Exponential"),gamma=2,f=1.2,oneway=F,lm1=NULL,lm2=NULL,rigid=NULL, similarity=NULL, affine=NULL,tps=FALSE,nh=NULL,toldist=0,pro=c("kd","vcg","morpho"),k0=50,prometh=1,angtol=pi/2,border=FALSE,horiz.disp=NULL,useiter=FALSE,AmbergK=NULL,AmbergLambda=NULL,tol=1e-5, useConstrained=TRUE, angclost=TRUE,noinc=FALSE,silent=FALSE, visualize=FALSE,folder=NULL,alpha=0.7,col1="red",col2="white",add=FALSE,bbox=NULL,bboxCrop=NULL,threads=0,cb=NULL,useValid2Constrain=FALSE,mahasafe=1e10,...) {
     typeargs <- c("gauss","laplace","exponential","bspline")
     displacementsmooth <- match.arg(tolower(displacementsmooth[1]),typeargs)
     displacementsmooth <- match(displacementsmooth,typeargs)-1
@@ -316,7 +317,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                     lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
                 }
             } else {
-                mesh1 <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm2tmp,lmModel=lm1)
+                mesh1 <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm2tmp,lmModel=lm1,mahasafe=mahasafe)
                 lm1 <- bary2point(bary$barycoords,bary$faceptr,mesh1)
             }
         }
@@ -354,7 +355,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
             }
         }
         if (!is.null(Bayes)) 
-            mesh1 <- vcgUpdateNormals(RvtkStatismo::PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align,sdmax=Bayes$sdmax[1],mahaprob=Bayes$mahaprob))
+            mesh1 <- vcgUpdateNormals(RvtkStatismo::PredictSample(Bayes$model,mesh1,representer = T,align=Bayes$align,sdmax=Bayes$sdmax[1],mahaprob=Bayes$mahaprob,mahasafe=mahasafe))
         
                                         #mesh1 <- vcgUpdateNormals(RvtkStatismo::PredictSample(Bayes$model,mesh1,representer = T,lmDataset=lm1,lmModel=lmModel,align=TRUE))
         
@@ -444,22 +445,24 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 wts <- c(1,wt)
                 wts <- wts/sum(wts)
                 good <- which(tmp$rt0 != 4)
-                if (! useValid2constrain)
-                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,dataset=mesh0,representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob)
+                if (! useValid2Constrain)
+                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,dataset=mesh0,representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob,mahasafe=mahasafe)
                 else
-                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=vert2points(mesh0)[good,],vert2points(DrawMean(Bayes$model)[good,]),representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob)
-                tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
-                
-            } else {
-                if (! useValid2constrain)
-                    tmp$addit <- RvtkStatismo::PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
-                else {
-                    good <- which(tmp$rt0 != 4)
-                    tmp$addit <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=tmp$addit[good,],lmModel=GetDomainPoints(Bayes$model)[good,],representer=FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align)
-                }
-            }
+                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=vert2points(mesh0)[good,],GetDomainPoints(Bayes$model)[good,],representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob,mahasafe=mahasafe)
             
+            tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
+            
+            
+        } else {
+                if (!useValid2Constrain) {
+                    tmp$addit <- RvtkStatismo::PredictSample(Bayes$model,tmp$addit,FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align,mahasafe=mahasafe)
+                } else {
+                    good <- which(tmp$rt0 != 4)
+                    tmp$addit <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=tmp$addit[good,],lmModel=GetDomainPoints(Bayes$model)[good,],representer=FALSE, sdmax=Bayes$sdmax[i],mahaprob=Bayes$mahaprob,align=Bayes$align,mahasafe=mahasafe)
+                }
         }
+    }
+        
         
         if (Amberg) {
             if (!useiter) 
