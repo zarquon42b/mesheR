@@ -177,7 +177,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @param bboxCrop extend of the bounding box around mesh1 (after alignmend) that will be cropped from target to speed things up.
 #' @param threads integer: threads to use in multithreaded routines.
 #' @param cb optional: callback function that takes arguments i="current iteration", distance= "distance from target to current estimate" and t.dist="average vertex displacement to last iteration"
-#' @param useValid2constrain logical: if TRUE and \code{x} is a shape model, then only those vertices with valid hits are used to compute the PosteriorMean.
+#' @param useValid2Constrain logical: if TRUE and \code{x} is a shape model, then only those vertices with valid hits are used to compute the PosteriorMean.
 #' @param mahasafe numeric: define the max allowed per-vertex mahalanobis distance (only available if the fitting is model based)
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
