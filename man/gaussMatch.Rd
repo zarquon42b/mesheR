@@ -16,7 +16,7 @@ gaussMatch(x, mesh2, iterations = 10, smooth = NULL, smoothit = 10,
   noinc = FALSE, silent = FALSE, visualize = FALSE, folder = NULL,
   alpha = 0.7, col1 = "red", col2 = "white", add = FALSE,
   bbox = NULL, bboxCrop = NULL, threads = 0, cb = NULL,
-  useValid2Constrain = FALSE, ...)
+  useValid2Constrain = FALSE, mahasafe = 1e+10, ...)
 }
 \arguments{
 \item{x}{reference mesh: triangular mesh of class "mesh3d"or of class BayesDeform created by createBayes to restrict based on a known distribution. To use this option the package RvtkStatismo \url{https://github.com/zarquon42b/RvtkStatismo} has to be installed. If x is a model, it works best if mesh2 is already aligned to the model's mean.}
@@ -125,6 +125,8 @@ discarded. Reduces distortion especially at mesh borders.}
 \item{cb}{optional: callback function that takes arguments i="current iteration", distance= "distance from target to current estimate" and t.dist="average vertex displacement to last iteration"}
 
 \item{useValid2Constrain}{logical: if TRUE and \code{x} is a shape model, then only those vertices with valid hits are used to compute the PosteriorMean.}
+
+\item{mahasafe}{numeric: define the max allowed per-vertex mahalanobis distance (only available if the fitting is model based). Currently only working with the mahasafe branch of RvtkStatismo.}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }
