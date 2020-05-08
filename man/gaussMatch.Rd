@@ -126,7 +126,7 @@ discarded. Reduces distortion especially at mesh borders.}
 
 \item{useValid2Constrain}{logical: if TRUE and \code{x} is a shape model, then only those vertices with valid hits are used to compute the PosteriorMean.}
 
-\item{mahasafe}{numeric: define the max allowed per-vertex mahalanobis distance (only available if the fitting is model based)}
+\item{mahasafe}{numeric: define the max allowed per-vertex mahalanobis distance (only available if the fitting is model based). Currently only working with the mahasafe branch of RvtkStatismo.}
 
 \item{\dots}{Further arguments passed to \code{nn2}.}
 }

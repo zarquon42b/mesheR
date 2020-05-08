@@ -178,7 +178,7 @@ gaussDisplace <- function(mesh1,mesh2,sigma,gamma=2,W0,f,oneway=F,nh=NULL,tol=0,
 #' @param threads integer: threads to use in multithreaded routines.
 #' @param cb optional: callback function that takes arguments i="current iteration", distance= "distance from target to current estimate" and t.dist="average vertex displacement to last iteration"
 #' @param useValid2Constrain logical: if TRUE and \code{x} is a shape model, then only those vertices with valid hits are used to compute the PosteriorMean.
-#' @param mahasafe numeric: define the max allowed per-vertex mahalanobis distance (only available if the fitting is model based)
+#' @param mahasafe numeric: define the max allowed per-vertex mahalanobis distance (only available if the fitting is model based). Currently only working with the mahasafe branch of RvtkStatismo.
 #' @param \dots Further arguments passed to \code{nn2}.
 #'
 #' @return If a patch is specified:
