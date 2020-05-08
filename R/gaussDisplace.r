@@ -446,9 +446,9 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
                 wts <- wts/sum(wts)
                 good <- which(tmp$rt0 != 4)
                 if (! useValid2Constrain)
-                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=lm1,lmModel=lmModel,dataset=mesh0,representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob,mahasafe=mahasafe)
+                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,dataset=mesh0,representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob,mahasafe=mahasafe)
                 else
-                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=vert2points(mesh0)[good,],GetDomainPoints(Bayes$model)[good,],representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob,mahasafe=mahasafe)
+                    tmpmesh <- RvtkStatismo::PredictSample(Bayes$model,lmDataset=vert2points(mesh0)[good,],lmModel=GetDomainPoints(Bayes$model)[good,],representer=TRUE, sdmax=Bayes$sdmax[i],align=Bayes$align,mahaprob=Bayes$mahaprob,mahasafe=mahasafe)
             
             tmp$addit <- t(wts[1]*mesh0$vb[1:3,]+wts[2]*tmpmesh$vb[1:3,])
             
