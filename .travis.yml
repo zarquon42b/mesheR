@@ -4,6 +4,7 @@
 # see the wiki:
 #   https://github.com/craigcitro/r-travis/wiki
 
+os: linux
 language: r
 cache: packages
 sudo: required
@@ -21,6 +22,7 @@ addons:
       - libxt-dev
       - x11proto-core-dev
       - autotools-dev
+      - gcc
       
 repos:
   CRAN: https://cloud.r-project.org
@@ -49,10 +51,14 @@ notifications:
     on_success: change
     on_failure: change
 
+script:
+  - |
+    R CMD build .
+    travis_wait 30 R CMD check mkin_*.tar.gz
 
 env:
   global:
     - R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
     - _R_CHECK_FORCE_SUGGESTS_: false
     - RGL_USE_NULL: true
-    - TRAVIS_R_VERSION: 3.6.2
+    
