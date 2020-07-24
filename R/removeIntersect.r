@@ -10,15 +10,15 @@
 #' @param outside logical: if TRUE the reference will be placed outside of the target. Inside otherwise
 #' @param gradthresh numerical: (abs) gradient threshold to determine convergence
 #' @param gradn integer: number of steps to include in computing gradient
-#' @param realign logical: if TRUE, \code{reference} will be aligned to a model inflated along normals by the max. distance to intersection.
-#' @param inflate numeric factor to multiply the max distance to intersect for inflating (only if \code{inflate=TRUE}
+#' @param realign logical: if TRUE, \code{reference} will be aligned by the points closest outside/inside of the target surface.
+#' @param alignthresh threshold which points to consider for realignment. For \code{alignthresh=.5}, all coordinates within .5 mm outside/inside of the targtet will be used to realign the shape.
 #' @param visualize logical: if TRUE watch the approximation
 #' @param silent logical: suppress messages
 #' @details This is a quite simple attempt to remove an intersection after the alignment of two meshes. This is achieved by translating \code{reference} along the average difference vectors of all vertices
 #' @importFrom pracma gradient
 #' @importFrom rgl rgl.cur rgl.clear
 #' @export
-removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outside=TRUE,gradthresh=-Inf,gradn=Inf,realign=FALSE,inflate=1,visualize=FALSE,silent=FALSE) {
+removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outside=TRUE,gradthresh=-Inf,gradn=Inf,realign=FALSE,alignthresh=.5,visualize=FALSE,silent=FALSE) {
     mesh <- FALSE
     ref.orig <- reference
     if (inherits(reference,"mesh3d")) {
@@ -74,8 +74,21 @@ removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outsid
                 displacement <- colMeans(diffs)
             displacement <- displacement/base::norm(displacement,"2")
             reference <- t(t(reference)+displacement*mean(abs(dists$quality)[below])*stepsize)
-            if (realign)
-                suppressMessages(reference <- vert2points(icp(reference,meshOffset(target,max(abs(dists$quality)[below])*inflate),iterations = 1,silent = TRUE)))
+            if (realign) {
+                ## suppressMessages(reference <- vert2points(icp(reference,meshOffset(target,max(abs(dists$quality)[below])*inflate),iterations = 1,silent = TRUE)))
+                myclost <- vcgClost(reference,target,sign=T)
+                if (!outside)
+                    myclost$quality <- -myclost$quality
+                clost <- which(as.logical((myclost$quality < alignthresh)*(myclost$quality > 0)))
+                
+                #print(clost)
+                if (length(clost)) {
+                    myclostvert <- reference[clost,]
+                    myclostaligned <- icp(myclostvert,target,iterations=1,getTransform = T)
+                    reference <- applyTransform(reference,myclostaligned$transform)
+                }
+                
+            }
             ## reference <- applyTransform(reference,myicp$transform)
             count <- count+1
             tmpcount <- tmpcount+1

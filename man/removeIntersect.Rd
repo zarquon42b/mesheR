@@ -4,9 +4,20 @@
 \alias{removeIntersect}
 \title{This functions aims to translate two meshes to remove an intersection}
 \usage{
-removeIntersect(reference, target, stepsize = 0.2, maxit = 100,
-  tol = 1, outside = TRUE, gradthresh = -Inf, gradn = Inf,
-  realign = FALSE, inflate = 1, visualize = FALSE, silent = FALSE)
+removeIntersect(
+  reference,
+  target,
+  stepsize = 0.2,
+  maxit = 100,
+  tol = 1,
+  outside = TRUE,
+  gradthresh = -Inf,
+  gradn = Inf,
+  realign = FALSE,
+  alignthresh = 0.5,
+  visualize = FALSE,
+  silent = FALSE
+)
 }
 \arguments{
 \item{reference}{matrix or mesh}
@@ -25,9 +36,9 @@ removeIntersect(reference, target, stepsize = 0.2, maxit = 100,
 
 \item{gradn}{integer: number of steps to include in computing gradient}
 
-\item{realign}{logical: if TRUE, \code{reference} will be aligned to a model inflated along normals by the max. distance to intersection.}
+\item{realign}{logical: if TRUE, \code{reference} will be aligned by the points closest outside/inside of the target surface.}
 
-\item{inflate}{numeric factor to multiply the max distance to intersect for inflating (only if \code{inflate=TRUE}}
+\item{alignthresh}{threshold which points to consider for realignment. For \code{alignthresh=.5}, all coordinates within .5 mm outside/inside of the targtet will be used to realign the shape.}
 
 \item{visualize}{logical: if TRUE watch the approximation}
 
