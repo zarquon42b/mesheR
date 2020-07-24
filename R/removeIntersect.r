@@ -14,11 +14,13 @@
 #' @param alignthresh threshold which points to consider for realignment. For \code{alignthresh=.5}, all coordinates within .5 mm outside/inside of the targtet will be used to realign the shape.
 #' @param visualize logical: if TRUE watch the approximation
 #' @param silent logical: suppress messages
+#' @param threads number of threads to use for closest point search (0=auto)
+#' @param alpha value with \code{0 <= alpha <=1} to render surface opacity of the target mesh.
 #' @details This is a quite simple attempt to remove an intersection after the alignment of two meshes. This is achieved by translating \code{reference} along the average difference vectors of all vertices
 #' @importFrom pracma gradient
 #' @importFrom rgl rgl.cur rgl.clear
 #' @export
-removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outside=TRUE,gradthresh=-Inf,gradn=Inf,realign=FALSE,alignthresh=.5,visualize=FALSE,silent=FALSE) {
+removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outside=TRUE,gradthresh=-Inf,gradn=Inf,realign=FALSE,minalign=5,alignthresh=.5,visualize=FALSE,silent=FALSE,threads=0,alpha=1) {
     mesh <- FALSE
     ref.orig <- reference
     if (inherits(reference,"mesh3d")) {
@@ -31,8 +33,11 @@ removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outsid
             open3d()
         else
             rgl.clear()
-        shade3d(target,col=3)
-        points3d(reference)
+        shade3d(target,col=3,alpha=alpha)
+        if (!mesh)
+            points3d(reference)
+        else
+            wire3d(updateVertices(ref.orig,reference),col="white")
     }
     if (interactive() && visualize) 
         readline("please select viewpoint\n")
@@ -42,17 +47,19 @@ removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outsid
     distvals <- NULL
     mygrad <- -Inf
     while (!final && count < maxit && abs(mygrad) > gradthresh) {
-        dists <- vcgClostKD(reference,target)
-        if (outside)
+        dists <- vcgClostKD(reference,target,threads=threads)
+        if (!outside)
+            dists$quality <- -dists$quality
+        ##if (outside)
             below <- which(dists$quality > tol)
-        else
-            below <- which(dists$quality < tol)
+        ##else
+        ##    below <- which(dists$quality < tol)
         final <- !length(below)
         if (!silent) {
         if (length(below))
-            cat(paste0("Max Dist:", max(abs(dists$quality[below])),"\n"))
+            message(paste0("Max Dist:", max(abs(dists$quality[below])),"\n"))
         else
-            cat(paste0("No points above the thresold of", tol," mm\n"))
+            message(paste0("No points above the thresold of ", tol," mm\n"))
         }
         if (!final) {
             distvals <- c(distvals,max(abs(dists$quality[below])))
@@ -76,15 +83,17 @@ removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outsid
             reference <- t(t(reference)+displacement*mean(abs(dists$quality)[below])*stepsize)
             if (realign) {
                 ## suppressMessages(reference <- vert2points(icp(reference,meshOffset(target,max(abs(dists$quality)[below])*inflate),iterations = 1,silent = TRUE)))
-                myclost <- vcgClost(reference,target,sign=T)
+                myclost <- vcgClostKD(reference,target,sign=T,threads = threads)
                 if (!outside)
                     myclost$quality <- -myclost$quality
                 clost <- which(as.logical((myclost$quality < alignthresh)*(myclost$quality > 0)))
-                
+                ##print(leng)
                 #print(clost)
-                if (length(clost)) {
+                if (length(clost) >= minalign) {
+                    ## subref <- updateVertices(ref.orig,reference)
+                    ##myclostvert <- rmVertex(subref,clost,T)
                     myclostvert <- reference[clost,]
-                    myclostaligned <- icp(myclostvert,target,iterations=1,getTransform = T)
+                    suppressMessages(myclostaligned <- icp(myclostvert,target,iterations=1,getTransform = T,silent=T,threads = threads))
                     reference <- applyTransform(reference,myclostaligned$transform)
                 }
                 
@@ -94,7 +103,10 @@ removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outsid
             tmpcount <- tmpcount+1
             if (visualize) {
                 rgl.pop()
-                points3d(reference)
+                if (!mesh)
+                    points3d(reference)
+                else
+                    wire3d(updateVertices(ref.orig,reference),col="white")
             }
             if (!silent)
             cat(paste0("finished iteration ",count,"\n\n"))

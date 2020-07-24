@@ -14,9 +14,12 @@ removeIntersect(
   gradthresh = -Inf,
   gradn = Inf,
   realign = FALSE,
+  minalign = 5,
   alignthresh = 0.5,
   visualize = FALSE,
-  silent = FALSE
+  silent = FALSE,
+  threads = 0,
+  alpha = 1
 )
 }
 \arguments{
@@ -43,6 +46,10 @@ removeIntersect(
 \item{visualize}{logical: if TRUE watch the approximation}
 
 \item{silent}{logical: suppress messages}
+
+\item{threads}{number of threads to use for closest point search (0=auto)}
+
+\item{alpha}{value with \code{0 <= alpha <=1} to render surface opacity of the target mesh.}
 }
 \description{
 This functions aims to translate two meshes to remove an intersection. This is done based on signed distance
