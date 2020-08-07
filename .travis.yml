@@ -25,7 +25,9 @@ addons:
 repos:
   CRAN: https://cloud.r-project.org
 
-r_binary_packages:
+
+r_packages:
+ - spam64
  - rgl
  - Rcpp
  - RcppEigen
@@ -40,10 +42,7 @@ r_binary_packages:
  - lbfgs
  - colorspace
  - testthat
- 
-r_packages:
-  - spam64
- 
+
 notifications:
   email:
     on_success: change
