@@ -17,6 +17,8 @@ createDisplacementField <- function(reference,target) {
         reference <- vert2points(reference)
     if (inherits(target,"mesh3d"))
         target <- vert2points(target)
+    target <- as.matrix(target)
+    reference <- as.matrix(reference)
     out <- list(domain=reference,DisplacementField=target-reference)
     class(out) <- "DisplacementField"
     return(out)
