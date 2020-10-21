@@ -4,9 +4,16 @@
 \alias{createBayes}
 \title{create an object of class BayesDeform to be used in gaussMatch and AmbergRegister}
 \usage{
-createBayes(model, sdmax = numeric(0), mahalanobis = "chisq",
-  ptValueNoise = 2, wt = NULL, align = TRUE, shrinkfun = NULL,
-  initparams = NULL)
+createBayes(
+  model,
+  sdmax = numeric(0),
+  mahalanobis = "chisq",
+  ptValueNoise = 2,
+  wt = NULL,
+  align = TRUE,
+  shrinkfun = NULL,
+  initparams = NULL
+)
 }
 \arguments{
 \item{model}{a model of class pPCA created with package RvtkStatismo}

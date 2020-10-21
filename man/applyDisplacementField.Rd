@@ -4,9 +4,16 @@
 \alias{applyDisplacementField}
 \title{apply a discrete displacement field to a set of points/mesh in its domain}
 \usage{
-applyDisplacementField(dispfield, points, k = 10, sigma = 20,
-  type = c("Gauss", "Laplace", "Exponential", "TPS"), gamma = 1,
-  lambda = 1e-08, threads = 1)
+applyDisplacementField(
+  dispfield,
+  points,
+  k = 10,
+  sigma = 20,
+  type = c("Gauss", "Laplace", "Exponential", "TPS"),
+  gamma = 1,
+  lambda = 1e-08,
+  threads = 1
+)
 }
 \arguments{
 \item{dispfield}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}} or}

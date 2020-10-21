@@ -4,8 +4,14 @@
 \alias{displacementField2Grid}
 \title{convert a discrete irregular displacement field to a displacement grid}
 \usage{
-displacementField2Grid(x, spacing = rep(2, 3), margin = 0.05,
-  IJK2RAS = diag(c(-1, -1, 1, 1)), invert = FALSE, ...)
+displacementField2Grid(
+  x,
+  spacing = rep(2, 3),
+  margin = 0.05,
+  IJK2RAS = diag(c(-1, -1, 1, 1)),
+  invert = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}

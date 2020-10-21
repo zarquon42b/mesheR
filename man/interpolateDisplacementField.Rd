@@ -4,9 +4,18 @@
 \alias{interpolateDisplacementField}
 \title{evaluate a displacement field using gaussian smoothed interpolation of a discrete displacement field}
 \usage{
-interpolateDisplacementField(dispfield, points, k = 10, sigma = 20,
-  gamma = 1, type = c("Gauss", "Laplace", "Exponential", "Bspline",
-  "TPS"), subsample = 2000, lambda = 1e-08, threads = 0, ...)
+interpolateDisplacementField(
+  dispfield,
+  points,
+  k = 10,
+  sigma = 20,
+  gamma = 1,
+  type = c("Gauss", "Laplace", "Exponential", "Bspline", "TPS"),
+  subsample = 2000,
+  lambda = 1e-08,
+  threads = 0,
+  ...
+)
 }
 \arguments{
 \item{dispfield}{@param dispfield displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}

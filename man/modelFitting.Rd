@@ -4,11 +4,25 @@
 \alias{modelFitting}
 \title{fit a model minimizing the (symmetric) mean squared  distance}
 \usage{
-modelFitting(model, tarmesh, iterations = 5, lbfgs.iter = 5,
-  lbfgs.orthantwise_c = 0, symmetric = c(0, 1, 2), refdist = 1e+05,
-  tardist = 1e+05, rho = pi/2, sdmax = NULL, mahaprob = c("none",
-  "chisq", "dist"), initparams = NULL, k = 50, threads = 0,
-  method = "lbfgs", silent = FALSE, ...)
+modelFitting(
+  model,
+  tarmesh,
+  iterations = 5,
+  lbfgs.iter = 5,
+  lbfgs.orthantwise_c = 0,
+  symmetric = c(0, 1, 2),
+  refdist = 1e+05,
+  tardist = 1e+05,
+  rho = pi/2,
+  sdmax = NULL,
+  mahaprob = c("none", "chisq", "dist"),
+  initparams = NULL,
+  k = 50,
+  threads = 0,
+  method = "lbfgs",
+  silent = FALSE,
+  ...
+)
 }
 \arguments{
 \item{model}{statistical model of class pPCA}

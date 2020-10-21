@@ -4,9 +4,17 @@
 \alias{remeshList}
 \title{Remesh a list of registered meshes (with corresponding vertices)}
 \usage{
-remeshList(matchlist, reference = 1, random = FALSE,
-  voxelSize = NULL, discretize = FALSE, multiSample = FALSE,
-  absDist = FALSE, mergeClost = FALSE, silent = FALSE)
+remeshList(
+  matchlist,
+  reference = 1,
+  random = FALSE,
+  voxelSize = NULL,
+  discretize = FALSE,
+  multiSample = FALSE,
+  absDist = FALSE,
+  mergeClost = FALSE,
+  silent = FALSE
+)
 }
 \arguments{
 \item{matchlist}{a list of meshes with corresponding vertices (same amount and pseudo-homologous positions), e.g. registered with \code{\link{gaussMatch}}. Meshes do not need to be aligned.}

@@ -4,12 +4,27 @@
 \alias{posteriorDeform}
 \title{Fit an SSM to a target based on subsampling corresponding points}
 \usage{
-posteriorDeform(model, target, reference = NULL, partsample = NULL,
-  samplenum = 1000, distance = 1e+10, slide = 3, bending = TRUE,
-  ray = FALSE, deform = FALSE, Amberg = FALSE, rhotol = pi/2,
-  modlm = NULL, tarlm = NULL, align2mod = TRUE,
-  alignbymesh = FALSE, forceLM = FALSE, silent = FALSE,
-  threads = 1)
+posteriorDeform(
+  model,
+  target,
+  reference = NULL,
+  partsample = NULL,
+  samplenum = 1000,
+  distance = 1e+10,
+  slide = 3,
+  bending = TRUE,
+  ray = FALSE,
+  deform = FALSE,
+  Amberg = FALSE,
+  rhotol = pi/2,
+  modlm = NULL,
+  tarlm = NULL,
+  align2mod = TRUE,
+  alignbymesh = FALSE,
+  forceLM = FALSE,
+  silent = FALSE,
+  threads = 1
+)
 }
 \arguments{
 \item{model}{statismo shape model}

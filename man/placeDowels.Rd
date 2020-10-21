@@ -4,8 +4,18 @@
 \alias{placeDowels}
 \title{Place Dowels representing tissue depth on a skull}
 \usage{
-placeDowels(lm, mesh, ldowel, render = TRUE, col = 1, radius = 1,
-  meshcol = 3, fine = 50, smooth = TRUE, dowelcol = NULL)
+placeDowels(
+  lm,
+  mesh,
+  ldowel,
+  render = TRUE,
+  col = 1,
+  radius = 1,
+  meshcol = 3,
+  fine = 50,
+  smooth = TRUE,
+  dowelcol = NULL
+)
 }
 \arguments{
 \item{lm}{k x 3landmarks representing dowel locations}

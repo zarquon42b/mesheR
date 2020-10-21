@@ -4,8 +4,15 @@
 \alias{selectVertex}
 \title{select and crop triangular surface meshes}
 \usage{
-selectVertex(mesh, col = 3, visible = TRUE, add = FALSE,
-  render = c("shade", "wire"), offset = 0.001, ...)
+selectVertex(
+  mesh,
+  col = 3,
+  visible = TRUE,
+  add = FALSE,
+  render = c("shade", "wire"),
+  offset = 0.001,
+  ...
+)
 }
 \arguments{
 \item{mesh}{triangular mesh of class "mesh3d"}

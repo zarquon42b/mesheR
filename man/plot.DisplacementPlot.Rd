@@ -4,8 +4,7 @@
 \alias{plot.DisplacementPlot}
 \title{plot the output of plot.DisplacementField}
 \usage{
-\method{plot}{DisplacementPlot}(x, lwd = 1, color = TRUE,
-  size = NULL, ...)
+\method{plot}{DisplacementPlot}(x, lwd = 1, color = TRUE, size = NULL, ...)
 }
 \arguments{
 \item{x}{displacement field of class "DisplacementField", e.g. created using \code{\link{createDisplacementField}}}

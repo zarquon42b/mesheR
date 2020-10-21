@@ -4,8 +4,7 @@
 \alias{rmInternals}
 \title{remove vertices within a convex surface mesh}
 \usage{
-rmInternals(mesh, mindist = 0, maxdist = 1e+12, explode = FALSE,
-  center = NULL)
+rmInternals(mesh, mindist = 0, maxdist = 1e+12, explode = FALSE, center = NULL)
 }
 \arguments{
 \item{mesh}{triangular mesh of class "mesh3d"}

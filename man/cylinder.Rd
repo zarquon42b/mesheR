@@ -4,8 +4,15 @@
 \alias{cylinder}
 \title{create a mesh representation of a cylinder}
 \usage{
-cylinder(x, dirs, length, radius = 1, fine = 20, addNormals = FALSE,
-  closelids = TRUE)
+cylinder(
+  x,
+  dirs,
+  length,
+  radius = 1,
+  fine = 20,
+  addNormals = FALSE,
+  closelids = TRUE
+)
 }
 \arguments{
 \item{x}{coordinates of center of the cylinders base - either a 3D-vector of a matrix of dim k x 3}

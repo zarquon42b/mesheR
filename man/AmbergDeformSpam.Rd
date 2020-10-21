@@ -4,8 +4,17 @@
 \alias{AmbergDeformSpam}
 \title{Deform triangular mesh based on correspondences}
 \usage{
-AmbergDeformSpam(mesh, lm1, lm2, k0 = 1, lambda = 1, S = NULL,
-  Hchol = NULL, clean = FALSE, ridgetol = 1e-08)
+AmbergDeformSpam(
+  mesh,
+  lm1,
+  lm2,
+  k0 = 1,
+  lambda = 1,
+  S = NULL,
+  Hchol = NULL,
+  clean = FALSE,
+  ridgetol = 1e-08
+)
 }
 \arguments{
 \item{mesh}{triangular mesh of class "mesh3d". No loose vertices, edges and

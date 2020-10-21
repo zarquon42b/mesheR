@@ -4,8 +4,16 @@
 \alias{cutMesh}
 \title{crop triangular surface meshes}
 \usage{
-cutMesh(mesh, visible = TRUE, keep.selected = TRUE, col = 3,
-  add = FALSE, render = c("shade", "wire"), offset = 0.001, ...)
+cutMesh(
+  mesh,
+  visible = TRUE,
+  keep.selected = TRUE,
+  col = 3,
+  add = FALSE,
+  render = c("shade", "wire"),
+  offset = 0.001,
+  ...
+)
 }
 \arguments{
 \item{mesh}{triangular mesh of class "mesh3d"}

@@ -4,9 +4,16 @@
 \alias{miniSQmodel}
 \title{minimize mean squared distance between model and a point-cloud with correspondences}
 \usage{
-miniSQmodel(clost, model, iterations = 10, initpar = NULL,
-  use = NULL, sdmax = NULL, mahaprob = c("none", "chisq", "dist"),
-  ...)
+miniSQmodel(
+  clost,
+  model,
+  iterations = 10,
+  initpar = NULL,
+  use = NULL,
+  sdmax = NULL,
+  mahaprob = c("none", "chisq", "dist"),
+  ...
+)
 }
 \arguments{
 \item{clost}{matrix or mesh3d}
