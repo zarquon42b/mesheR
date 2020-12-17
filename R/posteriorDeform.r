@@ -113,7 +113,7 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
         deformfun <- function(mesh,lm1,lm2)  {return(tps3d(mesh,lm1,lm2,threads=threads))}
     if (is.null(partsample))
         partsample <- vcgSample(meanmod,samplenum)
-    corrs   <- getCorrespondences(reference,target,distance,silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol,modlm = modlm,tarlm = tarlm,forceLM=forceLM)
+    corrs   <- getCorrespondences(reference,target,distance,silent=silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol,modlm = modlm,tarlm = tarlm,forceLM=forceLM)
     myslide <- corrs$myslide
     targetpoints <- corrs$targetpoints
     back2mod <- transferPoints(myslide,reference,meanmod,tolwarn = 5)
@@ -129,12 +129,52 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
         
         
     }
-    cat("Relaxing landmarks\n")
-    if (deform) {
+      if (deform) {
         myslide <- transferPoints(myslide,reference,deformed,tolwarn = 5)
         deformed <- deformfun(deformed,myslide,targetpoints)
     }
     count <- 0
     return(deformed)
+    
+}
+
+#' Deforms a reference to a target based on a TPS or AmbergDeform
+#'
+#' Deforms a (pre-aligned) reference to a target based on a TPS/AmbergDeform and automatically sampled sliding semi-landmarks
+#'
+#' @param reference reference mesh
+#' @param target target mesh
+#' @param partsample predetermined sample points on the reference mesh
+#' @param samplenum integer: if partsample=NULL, this specifies the number of coordinates sampled on the model mean
+#' @param distance numeric: constrain maximum distance to mark target point as appropriate
+#' @param slide integer: if > 0 the valid correspondences on the model instance will be relaxed minimizing bending energy/procrustes distance.
+#' @param bending logical: if TRUE, the coordinates on the model instance are relaxed using bending energy, Procrustes distance otherwise
+#' @param ray logical: if TRUE, the closest point search will be performed along the normals only
+#' @param Amberg if TRUE the deformation will use the function \code{\link{AmbergDeformSpam}} and \code{\link{tps3d}} otherwise
+#' @param rhotol maximal tolerated angle between normals to be considered a valid match
+#' @param reflm matrix containing 3D landmarks on the reference
+#' @param tarlm  matrix containing 3D landmarks on the target surface
+#' @param forceLM if TRUE, predfined landmarks \code{modlm} are not allowed to slide. For cases with high uncertainty, this can lead to unwanted mesh distortions.
+#' @param silent logical: supress debug output
+#' @param threads integer: number of threads to use for tps interpolation (set to 1 if using openblas, or otherwise it can become instable)
+#' @return returns a deformed version of a model instance fitted to the target
+#' @note Please note that it is required to align the target mesh to the reference mesh beforehand. This can be performed using the function \code{\link{icp}}, for example.
+#' @export 
+subsampleDeform <- function(reference,target,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE, Amberg=FALSE,rhotol=pi/2,reflm=NULL,tarlm=NULL,forceLM=FALSE,silent=FALSE,threads=1) {
+    if (Amberg)
+        deformfun <- function(mesh,lm1,lm2) { return( AmbergDeformSpam(mesh,lm1,lm2,k0=10)$mesh)}
+    else
+        deformfun <- function(mesh,lm1,lm2)  {return(tps3d(mesh,lm1,lm2,threads=threads))}
+    if (is.null(partsample))
+        partsample <- vcgSample(reference,samplenum)
+    corrs   <- getCorrespondences(reference,target,distance,silent=silent,bending=bending,partsample = partsample,ray=ray,meanmod = reference,tol = rhotol,modlm = reflm,tarlm = tarlm,forceLM=forceLM)
+    myslide <- corrs$myslide
+    targetpoints <- corrs$targetpoints  
+    message("Relaxing landmarks\n")
+    deformed <- deformfun(reference,myslide,targetpoints)
+    count <- 0
+    return(deformed)
+    
+
     
 }
