@@ -245,7 +245,10 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
     if (!is.null(Bayes)) {
         if (!requireNamespace("RvtkStatismo"))
             stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
-        mesh1 <- RvtkStatismo::DrawMean(Bayes$model)
+        if (is.null(Bayes$initparams))
+            mesh1 <- RvtkStatismo::DrawMean(Bayes$model)
+        else
+            mesh1 <- vcgUpdateNormals(RvtkStatismo::DrawSample(Bayes$model,Bayes$initparams))
     }
     
     
