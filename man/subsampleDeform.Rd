@@ -19,7 +19,8 @@ subsampleDeform(
   tarlm = NULL,
   forceLM = FALSE,
   silent = FALSE,
-  threads = 1
+  threads = 1,
+  ...
 )
 }
 \arguments{
@@ -52,6 +53,8 @@ subsampleDeform(
 \item{silent}{logical: supress debug output}
 
 \item{threads}{integer: number of threads to use for tps interpolation (set to 1 if using openblas, or otherwise it can become instable)}
+
+\item{...}{additional parameters passed to \code{\link{AmbergDeformSpam}}.}
 }
 \value{
 returns a deformed version of a model instance fitted to the target

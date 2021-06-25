@@ -68,7 +68,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @param forceLM if TRUE, predfined landmarks \code{modlm} are not allowed to slide. For cases with high uncertainty, this can lead to unwanted mesh distortions.
 #' @param silent logical: supress debug output
 #' @param threads integer: number of threads to use for tps interpolation (set to 1 if using openblas, or otherwise it can become instable)
-#'
+#' @param ... additional parameters passed to \code{\link{AmbergDeformSpam}}.
 #' @return returns a deformed version of a model instance fitted to the target
 #' @note Please note that it is required to align the target mesh to the model mean beforehand. This can be performed using the function \code{\link{icp}}, for example.
 #' @examples
@@ -100,7 +100,7 @@ getCorrespondences <- function(mesh,targetmesh,distance,silent=TRUE,slide=ifelse
 #' @importFrom Rvcg vcgSample
 #' @importFrom Morpho relaxLM
 #' @export
-posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,alignbymesh=FALSE,forceLM=FALSE,silent=FALSE,threads=1) {
+posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE,deform=FALSE, Amberg=FALSE,rhotol=pi/2,modlm=NULL,tarlm=NULL,align2mod=TRUE,alignbymesh=FALSE,forceLM=FALSE,silent=FALSE,threads=1,...) {
       if (!requireNamespace("RvtkStatismo"))
           stop("for using the option Bayes, please install RvtkStatismo from https://github.com/zarquon42b/RvtkStatismo")
     meanmod <- RvtkStatismo::DrawMean(model)
@@ -108,9 +108,9 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
         reference <- meanmod
 ## cat("Deformation step without curvature\n")
     if (Amberg)
-        deformfun <- function(mesh,lm1,lm2) { return( AmbergDeformSpam(mesh,lm1,lm2,k0=10)$mesh)}
+        deformfun <- function(mesh,lm1,lm2,...) { return( AmbergDeformSpam(mesh,lm1,lm2,...)$mesh)}
     else
-        deformfun <- function(mesh,lm1,lm2)  {return(tps3d(mesh,lm1,lm2,threads=threads))}
+        deformfun <- function(mesh,lm1,lm2,...)  {return(tps3d(mesh,lm1,lm2,threads=threads))}
     if (is.null(partsample))
         partsample <- vcgSample(meanmod,samplenum)
     corrs   <- getCorrespondences(reference,target,distance,silent=silent,bending=bending,partsample = partsample,ray=ray,meanmod = meanmod,tol = rhotol,modlm = modlm,tarlm = tarlm,forceLM=forceLM)
@@ -131,7 +131,7 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
     }
       if (deform) {
         myslide <- transferPoints(myslide,reference,deformed,tolwarn = 5)
-        deformed <- deformfun(deformed,myslide,targetpoints)
+        deformed <- deformfun(deformed,myslide,targetpoints,...)
     }
     count <- 0
     return(deformed)
@@ -157,21 +157,22 @@ posteriorDeform <- function(model,target,reference=NULL,partsample=NULL,samplenu
 #' @param forceLM if TRUE, predfined landmarks \code{modlm} are not allowed to slide. For cases with high uncertainty, this can lead to unwanted mesh distortions.
 #' @param silent logical: supress debug output
 #' @param threads integer: number of threads to use for tps interpolation (set to 1 if using openblas, or otherwise it can become instable)
+#' @param ... additional parameters passed to \code{\link{AmbergDeformSpam}}.
 #' @return returns a deformed version of a model instance fitted to the target
 #' @note Please note that it is required to align the target mesh to the reference mesh beforehand. This can be performed using the function \code{\link{icp}}, for example.
 #' @export 
-subsampleDeform <- function(reference,target,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE, Amberg=FALSE,rhotol=pi/2,reflm=NULL,tarlm=NULL,forceLM=FALSE,silent=FALSE,threads=1) {
+subsampleDeform <- function(reference,target,partsample=NULL,samplenum=1000,distance=1e10,slide=3,bending=TRUE,ray=FALSE, Amberg=FALSE,rhotol=pi/2,reflm=NULL,tarlm=NULL,forceLM=FALSE,silent=FALSE,threads=1,...) {
     if (Amberg)
-        deformfun <- function(mesh,lm1,lm2) { return( AmbergDeformSpam(mesh,lm1,lm2,k0=10)$mesh)}
+        deformfun <- function(mesh,lm1,lm2,...) { return( AmbergDeformSpam(mesh,lm1,lm2,...)$mesh)}
     else
-        deformfun <- function(mesh,lm1,lm2)  {return(tps3d(mesh,lm1,lm2,threads=threads))}
+        deformfun <- function(mesh,lm1,lm2,...)  {return(tps3d(mesh,lm1,lm2,threads=threads))}
     if (is.null(partsample))
         partsample <- vcgSample(reference,samplenum)
     corrs   <- getCorrespondences(reference,target,distance,silent=silent,bending=bending,partsample = partsample,ray=ray,meanmod = reference,tol = rhotol,modlm = reflm,tarlm = tarlm,forceLM=forceLM)
     myslide <- corrs$myslide
     targetpoints <- corrs$targetpoints  
     message("Relaxing landmarks\n")
-    deformed <- deformfun(reference,myslide,targetpoints)
+    deformed <- deformfun(reference,myslide,targetpoints,...)
     count <- 0
     return(deformed)
     
