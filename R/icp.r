@@ -64,17 +64,13 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
         class(mesh1) <- "mesh3d"
     }
     meshorig <- mesh1 <- vcgUpdateNormals(mesh1,silent=silent)
-      mesh2 <- vcgUpdateNormals(mesh2)
-       if (pcAlign) {
-                mesh1 <- pcAlign(mesh1,mesh2,optim=pcOptim)
-                if (!is.null(lm1))
-                    lm1 <- applyTransform(lm1,computeTransform(mesh2,mesh1))
-            }
+      mesh2 <- vcgUpdateNormals(mesh2,silent=silent)
+     
       mysample <- NULL
       
       KDtree <- vcgCreateKDtreeFromBarycenters(mesh2)
       starticks <- 10
-           
+    
       type <- match.arg(type,c("rigid","similarity","affine"))
       if (!is.null(lm1) && !pcAlign){## perform initial rough registration
           trafo <- computeTransform(lm2,lm1,type=type,reflection=reflection,weights=weights)
@@ -89,6 +85,16 @@ icp <- function(mesh1, mesh2, iterations=3,lm1=NULL, lm2=NULL, uprange=1, maxdis
               mysample <- fastKmeans(mesh1,k=subsample,threads=threads)$centers
           mysample <- vcgClostKD(mysample,mesh1,threads=threads)
       }
+    if (pcAlign) {
+        
+        pcmesh <- pcAlign(mysample,mesh2,optim=pcOptim)
+        trafo <- computeTransform(pcmesh,mysample,type="rigid",reflection=FALSE)
+        mysample <- pcmesh
+        mesh1 <- applyTransform(mesh1,trafo)
+        if (!is.null(lm1))
+            lm1 <- applyTransform(lm1,computeTransform(mesh2,mesh1))
+    }
+    
       origsample <- mysample
       if (!silent) 
           cat(paste0("\n performing ",type," registration\n\n") )
