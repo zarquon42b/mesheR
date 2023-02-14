@@ -6,6 +6,7 @@
 #' @param labels character vector of length \code{k} containing landmark names
 #' @param size integer: voxel size around landmark
 #' @export
+#' @importFrom jsonlite write_json
 write.ano.json <- function(x,filename=dataname,labels=dataname,size=1) {
     dataname <- deparse(substitute(x))
     if (!grepl("*.json$", filename)) 
@@ -14,7 +15,6 @@ write.ano.json <- function(x,filename=dataname,labels=dataname,size=1) {
 
     if (labels[[1]] == dataname)
         mylabels <- paste0(dataname,"-",1:nrx)
-    
     else if (length(labels) == nrx)
         mylabels <- labels
     
