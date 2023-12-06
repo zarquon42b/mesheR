@@ -2,19 +2,9 @@
 % Please edit documentation in R/remeshList.r
 \name{remeshList}
 \alias{remeshList}
-\title{Remesh a list of registered meshes (with corresponding vertices)}
+\title{consistently remesh a list of registered meshes (with corresponding vertices)}
 \usage{
-remeshList(
-  matchlist,
-  reference = 1,
-  random = FALSE,
-  voxelSize = NULL,
-  discretize = FALSE,
-  multiSample = FALSE,
-  absDist = FALSE,
-  mergeClost = FALSE,
-  silent = FALSE
-)
+remeshList(matchlist, reference = 1, random = FALSE, fun = vcgQEdecim, ...)
 }
 \arguments{
 \item{matchlist}{a list of meshes with corresponding vertices (same amount and pseudo-homologous positions), e.g. registered with \code{\link{gaussMatch}}. Meshes do not need to be aligned.}
@@ -23,24 +13,16 @@ remeshList(
 
 \item{random}{if TRUE, a random specimen is selected for initial decimation}
 
-\item{voxelSize}{voxel size for space discretization}
+\item{fun}{specify function to operate on the reference}
 
-\item{discretize}{If TRUE, the position of the intersected edge of the marching cube grid is not computed by linear interpolation, but it is placed in fixed middle position. As a consequence the resampled object will look severely aliased by a stairstep appearance.}
-
-\item{multiSample}{If TRUE, the distance field is more accurately compute by multisampling the volume (7 sample for each voxel). Much slower but less artifacts.}
-
-\item{absDist}{If TRUE, an unsigned distance field is computed. In this case you have to choose a not zero Offset and a double surface is built around the original surface, inside and outside.}
-
-\item{mergeClost}{logical: merge close vertices}
-
-\item{silent}{logical: suppress messages}
+\item{...}{parameters passed to fun}
 }
 \value{
-a list of remeshed meshes with correspondences preserved.
+a list of decimated meshes with correspondences preserved.
 }
 \description{
-Remesh a list of registered meshes (with corresponding vertices), preserving correspondences using Quadric Edge Collapse decimation
+consistently remesh a list of registered meshes (with corresponding vertices), preserving correspondences using Quadric Edge Collapse decimation
 }
 \details{
-The remeshing is applied to a reference and then the barycentric coordinates of the new vertices on the original surface are calculated. These are used to extract the corresponding positions of the remeshed versions on all meshes in the sample. The remeshing is performed by the function \code{vcgUniformRemesh} from the Rvcg-package.
+The decimation is applied to a reference and then the barycentric coordinates of the new vertices on the original surface are calculated. These are used to extract the corresponding positions of the remeshed versions on all meshes in the sample. The Decimation is performed by the function \code{vcgQEdecim} from the Rvcg-package.
 }

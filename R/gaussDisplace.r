@@ -388,7 +388,7 @@ gaussMatch <- function(x,mesh2,iterations=10,smooth=NULL,smoothit=10,smoothtype=
         else {
             rgl.bringtotop()
             if (!add)
-                rgl.clear()
+                clear3d()
         }
         bb <- meshcube(mesh1)
         bmean <- apply(bb,2,mean)

@@ -18,7 +18,7 @@
 #' @param alpha value with \code{0 <= alpha <=1} to render surface opacity of the target mesh.
 #' @details This is a quite simple attempt to remove an intersection after the alignment of two meshes. This is achieved by translating \code{reference} along the average difference vectors of all vertices
 #' @importFrom pracma gradient
-#' @importFrom rgl rgl.cur rgl.clear
+#' @importFrom rgl rgl.cur clear3d
 #' @export
 removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outside=TRUE,gradthresh=-Inf,gradn=Inf,realign=FALSE,minalign=5,alignthresh=.5,visualize=FALSE,silent=FALSE,threads=0,alpha=1) {
     mesh <- FALSE
@@ -32,7 +32,7 @@ removeIntersect <- function(reference,target,stepsize=0.2,maxit=100,tol=1,outsid
         if (rgl.cur()==0)
             open3d()
         else
-            rgl.clear()
+            clear3d()
         shade3d(target,col=3,alpha=alpha)
         if (!mesh)
             points3d(reference)

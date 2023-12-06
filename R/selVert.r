@@ -29,7 +29,7 @@
 #' data(nose)
 #' selection <- selectVertex(shortnose.mesh)
 #' }
-#' @importFrom rgl wire3d shade3d open3d rgl.bringtotop select3d rgl.pop points3d rgl.clear
+#' @importFrom rgl wire3d shade3d open3d rgl.bringtotop select3d rgl.pop points3d clear3d
 #' @export selectVertex 
 selectVertex <- function(mesh,col=3,visible=TRUE,add=FALSE,render=c("shade","wire"), offset=1e-3, ...)
 {
@@ -171,7 +171,7 @@ cutMesh <- function(mesh,visible=TRUE,keep.selected=TRUE,col=3,add=FALSE,render=
         else
             vb <- removal
         outmesh <- rmVertex(mesh,vb)
-        rgl.clear()
+        clear3d()
         shade3d(outmesh,col=col,specular="black",back=back,front=front)
         cat(paste(length(vb)," vertices removed\n"))
         invisible(outmesh)

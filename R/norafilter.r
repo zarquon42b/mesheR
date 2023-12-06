@@ -21,8 +21,7 @@ write.ano.json <- function(x,filename=dataname,labels=dataname,size=1) {
        
    
     ## setup markups
-    orientation <- c(-1,0,0,0,-1,0,0,0,1)
-   
+  
     position <- lapply(1:nrx, function(y) y <- x[y,] )
     poschk <- which(as.logical(sapply(lapply(position,is.na),sum)))
     if (length(poschk))

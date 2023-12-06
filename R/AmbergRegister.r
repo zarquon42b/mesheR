@@ -255,7 +255,7 @@ AmbergRegister <- function(x, mesh2, lm1=NULL, lm2=NULL, k=1, lambda=1, iteratio
             open3d()
         else {
             rgl.bringtotop()
-            rgl.clear()
+            clear3d()
         }
         points3d(meshcube(tmp$mesh),col="white",alpha=0)
         shade3d(mesh2,col=2,specular=1)
