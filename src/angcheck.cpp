@@ -40,7 +40,7 @@ RcppExport SEXP angcheck(SEXP mat1_, SEXP mat2_, SEXP threads_) {
     
     return wrap(angles);
   }  catch (std::exception& e) {
-    ::Rf_error( e.what());
+    ::Rf_error("%s", e.what()); 
   } catch (...) {
     ::Rf_error("unknown exception");
   }
