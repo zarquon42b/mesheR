@@ -40,7 +40,7 @@ RcppExport SEXP areafunCpp(SEXP A_) {
   }
   return wrap(out);
 }  catch (std::exception& e) {
-    ::Rf_error( e.what());
+    ::Rf_error("%s", e.what()); 
     return wrap(1);
   } catch (...) {
     ::Rf_error("unknown exception");

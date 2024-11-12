@@ -34,13 +34,13 @@ RcppExport SEXP angcheck(SEXP mat1_, SEXP mat2_, SEXP threads_) {
     int threads = as<int>(threads_);
     arma::vec angles(mat1.n_cols);
 #pragma omp parallel for schedule(static) num_threads(threads)
-    for (int i = 0; i < mat1.n_cols;i++) {
+    for (int i = 0; i < static_cast<int>(mat1.n_cols);i++) {
       angles(i) = anglecalc(mat1.col(i), mat2.col(i));
     }
     
     return wrap(angles);
   }  catch (std::exception& e) {
-    ::Rf_error( e.what());
+    ::Rf_error("%s", e.what()); 
   } catch (...) {
     ::Rf_error("unknown exception");
   }

@@ -50,7 +50,7 @@ RcppExport SEXP smoothField(SEXP evaluatePoints_, SEXP clostPoints_, SEXP displa
     return wrap(out);
 
   }  catch (std::exception& e) {
-    ::Rf_error( e.what());
+    ::Rf_error("%s", e.what()); 
   } catch (...) {
     ::Rf_error("unknown exception");
   }
