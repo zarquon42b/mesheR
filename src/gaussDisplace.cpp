@@ -94,7 +94,7 @@ RcppExport SEXP displaceGauss(SEXP points_,SEXP clostPointsM_, SEXP D1_, SEXP D2
     delete gk;
     return wrap(out);
   }  catch (std::exception& e) {
-    ::Rf_error( e.what());
+    ::Rf_error("%s", e.what());
   } catch (...) {
     ::Rf_error("unknown exception");
   }
